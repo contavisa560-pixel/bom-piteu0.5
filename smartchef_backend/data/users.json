@@ -1,0 +1,54 @@
+[
+  {
+    "id": "user1",
+    "name": "Chef Demo",
+    "email": "chef@culinaria.com",
+    "passwordHash": "$2a$10$RSMF2TghgCLO6XCTwMN8U.YxNRYQSKWduI9u88sHgGZVqcfvnnQ1a",
+    "level": 1,
+    "points": 20,
+    "favorites": [],
+    "picture": "/uploads/user1_avatar.jpg",
+    "isPremium": false,
+    "phone": "",
+    "language": "Português",
+    "security": {
+      "twoFactorAuth": false
+    }
+  },
+  {
+    "id": "google_103395084327479257201",
+    "name": "Conta Visa",
+    "email": "contavisa560@gmail.com",
+    "provider": "google",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocLTSrgURArfFEBl-AVzD7rS8nprclL58Q_WYcjtzxY5I382JA=s96-c",
+    "passwordHash": null,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false
+  },
+  {
+    "id": "google_111774323710168148126",
+    "name": "Quim Carruagem",
+    "email": "quimcarruagem@gmail.com",
+    "provider": "google",
+    "picture": "http://localhost:4000/uploads/google_111774323710168148126_1764064631095.jpg",
+    "passwordHash": null,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false
+  },
+  {
+    "id": "user_1764064923217",
+    "name": "mauro",
+    "email": "mauricio@gmail.com",
+    "passwordHash": "$2a$10$SWeSB/rY8YoYUuSmDNkWxuV26DjoZS1nwVOaqs2VOScN7Ci0CfQPy",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false
+  }
+]

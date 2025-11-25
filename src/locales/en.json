@@ -1,0 +1,23 @@
+{
+  "settings": "Settings",
+  "account": "Account",
+  "appearance": "Appearance",
+  "language": "Language",
+  "theme": "Theme",
+  "save": "Save",
+  "backup": "Backup",
+  "restore": "Restore",
+  "export": "Export",
+
+  "header": {
+    "smartKitchen": "Smart Kitchen 🧑‍🍳",
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "premium": "Premium",
+    "premiumMember": "Premium Member ✨",
+    "freeMember": "Free Member",
+    "myProfile": "My Profile",
+    "subscription": "Subscription",
+    "logout": "Logout"
+  }
+}

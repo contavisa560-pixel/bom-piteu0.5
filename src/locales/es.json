@@ -1,0 +1,23 @@
+{
+  "settings": "Configuración",
+  "account": "Cuenta",
+  "appearance": "Apariencia",
+  "language": "Idioma",
+  "theme": "Tema",
+  "save": "Guardar",
+  "backup": "Copia de seguridad",
+  "restore": "Restaurar",
+  "export": "Exportar",
+
+  "header": {
+    "smartKitchen": "Cocina Inteligente 🧑‍🍳",
+    "home": "Inicio",
+    "marketplace": "Marketplace",
+    "premium": "Premium",
+    "premiumMember": "Miembro Premium ✨",
+    "freeMember": "Miembro Gratuito",
+    "myProfile": "Mi Perfil",
+    "subscription": "Suscripción",
+    "logout": "Salir"
+  }
+}
