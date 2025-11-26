@@ -20,12 +20,27 @@ const app = express();
 // -------------------------------
 // CORS
 // -------------------------------
+const allowedOrigins = [
+  "https://bompiteuapp.netlify.app", // frontend no Netlify
+  "https://bom-piteu05-7wfyh8hdf-joaquim-carruagems-projects.vercel.app" // frontend na Vercel
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
+    origin: function (origin, callback) {
+      // permitir requests sem origin (Postman, backend para backend)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = "O domínio não está autorizado pelo CORS";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true
   })
 );
+
 
 app.use(bodyParser.json());
 app.use("/uploads", express.static("uploads"));
@@ -285,3 +300,4 @@ app.put("/api/users/:id", (req, res) => {
 app.listen(process.env.PORT, () => {
   console.log(`🔥 Backend a correr em http://localhost:${process.env.PORT}`);
 });
+
