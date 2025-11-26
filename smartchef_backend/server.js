@@ -21,8 +21,8 @@ const app = express();
 // CORS
 // -------------------------------
 const allowedOrigins = [
-  "https://bompiteuapp.netlify.app", // frontend no Netlify
-  "https://bom-piteu05-7wfyh8hdf-joaquim-carruagems-projects.vercel.app" // frontend na Vercel
+  "https://bompiteuapp.netlify.app",
+  "https://bom-piteu05.vercel.app" // CORRIGIDO
 ];
 
 app.use(
