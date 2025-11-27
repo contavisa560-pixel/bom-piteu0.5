@@ -22,7 +22,8 @@ const app = express();
 // -------------------------------
 const allowedOrigins = [
   "https://bompiteuapp.netlify.app",
-  "https://bom-piteu05.vercel.app" // CORRIGIDO
+  "https://bom-piteu05.vercel.app", // CORRIGIDO
+  "http://localhost:3000"
 ];
 
 app.use(
