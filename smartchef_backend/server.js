@@ -20,9 +20,9 @@ const app = express();
 // CORS FIX COMPLETO
 // -------------------------------
 const allowedOrigins = [
-"[https://bompiteuapp.netlify.app](https://bompiteuapp.netlify.app)",
-"[https://bom-piteu05.vercel.app](https://bom-piteu05.vercel.app)",
-"http://localhost:3000"
+  "https://bompiteuapp.netlify.app",
+  "https://bom-piteu05.vercel.app",
+  "http://localhost:3000"
 ];
 
 app.use((req, res, next) => {
