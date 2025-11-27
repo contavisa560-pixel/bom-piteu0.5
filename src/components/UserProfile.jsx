@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Sparkles } from "lucide-react";
+import Tabs from "./Tabs";
 
 import { useContext } from "react";
 import {
@@ -615,24 +616,9 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
         </div>
 
         {/* ABAS */}
-        <div className="flex gap-4 mt-10 border-b pb-2">
-          <button onClick={() => setActiveTab("geral")} className={`px-3 py-1 rounded ${activeTab === "geral" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Dados Pessoais</button>
-          <button onClick={() => setActiveTab("alimentacao")} className={`px-3 py-1 rounded ${activeTab === "alimentacao" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Alimentação</button>
-          <button onClick={() => setActiveTab("experiencia")} className={`px-3 py-1 rounded ${activeTab === "experiencia" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Experiência</button>
-          <button onClick={() => setActiveTab("seguranca")} className={`px-3 py-1 rounded ${activeTab === "seguranca" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Segurança</button>
-          <button onClick={() => setActiveTab("definicoes")} className={`px-3 py-1 rounded ${activeTab === "definicoes" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>Definições</button>
-          <button
-            onClick={() => setActiveTab("conta")}
-            className={`px-3 py-1 rounded ${activeTab === "conta" ? 'text-orange-500 font-bold' : 'text-gray-600 dark:text-gray-300'
-              }`}
-          >
-            Conta
-          </button>
-
-        </div>
-
+          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        
         {/* TAB: Dados Pessoais */}
-
         {/* ========================  
       ABA GERAL PREMIUM  
 ======================== */}
