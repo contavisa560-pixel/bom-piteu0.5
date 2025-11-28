@@ -22,7 +22,9 @@ const app = express();
 // -------------------------------
 const allowedOrigins = [
   "https://bom-piteu05.vercel.app", 
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://bom-piteu0-5.onrender.com"
 ];
 
 app.use(
