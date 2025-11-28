@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChefHat } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import React, { useState, useEffect } from "react";
+
+
+
 
 const WelcomeScreen = ({ onLogin }) => {
   const [isRegister, setIsRegister] = useState(false);
@@ -10,6 +14,19 @@ const WelcomeScreen = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+ 
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+  const userParam = params.get("user");
+
+  if (token && userParam) {
+    const user = JSON.parse(decodeURIComponent(userParam));
+    onLogin(user); // função que você já passa por props
+    localStorage.setItem("token", token); // opcional
+    window.history.replaceState({}, document.title, "/"); // limpa a URL
+  }
+}, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -111,9 +128,8 @@ const WelcomeScreen = ({ onLogin }) => {
                 Continuar com Google
               </Button>
 
-
               <Button
-                onClick={() => window.location.href = "http://localhost:4000/auth/facebook"}
+                onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/facebook`}
                 className="w-full bg-blue-700 hover:bg-blue-800 text-white"
               >
                 Continuar com Facebook
