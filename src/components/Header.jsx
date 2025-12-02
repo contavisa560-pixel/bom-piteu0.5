@@ -149,3 +149,4 @@ const Header = ({ user, onLogout, onNavigate }) => {
 };
 
 export default Header;
+
