@@ -21,6 +21,7 @@ import "./checkEnv.js";
 
 
 function App() {
+  
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -164,7 +165,10 @@ function App() {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-        {user && currentView !== "welcome" && <Header user={user} onLogout={handleLogout} onNavigate={handleNavigate} />}
+        {user && currentView !== "welcome" && currentView !== "chat" && (
+          <Header user={user} onLogout={handleLogout} onNavigate={handleNavigate} />
+        )}
+
 
         <main className="container mx-auto px-4 py-8">
           <AnimatePresence mode="wait">
@@ -187,3 +191,4 @@ function App() {
 }
 
 export default App;
+
