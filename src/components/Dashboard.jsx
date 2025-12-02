@@ -1,14 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, MessageCircle, Mic, AlertCircle, Wine, Cake, UtensilsCrossed as UtensilsCross, ShoppingCart, Heart, Globe, Calendar, Clipboard, ArrowRight, Baby, User as UserIcon, Beer, GlassWater as GlassWhiskey } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import OnboardingAdvanced from './OnboardingAdvanced'; // <-- importamos o Onboarding
 
 const Dashboard = ({ onStartChat, onNavigate, user }) => {
   const [streak, setStreak] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Checa streak e login
   useEffect(() => {
     const lastLoginStr = localStorage.getItem('bomPiteuLastLogin');
     const today = new Date().toDateString();
@@ -24,7 +26,7 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
         const newStreak = currentStreak + 1;
         setStreak(newStreak);
         localStorage.setItem('bomPiteuStreak', newStreak.toString());
-        toast({ title: `🔥 Dia ${newStreak}!`, description: "Estás imparável! Continuas a tua jornada culinária." });
+        toast({ title: ` Dia ${newStreak}!`, description: "Estás imparável! Continuas a tua jornada culinária." });
       } else if (diffDays > 1) {
         setStreak(1);
         localStorage.setItem('bomPiteuStreak', '1');
@@ -38,6 +40,15 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
     }
 
     localStorage.setItem('bomPiteuLastLogin', today);
+
+    // Mostra onboarding apenas se usuário nunca completou o tutorial
+    if (user?.id) {
+      const onboardingCompleted = localStorage.getItem(`bomPiteuOnboardingCompleted_${user.id}`);
+      if (!onboardingCompleted) {
+        setShowOnboarding(true);
+      }
+    }
+
   }, []);
 
   const handleFeatureClick = (feature) => {
@@ -63,6 +74,7 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
     onStartChat({ title: recipeName });
   };
 
+  // Dados do Dashboard
   const dailyRecipes = [
     { name: "Salada Caesar com Frango", image: "Salada Caesar com frango grelhado e croutons", category: "Almoço Leve" },
     { name: "Sopa de Lentilhas", image: "Sopa de lentilhas vermelhas com um fio de azeite", category: "Jantar Rápido" },
@@ -87,12 +99,22 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
     { title: "Alimentação Infantil", icon: Baby, color: "text-teal-500", action: () => handleSpecialFoodClick('Comida para Bebés e Crianças') },
     { title: "Alimentação Sénior", icon: UserIcon, color: "text-indigo-500", action: () => handleSpecialFoodClick('Comida para Idosos') },
   ];
+
   if (!user) {
     return <div className="text-center text-gray-500 mt-10">A carregar informações do utilizador...</div>;
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 relative">
+      {/* --- ONBOARDING --- */}
+      {showOnboarding && <OnboardingAdvanced onFinish={() => {
+        setShowOnboarding(false);
+        if (user?.id) {
+          localStorage.setItem(`bomPiteuOnboardingCompleted_${user.id}`, 'true');
+        }
+      }} />}
+
+      {/* --- DASHBOARD EXISTENTE --- */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -106,9 +128,9 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
 
         <p className="text-lg text-white/90 max-w-3xl mx-auto mb-6 relative z-10">O que vamos cozinhar hoje?</p>
         <div className="flex justify-center flex-wrap gap-4 relative z-10">
-          <Button onClick={() => onNavigate('imageRecognition')} size="lg" className="bg-white text-orange-600 hover:bg-white/90 rounded-full shadow-lg transition-all transform hover:scale-105"><Camera className="mr-2 h-6 w-6" /> Reconhecer Imagem</Button>
-          <Button onClick={() => onStartChat(null)} size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 rounded-full shadow-lg transition-all transform hover:scale-105"><MessageCircle className="mr-2 h-6 w-6" /> Falar com o Chef</Button>
-          <Button onClick={() => onNavigate('voiceRecognition')} size="lg" className="bg-white text-blue-600 hover:bg-white/90 rounded-full shadow-lg transition-all transform hover:scale-105"><Mic className="mr-2 h-6 w-6" /> Pesquisa por Voz</Button>
+          <Button id="cameraButton" onClick={() => onNavigate('imageRecognition')} size="lg" className="bg-white text-orange-600 hover:bg-white/90 rounded-full shadow-lg transition-all transform hover:scale-105"><Camera className="mr-2 h-6 w-6" /> Reconhecer Imagem</Button>
+          <Button id="chatButton" onClick={() => onStartChat(null)} size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 rounded-full shadow-lg transition-all transform hover:scale-105"><MessageCircle className="mr-2 h-6 w-6" /> Falar com o Chef</Button>
+          <Button id="voiceButton" onClick={() => onNavigate('voiceRecognition')} size="lg" className="bg-white text-blue-600 hover:bg-white/90 rounded-full shadow-lg transition-all transform hover:scale-105"><Mic className="mr-2 h-6 w-6" /> Pesquisa por Voz</Button>
         </div>
       </motion.div>
 
@@ -119,6 +141,8 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
         </motion.div>
       )}
 
+
+      {/* CARDS RÁPIDOS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
         <Card className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center justify-center p-4 bg-blue-50 text-blue-800">
           <Calendar className="h-8 w-8 mb-2" />
@@ -139,24 +163,40 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
         ))}
       </div>
 
+      {/* SUGESTÕES DO DIA */}
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-gray-800">Sugestões do Dia</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {dailyRecipes.map((recipe) => (
-            <motion.div key={recipe.name} whileHover={{ y: -5 }} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" onClick={() => handleRecipeClick(recipe.name)}>
+            <motion.div
+              key={recipe.name}
+              whileHover={{ y: -5 }}
+              className="daily-recipes-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer relative"
+              onClick={() => handleRecipeClick(recipe.name)}
+            >
               <div className="h-40 overflow-hidden relative">
-                <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={recipe.image} src="https://images.unsplash.com/photo-1676436293942-99438c6058be" />
+                <img
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  alt={recipe.image}
+                  src="https://images.unsplash.com/photo-1676436293942-99438c6058be"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <span className="absolute bottom-2 left-3 text-white font-semibold text-lg">{recipe.name}</span>
                 <span className="absolute top-2 right-2 bg-white/80 text-gray-800 text-xs font-bold px-2 py-1 rounded-full">{recipe.category}</span>
               </div>
+              {/* Setinha demonstrativa no canto inferior direito */}
+              <div className="absolute bottom-2 right-2 bg-black/50 p-1 rounded-full">
+                <ArrowRight className="h-4 w-4 text-white" />
+              </div>
             </motion.div>
+
           ))}
         </CardContent>
       </Card>
 
+      {/* PETISCOS & ACOMPANHAMENTOS */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center">Petiscos & Acompanhamentos</CardTitle>
@@ -164,17 +204,27 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {petiscos.map(item => (
-            <div key={item.name} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer border" onClick={() => handleRecipeClick(item.recipe)}>
+            <div
+              key={item.name}
+              className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer border relative"
+              onClick={() => handleRecipeClick(item.recipe)}
+            >
               <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center relative">
                 <item.icon className="w-6 h-6 text-gray-700" />
                 <span className="absolute -top-1 -right-1 text-lg">{item.country}</span>
               </div>
               <p className="font-semibold text-gray-700 text-sm flex-1">{item.name}</p>
+              {/* Setinha demonstrativa */}
+              <div className="flex-shrink-0 bg-gray-200 p-1 rounded-full">
+                <ArrowRight className="h-4 w-4 text-gray-700" />
+              </div>
             </div>
+
           ))}
         </CardContent>
       </Card>
 
+      {/* DOCES & BEBIDAS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -191,6 +241,7 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
             ))}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center"><Wine className="mr-2 text-cyan-500" />Cocktails & Bebidas</CardTitle>
@@ -212,3 +263,4 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
 };
 
 export default Dashboard;
+
