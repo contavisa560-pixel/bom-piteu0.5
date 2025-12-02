@@ -14,6 +14,7 @@ const querystring = require("querystring");
 const { readUsers, writeUsers } = require("./db");
 const authRoutes = require("./auth");
 const openaiChatRoute = require("./routes/openaiChat");
+const openaiAudioRoute = require("./routes/openaiAudio");
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use("/uploads", express.static("uploads"));
 // -------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/openai", openaiChatRoute);
+app.use("/api/openai", openaiAudioRoute);
 
 // -------------------------------
 // GOOGLE LOGIN
