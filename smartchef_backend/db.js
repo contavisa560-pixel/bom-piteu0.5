@@ -1,18 +1,24 @@
-const fs = require("fs");
-const path = require("path");
+// db.js
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
-const DATA_DIR = path.join(__dirname, "data");
-const USERS_FILE = path.join(DATA_DIR, "users.json");
+// Carrega as variáveis de ambiente do arquivo .env
+dotenv.config();
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]");
+async function connectDB() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      // parâmetros padrão do Mongoose
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-function readUsers() {
-  return JSON.parse(fs.readFileSync(USERS_FILE, "utf8"));
+    console.log("MongoDB conectado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao conectar ao MongoDB:", error);
+    process.exit(1); // encerra a aplicação se não conseguir conectar
+  }
 }
 
-function writeUsers(data) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
-}
-
-module.exports = { readUsers, writeUsers };
+// Exporta a função para ser usada em server.js ou outros arquivos
+module.exports = connectDB;
