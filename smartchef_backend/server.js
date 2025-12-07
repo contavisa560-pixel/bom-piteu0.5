@@ -2,6 +2,7 @@ require("dotenv").config({ path: __dirname + "/.env" });
 
 const express = require("express");
 const cors = require("cors");
+const connectDB = require("./db");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const jwt = require("jsonwebtoken");
@@ -14,36 +15,19 @@ const querystring = require("querystring");
 const { readUsers, writeUsers } = require("./db");
 const authRoutes = require("./auth");
 const openaiChatRoute = require("./routes/openaiChat");
-const openaiAudioRoute = require("./routes/openaiAudio");
 
 const app = express();
+connectDB();
 
 // -------------------------------
 // CORS
 // -------------------------------
-const allowedOrigins = [
-  "https://bom-piteu05.vercel.app", 
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "https://bom-piteu0-5.onrender.com"
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // permitir requests sem origin (Postman, backend para backend)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = "O domínio não está autorizado pelo CORS";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true
+    origin: process.env.CLIENT_URL,
+    credentials: true,
   })
 );
-
 
 app.use(bodyParser.json());
 app.use("/uploads", express.static("uploads"));
@@ -53,7 +37,6 @@ app.use("/uploads", express.static("uploads"));
 // -------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/openai", openaiChatRoute);
-app.use("/api/openai", openaiAudioRoute);
 
 // -------------------------------
 // GOOGLE LOGIN
@@ -99,15 +82,23 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Iniciar login Google
 app.get(
   "/api/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  })
 );
 
 // Callback Google
 app.get(
   "/api/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: process.env.CLIENT_URL, session: false }),
+  passport.authenticate("google", {
+    failureRedirect: process.env.CLIENT_URL,
+    session: false,
+  }),
   (req, res) => {
-    const token = jwt.sign({ id: req.user.id }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ id: req.user.id }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
     const userParam = encodeURIComponent(JSON.stringify(req.user));
     res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   }
@@ -116,21 +107,24 @@ app.get(
 // -------------------------------
 // TIKTOK LOGIN
 // -------------------------------
-// -------------------------------
-// TIKTOK LOGIN (CÓDIGO LIMPO)
-// -------------------------------
+
+// Iniciar login TikTok
 app.get("/api/auth/tiktok", (req, res) => {
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
-  const redirectUri = encodeURIComponent(`${process.env.SERVER_URL}/api/auth/tiktok/callback`);
+  const redirectUri = encodeURIComponent(
+    `${process.env.SERVER_URL}/api/auth/tiktok/callback`
+  );
   const scope = "user.info.basic";
-  const state = "state123";
+  const state = "state123"; // pode gerar aleatório se quiser
 
   const url = `https://www.tiktok.com/auth/authorize?client_key=${clientKey}&response_type=code&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`;
   res.redirect(url);
 });
 
+// Callback TikTok
 app.get("/api/auth/tiktok/callback", async (req, res) => {
   const { code } = req.query;
+
   if (!code) {
     return res.redirect(`${process.env.CLIENT_URL}/?error=NoCode`);
   }
@@ -146,14 +140,16 @@ app.get("/api/auth/tiktok/callback", async (req, res) => {
       })
     );
 
-    const tiktokUser = tokenRes.data.data;
+    const data = tokenRes.data.data;
+    const tiktokUser = data ? data : null;
 
-    if (!tiktokUser) {
+    if (!tiktokUser)
       return res.redirect(`${process.env.CLIENT_URL}/?error=TikTokLoginFailed`);
-    }
 
     const users = readUsers();
-    let user = users.find(u => u.id === "tiktok_" + tiktokUser.user_unique_id);
+    let user = users.find(
+      (u) => u.id === "tiktok_" + tiktokUser.user_unique_id
+    );
 
     if (!user) {
       user = {
@@ -168,7 +164,6 @@ app.get("/api/auth/tiktok/callback", async (req, res) => {
         favorites: [],
         isPremium: false,
       };
-
       users.push(user);
       writeUsers(users);
     }
@@ -176,14 +171,12 @@ app.get("/api/auth/tiktok/callback", async (req, res) => {
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
     const userParam = encodeURIComponent(JSON.stringify(user));
 
-    return res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
-
+    res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   } catch (err) {
     console.error("Erro TikTok OAuth:", err.response?.data || err.message);
-    return res.redirect(`${process.env.CLIENT_URL}/?error=TikTokLoginFailed`);
+    res.redirect(`${process.env.CLIENT_URL}/?error=TikTokLoginFailed`);
   }
 });
-
 
 // ================================
 // INSTAGRAM LOGIN (META OAUTH)
@@ -235,7 +228,7 @@ app.get("/api/auth/instagram/callback", async (req, res) => {
 
     // Registo / login automático
     const users = readUsers();
-    let user = users.find(u => u.id === "instagram_" + instaUser.id);
+    let user = users.find((u) => u.id === "instagram_" + instaUser.id);
 
     if (!user) {
       user = {
@@ -260,7 +253,9 @@ app.get("/api/auth/instagram/callback", async (req, res) => {
     res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   } catch (err) {
     console.error("Erro Instagram OAuth:", err.response?.data || err.message);
-    return res.redirect(`${process.env.CLIENT_URL}/?error=InstagramLoginFailed`);
+    return res.redirect(
+      `${process.env.CLIENT_URL}/?error=InstagramLoginFailed`
+    );
   }
 });
 
@@ -270,7 +265,9 @@ app.get("/api/auth/instagram/callback", async (req, res) => {
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
-    const fileName = `${req.params.id}_${Date.now()}${path.extname(file.originalname)}`;
+    const fileName = `${req.params.id}_${Date.now()}${path.extname(
+      file.originalname
+    )}`;
     cb(null, fileName);
   },
 });
