@@ -1,57 +1,67 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { readUsers, writeUsers } = require("./db");
+const User = require("../models/User");
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ==== REGISTO ====
 router.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-  const users = readUsers();
-  const exists = users.find(u => u.email === email);
+    // Verificar se email já existe
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ error: "Email já registado." });
+    }
 
-  if (exists) return res.status(400).json({ error: "Email já registado." });
+    // Criptografar senha
+    const hashed = await bcrypt.hash(password, 10);
 
-  const hashed = await bcrypt.hash(password, 10);
+    // Criar user
+    const newUser = await User.create({
+      name,
+      email,
+      passwordHash: hashed,
+      avatar: "",
+      level: 1,
+      points: 0,
+      favorites: [],
+      isPremium: false
+    });
 
-  const newUser = {
-    id: "user_" + Date.now(),
-    name,
-    email,
-    passwordHash: hashed,
-    provider: "local",
-    picture: "",
-    level: 1,
-    points: 0,
-    favorites: [],
-    isPremium: false
-  };
+    // Gerar token
+    const token = jwt.sign({ id: newUser._id }, JWT_SECRET, { expiresIn: "7d" });
 
-  users.push(newUser);
-  writeUsers(users);
-
-  const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "7d" });
-
-  res.json({ user: newUser, token });
+    return res.json({ user: newUser, token });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Erro no registo", details: error });
+  }
 });
 
 // ==== LOGIN ====
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const users = readUsers();
-  const user = users.find(u => u.email === email);
-  if (!user) return res.status(404).json({ error: "Email não encontrado." });
+    // Buscar usuário
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "Email não encontrado." });
 
-  const isMatch = await bcrypt.compare(password, user.passwordHash);
-  if (!isMatch) return res.status(400).json({ error: "Senha incorreta." });
+    // Verificar senha
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) return res.status(400).json({ error: "Senha incorreta." });
 
-  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
+    // Gerar token
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
-  res.json({ user, token });
+    return res.json({ user, token });
+  } catch (error) {
+    return res.status(500).json({ error: "Erro no login", details: error });
+  }
 });
 
 module.exports = router;

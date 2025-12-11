@@ -14,6 +14,9 @@ const querystring = require("querystring");
 
 const { readUsers, writeUsers } = require("./db");
 const authRoutes = require("./auth");
+const userRoutes = require("./userRoutes")
+const limitRoutes = require("./limitRoutes")
+const preferenceRoutes = require("./preferenceRoutes")
 const openaiChatRoute = require("./routes/openaiChat");
 
 const app = express();
@@ -36,6 +39,9 @@ app.use("/uploads", express.static("uploads"));
 // ROTAS PRINCIPAIS
 // -------------------------------
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/limits", limitRoutes);
+app.use("/api/preferences", prefereceRoutes)
 app.use("/api/openai", openaiChatRoute);
 
 // -------------------------------
@@ -71,7 +77,6 @@ passport.use(
         users.push(user);
         writeUsers(users);
       }
-
       return done(null, user);
     }
   )
