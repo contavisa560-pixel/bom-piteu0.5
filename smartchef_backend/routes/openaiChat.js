@@ -1,25 +1,36 @@
-// routes/openaiChat.js
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
+const OpenAI = require("openai");
+const Message = require("../models/MessageModel");
+const limitService = require("../services/limitService"); // ← para limites
 
-const Groq = require("groq-sdk");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-// POST /api/openai/chat
-router.post("/chat", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { message, profile } = req.body;
+    const { message, userId, profile } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({ error: "missing_message" });
     }
 
-    const systemPrompt = `Tu és o SmartChef IA — um assistente de cozinha profissional, amigável e rápido. 
-Responde sempre de forma clara e útil. Adapta-te ao utilizador quando o perfil for fornecido.`;
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+    const canUse = await limitService.checkLimits(userId);
+    if (!canUse.allowed) {
+      return res.status(403).json({
+        error: "limit_reached",
+        message: canUse.message
+      });
+    }
+    const systemPrompt = `
+Tu és o SmartChef — um assistente de cozinha inteligente, direto e amigável.
+Adapta-te ao utilizador quando o perfil for fornecido.
+    `;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // ou outro modelo
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message }
@@ -30,12 +41,20 @@ Responde sempre de forma clara e útil. Adapta-te ao utilizador quando o perfil 
 
     const reply = completion.choices?.[0]?.message?.content || "Erro ao gerar resposta.";
 
+    await Message.create({
+      user: userId,
+      content: message,
+      response: reply
+    });
+
+    await limitService.increment(userId);
+
     res.json({ reply });
 
   } catch (err) {
-    console.error("🔥 GROQ ERROR:", err);
+    console.error("OPENAI ERROR:", err);
     res.status(500).json({
-      error: "Erro GROQ",
+      error: "Erro OpenAI",
       details: err.message || String(err)
     });
   }
