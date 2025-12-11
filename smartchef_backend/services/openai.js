@@ -4,7 +4,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// 🔥 MODELOS PERMITIDOS
+// MODELOS PERMITIDOS
 const MODEL = process.env.AI_MODEL || "gpt-4o-mini";
 
 module.exports = {
