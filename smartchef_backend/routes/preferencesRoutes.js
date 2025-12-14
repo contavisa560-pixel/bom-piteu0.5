@@ -1,16 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Preferences = require("../models/Preferences");
+const Preferences = require("../models/Preference");
 
 // GET PREFERENCES
 router.get("/:userId", async (req, res) => {
   try {
-    const preferences = await Preferences.findOne({ userId: req.params.id });
+    const preferences = await Preferences.findOne({ userId: req.params.userId });
     return res.json({
       success: true,
       data: preferences || {}
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -24,9 +23,9 @@ router.get("/:userId", async (req, res) => {
 router.post("/:userId", async (req, res) => {
   try {
     const updated = await Preferences.findOneAndUpdate(
-      { userId: req.params.id },
+      { userId: req.params.userId },
       req.body,
-      { new: true, upsert: true }
+      { new: true, upsert: true } // upsert cria se não existir
     );
 
     return res.json({
@@ -34,7 +33,6 @@ router.post("/:userId", async (req, res) => {
       message: "Preferências atualizadas!",
       data: updated
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,

@@ -1,43 +1,41 @@
 const express = require("express");
 const router = express.Router();
+const OpenAI = require("openai");
+const Image = require("../models/Image");
 const limitService = require("../services/limitService");
 
-// CHECK LIMITS
-router.get("/limits/:id/check", async (req, res) => {
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// Gerar imagem
+router.post("/", async (req, res) => {
   try {
-    const userId = req.params.id;
-    const result = await limitService.checkUserLimit(userId);
-    return res.json({
-      success: true,
-      data: result
+    const { prompt, userId } = req.body;
+    if (!prompt || !prompt.trim()) return res.status(400).json({ error: "missing_prompt" });
+
+    // Checar limites
+    const canUse = await limitService.checkUserLimit(userId, "gen");
+    if (!canUse.status) return res.status(403).json({ error: "limit_reached", message: canUse.message });
+
+    // Gerar imagem OpenAI
+    const result = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt,
+      size: "1024x1024",
+      n: 1
     });
 
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Erro ao checar limites",
-      error
-    });
-  }
-});
+    const imageUrl = result.data[0].url;
 
-// OPTIONAL: RESET LIMITS (para testes)
-router.post("/limits/:id/check", async (req, res) => {
-  try {
-    const 
-    const reset = await limitService.resetifNeeded(user);
-    return res.json({
-      success: true,
-      message: "Limites resetados!",
-      data: reset
-    });
+    // Salvar no DB
+    await Image.create({ user: userId, prompt, url: imageUrl, type: "gen" });
 
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Erro ao resetar limites",
-      error
-    });
+    // Incrementar uso
+    await limitService.incrementUsage(userId, "gen");
+
+    res.json({ url: imageUrl });
+  } catch (err) {
+    console.error("OPENAI IMAGE ERROR:", err);
+    res.status(500).json({ error: "Erro OpenAI Image", details: err.message || String(err) });
   }
 });
 

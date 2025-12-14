@@ -60,3 +60,13 @@ export async function updateUserSettings(id, settings) {
   });
   return res.json();
 }
+
+// Atualizar perfil do usuário
+export async function updateUserProfile(id, data) {
+  const res = await fetch(`${API_URL}/api/users/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
