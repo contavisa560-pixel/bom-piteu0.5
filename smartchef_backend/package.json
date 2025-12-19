@@ -9,6 +9,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google-cloud/vision": "^5.3.4",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",

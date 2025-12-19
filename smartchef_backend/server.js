@@ -1,11 +1,10 @@
-require("dotenv").config();
-require("./cronJobsAdvanced"); // Cron jobs avançados
+require("dotenv").config({ path: __dirname + "/.env" });
 
 const express = require("express");
 const cors = require("cors");
+const { connectDB, readUsers, writeUsers } = require("./db");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const FacebookStrategy = require("passport-facebook").Strategy;
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const multer = require("multer");
@@ -13,145 +12,136 @@ const path = require("path");
 const axios = require("axios");
 const querystring = require("querystring");
 
-const connectDB = require("./db");
-const User = require("./models/User");
-const authRoutes = require("./routes/authRoutes");
-const openaiChatRoutes = require("./routes/openaiChat");
-const imageRoutes = require("./routes/imageRoutes");
-const visionRoutes = require("./routes/visionRoutes");
-const historyRoutes = require("./routes/historyRoutes");
-const { apiLimiter, authLimiter } = require("./middleware/rateLimiter");
-const { authenticate } = require("./middleware/security/jwtAuth");
+const authRoutes = require("./auth");
+const openaiChatRoute = require("./routes/openaiChat");
+const recipeSessionRoutes = require("./routes/recipeSession");
 
 const app = express();
-
-// ===================== DATABASE =====================
 connectDB();
 
-// ===================== MIDDLEWARES =====================
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-app.use(express.json());
+// -------------------------------
+// CORS
+// -------------------------------
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
+
 app.use(bodyParser.json());
 app.use("/uploads", express.static("uploads"));
-app.use(passport.initialize());
 
-// Rate limit global
-app.use("/api/", apiLimiter);
-// Rate limit extra para login/register
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/register", authLimiter);
-
-// ===================== MULTER UPLOAD =====================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => {
-    cb(null, `${req.user?._id || "unknown"}_${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png"];
-    if (allowedTypes.includes(file.mimetype)) cb(null, true);
-    else cb(new Error("Tipo de arquivo inválido"));
-  }
-});
-
-// ===================== ROTAS =====================
+// -------------------------------
+// ROTAS PRINCIPAIS
+// -------------------------------
 app.use("/api/auth", authRoutes);
-app.use("/api/chat", openaiChatRoutes);
-app.use("/api/image", imageRoutes);
-app.use("/api/vision", visionRoutes);
-app.use("/api/history", historyRoutes);
+app.use("/api/openai", openaiChatRoute);
+app.use("/api/recipe", recipeSessionRoutes);
+// -------------------------------
+// ROTA: obter utilizador por id (GET) — requerida pelo frontend
+// -------------------------------
+app.get("/api/users/:id", (req, res) => {
+  const users = readUsers();
+  const user = users.find((u) => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: "user_not_found" });
+  // opcional: não enviar passwordHash
+  const safeUser = { ...user };
+  delete safeUser.passwordHash;
+  res.json(safeUser);
+});
 
-app.get("/api/health", (req, res) => res.json({ status: "OK" }));
+// -------------------------------
+// GOOGLE LOGIN
+// -------------------------------
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
 
-// ===================== JWT =====================
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${process.env.SERVER_URL}/api/auth/google/callback`,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      const users = readUsers();
+      let user = users.find((u) => u.email === profile.emails[0].value);
+
+      if (!user) {
+        user = {
+          id: "google_" + profile.id,
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          provider: "google",
+          picture: profile.photos[0].value,
+          passwordHash: null,
+          level: 1,
+          points: 0,
+          favorites: [],
+          isPremium: false,
+        };
+        users.push(user);
+        writeUsers(users);
+      }
+
+      return done(null, user);
+    }
+  )
+);
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// ===================== GOOGLE OAUTH =====================
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${process.env.SERVER_URL}/api/auth/google/callback`,
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails[0].value;
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({
-        name: profile.displayName,
-        email,
-        provider: "google",
-        avatar: profile.photos[0].value,
-        needsPassword: true
-      });
-    }
-    return done(null, user);
-  } catch (err) {
-    return done(err, null);
-  }
-}));
+// Iniciar login Google
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  })
+);
 
-app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-app.get("/api/auth/google/callback",
-  passport.authenticate("google", { session: false }),
+// Callback Google
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: process.env.CLIENT_URL,
+    session: false,
+  }),
   (req, res) => {
-    if (req.user.needsPassword) return res.redirect(`${process.env.CLIENT_URL}/set-password?userId=${req.user._id}`);
-    const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: "7d" });
-    res.redirect(`${process.env.CLIENT_URL}/?token=${token}`);
+    const token = jwt.sign({ id: req.user.id }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    const userParam = encodeURIComponent(JSON.stringify(req.user));
+    res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   }
 );
 
-// ===================== FACEBOOK OAUTH =====================
-passport.use(new FacebookStrategy({
-  clientID: process.env.FACEBOOK_CLIENT_ID,
-  clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-  callbackURL: `${process.env.SERVER_URL}/api/auth/facebook/callback`,
-  profileFields: ['id', 'displayName', 'email', 'photos']
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails?.[0]?.value || `fb_${profile.id}@facebook.com`;
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({
-        name: profile.displayName,
-        email,
-        provider: "facebook",
-        avatar: profile.photos?.[0]?.value || "",
-        needsPassword: true
-      });
-    }
-    return done(null, user);
-  } catch (err) {
-    return done(err, null);
-  }
-}));
+// -------------------------------
+// TIKTOK LOGIN
+// -------------------------------
 
-app.get("/api/auth/facebook", passport.authenticate("facebook", { scope: ["email"] }));
-app.get("/api/auth/facebook/callback",
-  passport.authenticate("facebook", { session: false }),
-  (req, res) => {
-    if (req.user.needsPassword) return res.redirect(`${process.env.CLIENT_URL}/set-password?userId=${req.user._id}`);
-    const token = jwt.sign({ id: req.user._id }, JWT_SECRET, { expiresIn: "7d" });
-    res.redirect(`${process.env.CLIENT_URL}/?token=${token}`);
-  }
-);
-
-// ===================== TIKTOK OAUTH =====================
+// Iniciar login TikTok
 app.get("/api/auth/tiktok", (req, res) => {
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
-  const redirectUri = encodeURIComponent(`${process.env.SERVER_URL}/api/auth/tiktok/callback`);
+  const redirectUri = encodeURIComponent(
+    `${process.env.SERVER_URL}/api/auth/tiktok/callback`
+  );
   const scope = "user.info.basic";
-  const state = "state123";
+  const state = "state123"; // pode gerar aleatório se quiser
+
   const url = `https://www.tiktok.com/auth/authorize?client_key=${clientKey}&response_type=code&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`;
   res.redirect(url);
 });
 
+// Callback TikTok
 app.get("/api/auth/tiktok/callback", async (req, res) => {
   const { code } = req.query;
-  if (!code) return res.redirect(`${process.env.CLIENT_URL}/?error=NoCode`);
+
+  if (!code) {
+    return res.redirect(`${process.env.CLIENT_URL}/?error=NoCode`);
+  }
+
   try {
     const tokenRes = await axios.post(
       "https://open-api.tiktok.com/oauth/access_token/",
@@ -162,102 +152,168 @@ app.get("/api/auth/tiktok/callback", async (req, res) => {
         grant_type: "authorization_code",
       })
     );
+
     const data = tokenRes.data.data;
-    let user = await User.findOne({ email: `tiktok_${data.user_unique_id}@tiktok.com` });
+    const tiktokUser = data ? data : null;
+
+    if (!tiktokUser)
+      return res.redirect(`${process.env.CLIENT_URL}/?error=TikTokLoginFailed`);
+
+    const users = readUsers();
+    let user = users.find(
+      (u) => u.id === "tiktok_" + tiktokUser.user_unique_id
+    );
+
     if (!user) {
-      user = await User.create({
-        name: data.display_name || "TikTok User",
-        email: `tiktok_${data.user_unique_id}@tiktok.com`,
+      user = {
+        id: "tiktok_" + tiktokUser.user_unique_id,
+        name: tiktokUser.display_name || "TikTok User",
+        email: tiktokUser.email || null,
         provider: "tiktok",
-        avatar: data.avatar_url || "",
-        needsPassword: true
-      });
+        picture: tiktokUser.avatar_url || "",
+        passwordHash: null,
+        level: 1,
+        points: 0,
+        favorites: [],
+        isPremium: false,
+      };
+      users.push(user);
+      writeUsers(users);
     }
-    if (user.needsPassword) return res.redirect(`${process.env.CLIENT_URL}/set-password?userId=${user._id}`);
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-    res.redirect(`${process.env.CLIENT_URL}/?token=${token}`);
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
+    const userParam = encodeURIComponent(JSON.stringify(user));
+
+    res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error("Erro TikTok OAuth:", err.response?.data || err.message);
     res.redirect(`${process.env.CLIENT_URL}/?error=TikTokLoginFailed`);
   }
 });
 
-// ===================== INSTAGRAM OAUTH =====================
+// ================================
+// INSTAGRAM LOGIN (META OAUTH)
+// ================================
 const INSTAGRAM_REDIRECT_URL = `${process.env.SERVER_URL}/api/auth/instagram/callback`;
 
 app.get("/api/auth/instagram", (req, res) => {
-  const url = "https://www.facebook.com/v19.0/dialog/oauth?" +
+  const url =
+    "https://www.facebook.com/v19.0/dialog/oauth?" +
     querystring.stringify({
       client_id: process.env.INSTAGRAM_CLIENT_ID,
       redirect_uri: INSTAGRAM_REDIRECT_URL,
-      scope: "instagram_basic,public_profile",
+      scope: "instagram_basic, public_profile",
       response_type: "code",
     });
+
   res.redirect(url);
 });
 
 app.get("/api/auth/instagram/callback", async (req, res) => {
   const { code } = req.query;
-  if (!code) return res.redirect(`${process.env.CLIENT_URL}/?error=NoCode`);
 
   try {
-    // 1️⃣ Obter Access Token do Instagram via Graph API
-    const tokenRes = await axios.get("https://graph.facebook.com/v19.0/oauth/access_token", {
-      params: {
-        client_id: process.env.INSTAGRAM_CLIENT_ID,
-        client_secret: process.env.INSTAGRAM_CLIENT_SECRET,
-        redirect_uri: INSTAGRAM_REDIRECT_URL,
-        code,
+    // Trocar código por access token
+    const tokenRes = await axios.post(
+      "https://graph.facebook.com/v19.0/oauth/access_token",
+      null,
+      {
+        params: {
+          client_id: process.env.INSTAGRAM_CLIENT_ID,
+          client_secret: process.env.INSTAGRAM_CLIENT_SECRET,
+          redirect_uri: INSTAGRAM_REDIRECT_URL,
+          code,
+        },
       }
-    });
+    );
 
     const accessToken = tokenRes.data.access_token;
 
-    // 2️⃣ Obter dados do usuário
+    // Buscar dados do utilizador
     const userRes = await axios.get("https://graph.facebook.com/me", {
-      params: { access_token: accessToken, fields: "id,name" }
+      params: {
+        access_token: accessToken,
+        fields: "id,name",
+      },
     });
 
     const instaUser = userRes.data;
 
-    let user = await User.findOne({ email: `instagram_${instaUser.id}@instagram.com` });
+    // Registo / login automático
+    const users = readUsers();
+    let user = users.find((u) => u.id === "instagram_" + instaUser.id);
+
     if (!user) {
-      user = await User.create({
+      user = {
+        id: "instagram_" + instaUser.id,
         name: instaUser.name,
-        email: `instagram_${instaUser.id}@instagram.com`,
+        email: null,
         provider: "instagram",
-        avatar: `https://graph.facebook.com/${instaUser.id}/picture?type=large`,
-        needsPassword: true
-      });
+        picture: `https://graph.facebook.com/${instaUser.id}/picture?type=large`,
+        passwordHash: null,
+        level: 1,
+        points: 0,
+        favorites: [],
+        isPremium: false,
+      };
+      users.push(user);
+      writeUsers(users);
     }
 
-    if (user.needsPassword) return res.redirect(`${process.env.CLIENT_URL}/set-password?userId=${user._id}`);
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
+    const userParam = encodeURIComponent(JSON.stringify(user));
 
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-    res.redirect(`${process.env.CLIENT_URL}/?token=${token}`);
+    res.redirect(`${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`);
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.redirect(`${process.env.CLIENT_URL}/?error=InstagramLoginFailed`);
+    console.error("Erro Instagram OAuth:", err.response?.data || err.message);
+    return res.redirect(
+      `${process.env.CLIENT_URL}/?error=InstagramLoginFailed`
+    );
   }
 });
 
-// ===================== AVATAR UPLOAD =====================
-app.post("/api/users/avatar", authenticate, upload.single("avatar"), async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    user.avatar = `${process.env.SERVER_URL}/uploads/${req.file.filename}`;
-    await user.save();
-
-    res.json({ success: true, avatar: user.avatar });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// -------------------------------
+// UPLOAD DE AVATAR
+// -------------------------------
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    const fileName = `${req.params.id}_${Date.now()}${path.extname(
+      file.originalname
+    )}`;
+    cb(null, fileName);
+  },
 });
 
-// ===================== SERVER =====================
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🔥 Backend rodando em http://localhost:${PORT}`));
+const upload = multer({ storage });
 
-module.exports = app;
+app.post("/api/users/:id/avatar", upload.single("avatar"), (req, res) => {
+  const users = readUsers();
+  const user = users.find((u) => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: "user_not_found" });
+
+  user.picture = `${process.env.SERVER_URL}/uploads/${req.file.filename}`;
+  writeUsers(users);
+
+  res.json({ imageUrl: user.picture });
+});
+
+// -------------------------------
+// PUT /api/users/:id
+// -------------------------------
+app.put("/api/users/:id", (req, res) => {
+  const users = readUsers();
+  const user = users.find((u) => u.id === req.params.id);
+  if (!user) return res.status(404).json({ error: "user_not_found" });
+
+  Object.assign(user, req.body);
+  writeUsers(users);
+  res.json({ success: true, user });
+});
+
+// -------------------------------
+// START SERVER
+// -------------------------------
+app.listen(process.env.PORT, () => {
+  console.log(`🔥 Backend a correr em http://localhost:${process.env.PORT}`);
+});

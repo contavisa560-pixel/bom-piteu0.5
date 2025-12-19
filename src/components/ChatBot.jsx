@@ -1,669 +1,440 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import WaveSurfer from "wavesurfer.js";
-import { motion } from "framer-motion";
-import { Send, User, Paperclip, Camera, Image, FileText, Mic, Headphones } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Send, Paperclip, ChefHat, Camera, Image, FileText,
+  Mic, X, ChevronLeft, Play, Pause,
+  Sparkles, Clock, CheckCircle2, MoreHorizontal
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
+import { sendTextMessage, sendImageMessage, advanceStep } from "@/services/recipeApi";
+import { useLocation } from "react-router-dom";
+import { sendStepText } from "@/services/recipeChatService";
+import { sendStepImage } from "@/services/recipeImageService";
+import { startRecipeSession } from '@/services/recipeApi';
 
-// NOTE: this file requires wavesurfer.js
-// Install with: npm install wavesurfer.js
 
-function AudioBubble({ audioUrl, isUser }) {
+// --- Waveform Minimalista ---
+function AudioWave({ audioUrl, isUser }) {
   const containerRef = useRef(null);
   const waveRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [current, setCurrent] = useState(0);
+
 
   useEffect(() => {
-    // clean up previous instance
-    if (waveRef.current) {
-      waveRef.current.destroy();
-      waveRef.current = null;
-    }
-
     if (!containerRef.current) return;
-
-    // create wavesurfer instance
     waveRef.current = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: isUser ? "#FFDAB3" : "rgba(255,255,255,0.35)",
-      progressColor: isUser ? "#FF8A00" : "#FFFFFF",
-      height: 25,
+      waveColor: isUser ? "rgba(255,255,255,0.3)" : "#cbd5e1",
+      progressColor: isUser ? "#fff" : "#f97316",
+      height: 24,
       barWidth: 2,
-      barRadius: 2,
-      responsive: true,
+      barGap: 3,
+      barRadius: 10,
       cursorWidth: 0,
-      normalize: true,
-      hideScrollbar: true,
-
-      //  FIX IMPORTANTE
-      backend: "MediaElement",
-      mediaControls: false,
-      xhr: {
-        cache: "default",
-        mode: "cors",
-        method: "GET",
-        credentials: "same-origin",
-      }
     });
-
-
-    // load audio (works with blob URLs)
-    try {
-      if (audioUrl && typeof audioUrl === "string") {
-        waveRef.current.load(audioUrl);
-      }
-    } catch (err) {
-      // fallback: create an <audio> element if wavesurfer can't load
-      console.error("WaveSurfer load error:", err);
-    }
-
-    const ws = waveRef.current;
-
-    const onReady = () => {
-      const d = ws.getDuration() || 0;
-      setDuration(d);
-    };
-
-    const onProcess = () => {
-      setCurrent(ws.getCurrentTime() || 0);
-    };
-
-    const onFinish = () => {
-      setPlaying(false);
-      setCurrent(ws.getDuration() || 0);
-    };
-
-    ws.on("ready", onReady);
-    ws.on("audioprocess", onProcess);
-    ws.on("finish", onFinish);
-    ws.on("seek", onProcess);
-
-    return () => {
-      try {
-        ws.un("ready", onReady);
-        ws.un("audioprocess", onProcess);
-        ws.un("finish", onFinish);
-        ws.un("seek", onProcess);
-        try { ws.stop(); } catch (e) { }
-        try { ws.destroy(); } catch (e) { }
-
-      } catch (e) {
-        // ignore
-      }
-    };
+    waveRef.current.load(audioUrl);
+    waveRef.current.on("finish", () => setPlaying(false));
+    return () => waveRef.current.destroy();
   }, [audioUrl, isUser]);
 
-  // keep playing state synced with wavesurfer
-  useEffect(() => {
-    const ws = waveRef.current;
-    if (!ws) return;
-
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-
-    ws.on("play", onPlay);
-    ws.on("pause", onPause);
-
-    return () => {
-      ws.un("play", onPlay);
-      ws.un("pause", onPause);
-    };
-  }, []);
-
-  const togglePlay = () => {
-    const ws = waveRef.current;
-    if (!ws) return;
-    ws.playPause();
-    // playing will be set by event listener
-  };
-
-  const format = (t) => {
-    if (!t || isNaN(t)) return "0:00";
-    const m = Math.floor(t / 60);
-    const s = Math.floor(t % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
   return (
-    <div
-      className={`w-full px-3 py-2 rounded-2xl shadow-sm flex gap-2 items-center
-  ${isUser ? "bg-white text-orange-700" : "bg-gradient-to-r from-orange-500 to-red-500 text-white"}
-  `}
-      style={{ minHeight: "50px", maxHeight: "60px" }}
-    >
-
-      {/* Play/Pause button */}
-
-      <button
-        onClick={togglePlay}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-white/30 hover:bg-white/40"
-        aria-label={playing ? "Pausar áudio" : "Tocar áudio"}
-      >
-        {playing ? "⏸" : "▶"}
+    <div className="flex items-center gap-3 w-[220px]">
+      <button onClick={() => { waveRef.current.playPause(); setPlaying(!playing); }}
+        className={`w-8 h-8 rounded-full flex items-center justify-center ${isUser ? "bg-white/20" : "bg-orange-100 text-orange-600"}`}>
+        {playing ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" className="ml-0.5" />}
       </button>
-
-      {/* Waveform container */}
-      <div className="flex-1">
-        <div ref={containerRef} className="w-full" />
-
-        {/* Thin Telegram-like progress bar */}
-        <div className="w-full h-[2px] mt-1 bg-white/30 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-white"
-            style={{ width: duration ? `${(current / duration) * 100}%` : "0%" }}
-          />
-        </div>
-
-        {/* times */}
-        <div className="flex justify-between text-xs mt-1 opacity-80">
-          <span>{format(current)}</span>
-          <span>{format(duration)}</span>
-        </div>
-      </div>
-
-      {/* iMessage-like animated bars while playing */}
-      <div className="flex gap-[4px] items-end ml-2">
-        <div
-          className={`w-[3px] rounded bg-current transition-all ${playing ? "h-4 animate-[bounce_0.45s_infinite]" : "h-3 opacity-50"}`}
-          style={{ animationDelay: "0s" }}
-        />
-        <div
-          className={`w-[3px] rounded bg-current transition-all ${playing ? "h-6 animate-[bounce_0.5s_infinite]" : "h-3 opacity-50"}`}
-          style={{ animationDelay: "0.08s" }}
-        />
-        <div
-          className={`w-[3px] rounded bg-current transition-all ${playing ? "h-3 animate-[bounce_0.4s_infinite]" : "h-3 opacity-50"}`}
-          style={{ animationDelay: "0.04s" }}
-        />
-      </div>
+      <div ref={containerRef} className="flex-1" />
     </div>
   );
 }
 
-export default function ChatBot({ userName = "Chef", onBack }) {
+export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Criar ID único para cada usuário (só gera uma vez)
-  const [userID, setUserID] = useState(() => {
-    let id = localStorage.getItem("uniqueUserID");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("uniqueUserID", id);
-    }
-    return id;
-  });
-
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    { id: '1', sender: 'bot', text: `Olá! Sou o seu assistente culinário. Como posso ajudar no seu preparo hoje?` }
+  ]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-
-  // Para câmera ao vivo
-  const [cameraStream, setCameraStream] = useState(null);
-  const videoRef = useRef(null);
-
-  // Previews de arquivos
+  const [loading, setLoading] = useState(false);
   const [previews, setPreviews] = useState([]);
+  const [showMenu, setShowMenu] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [stepValidated, setStepValidated] = useState(false);
+  const [sessionId, setSessionId] = useState(null); // vem do fluxo anterior
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [canAdvance, setCanAdvance] = useState(false);
+  
 
-  // Áudio
-  const [audioChunks, setAudioChunks] = useState([]);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [recording, setRecording] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState(null);
 
-  const messageEndRef = useRef(null);
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
-
-  // Carregar mensagens do usuário
   useEffect(() => {
-    if (!userID) return;
+    console.log("=== DEBUG INFO ===");
+    console.log("Token:", localStorage.getItem("token"));
+    console.log("Session ID:", sessionId);
+    console.log("API URL:", import.meta.env.VITE_API_URL);
+  }, [sessionId]);
 
-    const saved = JSON.parse(localStorage.getItem(`chatMessages_${userID}`));
-    if (saved && Array.isArray(saved) && saved.length > 0) {
-      setMessages(saved);
-    } else {
-      setMessages([
-        { id: uuidv4(), sender: "bot", text: `${userName}, o que vamos cozinhar hoje?` }
-      ]);
+
+  const videoRef = useRef(null);
+  const scrollRef = useRef(null);
+
+  // ChatBot.jsx 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get("token");
+    if (tokenFromUrl) {
+      localStorage.setItem("token", tokenFromUrl);
+      setToken(tokenFromUrl); // ✅ atualizar estado
+      console.log("Token armazenado:", tokenFromUrl);
     }
-  }, [userID, userName]);
-
-  // Scroll automático
-  useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
-
-  // Salvar mensagens no localStorage
-  useEffect(() => {
-    if (userID) {
-      localStorage.setItem(`chatMessages_${userID}`, JSON.stringify(messages));
-    }
-  }, [messages, userID]);
-
-  // Fechar menus ao clicar fora
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target) &&
-        buttonRef.current && !buttonRef.current.contains(event.target)) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Atualiza videoRef quando cameraStream mudar
-  useEffect(() => {
-    if (cameraStream && videoRef.current) {
-      videoRef.current.srcObject = cameraStream;
-      videoRef.current.play().catch(console.error);
-    }
-  }, [cameraStream]);
 
-  // Adicionar preview de imagem ou documento
-  const addPreview = (file, type) => {
-    const id = uuidv4();
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPreviews(prev => [...prev, { id, type, data: ev.target.result, name: file.name }]);
-    };
-    reader.readAsDataURL(file);
-  };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    addPreview(file, "image");
-  };
+  useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
-  const handleDocument = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    addPreview(file, "document");
-  };
+ useEffect(() => {
+  // Primeiro tenta obter de location.state (quando navegaste com state)
+  if (location.state?.sessionId) {
+    setSessionId(location.state.sessionId);
+    return;
+  }
 
+  // Senão usa sessionId guardado no localStorage (definido pelo Dashboard ao criar sessão)
+  const storedSession = localStorage.getItem("currentSessionId");
+  if (storedSession) {
+    setSessionId(storedSession);
+    return;
+  }
+
+  // fallback: avisa o utilizador
+  alert("Sessão não iniciada. Por favor, inicie uma receita antes de abrir o chatbot.");
+}, [location.state]);
+
+
+
+
+  // --- Lógica da Câmera ---
   const handleCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       setCameraStream(stream);
+      setShowMenu(false);
     } catch (err) {
-      console.error("Erro ao acessar a câmera:", err);
-      alert("Não foi possível acessar a câmera. Verifique permissões e HTTPS.");
+      alert("Não foi possível acessar a câmera.");
     }
   };
 
   const capturePhoto = () => {
-    if (!videoRef.current) return;
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const imageData = canvas.toDataURL("image/png");
-    setPreviews(prev => [...prev, { id: uuidv4(), type: "image", data: imageData, name: "camera.png" }]);
-
-    cameraStream.getTracks().forEach(track => track.stop());
-    setCameraStream(null);
-    if (videoRef.current) videoRef.current.srcObject = null;
+    canvas.getContext("2d").drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    const data = canvas.toDataURL("image/png");
+    setPreviews(prev => [...prev, { id: uuidv4(), data, type: "image/png" }]);
+    stopCamera();
   };
 
-  // GRAVAÇÃO DE ÁUDIO
-  const startRecording = async () => {
-    if (recording) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      setMediaRecorder(recorder);
-      setAudioChunks([]);
-
-      recorder.ondataavailable = (e) => {
-        setAudioChunks(prev => [...prev, e.data]);
-      };
-
-      recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        setPreviewAudio({ blob: audioBlob, url: audioUrl });
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      recorder.start();
-      setRecording(true);
-
-      // Limitar a gravação a 30s
-      setTimeout(() => {
-        if (recorder.state !== "inactive") recorder.stop();
-        setRecording(false);
-      }, 30000);
-
-    } catch (err) {
-      console.error("Erro ao acessar microfone:", err);
-      alert("Não foi possível acessar o microfone.");
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-      setRecording(false);
+  useEffect(() => {
+    if (cameraStream && videoRef.current) videoRef.current.srcObject = cameraStream;
+  }, [cameraStream]);
+
+  const sendMessage = async () => {
+
+    // Verificar token primeiro
+    /*  const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        alert("Você precisa fazer login para usar o chef.");
+        navigate("/login");
+        return;
+      }
+
+      // Verificar sessionId
+      if (!sessionId) {
+        alert("Sessão não iniciada. Por favor, inicie uma sessão de receita.");
+        return;
+      }*/
+
+    // Se tem imagem para enviar
+    if (previews.length > 0) {
+      const imageUrl = previews[0].data;
+
+      try {
+        const response = await sendStepImage({
+          sessionId,
+          imageUrl,
+          token
+        });
+
+        setMessages(prev => [
+          ...prev,
+          {
+            id: uuidv4(),
+            sender: "bot",
+            text: response.chefFeedback || response.vision?.notes || "Imagem analisada"
+          }
+        ]);
+
+        setStepValidated(response.validationStatus === "VALID");
+        setCanAdvance(response.validationStatus === "VALID");
+        setPreviews([]);
+        setLoading(false);
+        return;
+      } catch (err) {
+        console.error("Erro ao enviar imagem:", err);
+        alert("Erro ao enviar imagem: " + err.message);
+        setLoading(false);
+        return;
+      }
     }
-  };
 
-  const sendAudio = async () => {
-    if (!previewAudio) return;
+    // Se é texto
+    if (!input.trim()) return;
 
-    // Mostrar no chat
-    const audioMsg = {
+    setLoading(true);
+
+    const userMsg = {
       id: uuidv4(),
       sender: "user",
-      type: "audio",
-      data: previewAudio.url
+      text: input
     };
 
-    setMessages(prev => [...prev, audioMsg]);
-    setIsTyping(true);
-
-    // Preparar envio
-    const formData = new FormData();
-    formData.append("audio", previewAudio.blob);
-    formData.append("userName", userName);
-
-    setPreviewAudio(null);
+    setMessages(prev => [...prev, userMsg]);
+    setInput("");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/openai/audio`, {
-        method: "POST",
-        body: formData,
+      // Usar o serviço correto
+      const response = await sendStepText({
+        sessionId,
+        content: input,
+        token
       });
-
-      const data = await res.json();
-
-      // Resposta do bot
-      const botMsg = {
-        id: uuidv4(),
-        sender: "bot",
-        text: data.reply || "Não consegui interpretar o áudio."
-      };
-
-      setMessages(prev => [...prev, botMsg]);
-
-    } catch (err) {
-      console.log(err);
 
       setMessages(prev => [
         ...prev,
-        { id: uuidv4(), sender: "bot", text: "Erro ao processar o áudio." }
+        {
+          id: uuidv4(),
+          sender: "bot",
+          text: response.chefFeedback || response.reply || "Resposta do chef"
+        }
       ]);
+
+      // Verificar se há validação
+      if (response.validationStatus) {
+        setStepValidated(response.validationStatus === "VALID");
+        setCanAdvance(response.validationStatus === "VALID");
+      }
+
+    } catch (err) {
+      console.error("Erro ao enviar mensagem:", err);
+
+      // Tratar erros específicos
+      if (err.message.includes("401") || err.message.includes("Token") || err.message.includes("inválido")) {
+        alert("Sessão expirada. Por favor, faça login novamente.");
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        alert("Erro ao comunicar com o chef: " + err.message);
+      }
     }
 
-    setIsTyping(false);
+    setLoading(false);
   };
 
-
-  const sendMessage = async () => {
-    if (!input.trim() && previews.length === 0 && !previewAudio) return;
-
-    const newMessages = [...messages];
-
-    previews.forEach(preview => {
-      newMessages.push({ id: preview.id, sender: "user", text: preview.name || "", type: preview.type, data: preview.data });
-    });
-
-    if (previewAudio) {
-      newMessages.push({
-        id: uuidv4(),
-        sender: "user",
-        type: "audio",
-        data: previewAudio.url,
-        blob: previewAudio.blob
-      });
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setPreviews(p => [...p, { id: uuidv4(), data: ev.target.result, type: file.type, name: file.name }]);
+      reader.readAsDataURL(file);
     }
+    setShowMenu(false);
+  };
 
-    if (input.trim()) {
-      newMessages.push({ id: uuidv4(), sender: "user", text: input });
-    }
-
-    setMessages(newMessages);
-    setInput("");
-    setPreviews([]);
-    setPreviewAudio(null);
-    setIsTyping(true);
-
+  const handleNextStep = async () => {
     try {
-      const messagesForBackend = newMessages
-        .map((msg) => ({ role: msg.sender === "user" ? "user" : "assistant", content: msg.text || "" }))
-        .filter(msg => msg.content.trim() !== "");
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/openai/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userName, messages: messagesForBackend }),
-      });
-
-      const data = await res.json();
-      const botMsg = { id: uuidv4(), sender: "bot", text: data.reply || "Não consegui responder agora." };
-      setMessages(prev => [...prev, botMsg]);
+      await advanceStep({ sessionId, token });
+      setStepValidated(false);
+      setCanAdvance(false);
+      onNextStep();
     } catch {
-      setMessages(prev => [...prev, { id: uuidv4(), sender: "bot", text: "Erro ao comunicar com o servidor." }]);
-    } finally {
-      setIsTyping(false);
+      alert("Passo ainda não validado pelo chefe.");
     }
   };
-
-  const handleKey = (e) => { if (e.key === "Enter") sendMessage(); };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-orange-200 via-red-50 to-yellow-50">
+    <div className="fixed inset-0 bg-[#FBFBFC] flex flex-col w-screen h-screen text-slate-900 overflow-hidden">
 
-      {/* HEADER */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="w-full flex items-center justify-between px-6 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg sticky top-0 z-50"
-      >
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={onBack} className="p-2 rounded-full bg-white/20 hover:bg-white/30">
-            <svg xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </Button>
-          <img src="public/ChatGPT Image 28_11_2025, 17_04_15.png" alt="App Logo" className="w-10 h-10 rounded-full shadow-md object-contain" />
-          <div className="flex flex-col">
-            <span className="font-semibold text-lg">{userName} Assistente</span>
-            <span className="text-sm flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Online
-            </span>
+      {/* Header Premium (Substituindo o do Dashboard) */}
+      <header className="h-20 flex items-center justify-between px-6 bg-white/80 backdrop-blur-md border-b border-slate-100 z-50">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400">
+            <ChevronLeft size={24} />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-3xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-200">
+              < ChefHat size={28} />
+            </div>
+            <div>
+              <h1 className=" font-bold tracking-tight">Assistente Chefe</h1>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span className="text-[12px] font-bold text-slate-400  tracking-widest">Online</span>
+              </div>
+            </div>
           </div>
         </div>
-        <Button variant="ghost" className="p-2 rounded-full hover:bg-white/20 text-white">
-          <Headphones size={20} />
-        </Button>
-      </motion.div>
-
-      {/* MENSAGENS */}
-      <div className="flex-1 overflow-y-auto px-14 py-3 space-y-2">
+        <button className="p-2 text-slate-300 hover:text-slate-600">
+          <MoreHorizontal size={24} />
+        </button>
+      </header>
+      {/* Main Chat */}
+      <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-[15%] lg:px-[25%] space-y-6 scrollbar-hide">
         {messages.map((msg) => (
           <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", damping: 14 }}
-            className={`flex flex-col relative ${msg.sender === "user"
-              ? "ml-auto items-end max-w-[80%] sm:max-w-[70%] md:max-w-[60%] lg:max-w-[50%]"
-              : "items-start max-w-[80%] sm:max-w-[70%] md:max-w-[60%] lg:max-w-[55%]"
-              }`}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className="flex items-center gap-2 mb-1">
-              {msg.sender === "user" && <User size={16} className="text-orange-500" />}
-              <span className="text-xs text-orange-600">{msg.sender === "user" ? "EU" : ""}</span>
-            </div>
-            <div
-              className={`p-3 rounded-2xl text-sm shadow-sm break-words break-all overflow-hidden whitespace-pre-wrap ${msg.sender === "user"
-                ? "bg-white text-orange-700"
-                : "bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                }`}
-            >
-              {msg.type === "image" && <img src={msg.data} className="max-w-full rounded-lg" />}
-              {msg.type === "document" && (
-                <a href={msg.data} download={msg.text} className="text-blue-600 underline">{msg.text}</a>
-              )}
-              {msg.type === "audio" && (
-                <AudioBubble audioUrl={msg.data} isUser={msg.sender === "user"} />
-              )}
-              {!msg.type && msg.text}
+            <div className={`group relative max-w-[85%] ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
+              <div className={`
+                    p-4 rounded-[22px] text-[15px] leading-relaxed
+                    ${msg.sender === 'user'
+                  ? 'bg-slate-900 text-white rounded-tr-none shadow-xl shadow-slate-200'
+                  : 'bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-sm'}
+                  `}>
+                {msg.text}
+                {msg.files?.map(f => (
+                  <img key={f.id} src={f.data} className="mt-3 rounded-xl max-h-64 w-full object-cover border border-white/20 shadow-md" alt="upload" />
+                ))}
+              </div>
+              <div className={`flex items-center gap-2 mt-2 px-1 text-[10px] font-bold text-slate-300 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <Clock size={10} /> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
             </div>
           </motion.div>
         ))}
-        {isTyping && (
-          <div className="flex items-center gap-2">
-            <div className="text-white px-4 py-2 rounded-2xl flex gap-2">
-              <span className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-bounce" />
-              <span className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-bounce delay-150" />
-              <span className="w-2 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-bounce delay-300" />
-            </div>
+        {loading && (
+          <div className="flex gap-1.5 px-4 opacity-50">
+            <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce"></span>
+            <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+            <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
           </div>
         )}
-        <div ref={messageEndRef} />
-      </div>
-      {/* INPUT / ÁUDIO */}
-      <div className="flex items-center gap-2 p-2 bg-gray-100 border-t border-neutral-300 relative">
+        <div ref={scrollRef} />
+      </main>
 
-        {/* Menu de anexos */}
-        <div className="relative">
-          <button
-            ref={buttonRef}
-            onClick={() => setShowMenu(prev => !prev)}
-            className="p-2 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            <Paperclip size={20} className="text-gray-600" />
-          </button>
-          {showMenu && (
-            <div ref={menuRef} className="absolute bottom-12 left-0 bg-white shadow-lg rounded-lg p-2 flex flex-col gap-2 w-36 z-50">
-              <button onClick={handleCamera} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 rounded">
-                <Camera size={18} /> Câmera
-              </button>
-              <label className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 rounded cursor-pointer">
-                <Image size={18} /> Foto
-                <input type="file" accept="image/*" onChange={handleImage} className="hidden" />
-              </label>
-              <label className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 rounded cursor-pointer">
-                <FileText size={18} /> Documento
-                <input type="file" onChange={handleDocument} className="hidden" />
-              </label>
+      {/* Input Row */}
+      <footer className="p-4 sm:p-8 bg-white/80 backdrop-blur-xl border-t border-slate-100">
+        <div className="max-w-4xl mx-auto space-y-4">
+
+          <AnimatePresence>
+            {previews.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {previews.map(p => (
+                  <div key={p.id} className="relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 group flex-shrink-0">
+                    <img src={p.data} className="w-full h-full object-cover" alt="preview" />
+                    <button onClick={() => setPreviews(prev => prev.filter(i => i.id !== p.id))} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-100">
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="relative flex items-end gap-3 bg-slate-50 border border-slate-200 rounded-[26px] p-2 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-500/5 focus-within:border-orange-200 transition-all shadow-inner">
+            <div className="relative">
+              <Button onClick={() => setShowMenu(!showMenu)} variant="ghost" size="icon" className="rounded-full w-12 h-12 hover:bg-white text-slate-400">
+                <Paperclip size={22} />
+              </Button>
+              {showMenu && (
+                <motion.div initial={{ scale: 0.9, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} className="absolute bottom-16 left-0 bg-white border border-slate-100 shadow-2xl rounded-3xl p-2 min-w-[220px] z-[60] overflow-hidden">
+                  <button onClick={handleCamera} className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl text-sm font-semibold text-slate-600 transition-colors">
+                    <Camera size={18} className="text-orange-500" /> Tirar Foto Agora
+                  </button>
+                  <label className="flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl cursor-pointer text-sm font-semibold text-slate-600 transition-colors border-t border-slate-50">
+                    <Image size={18} className="text-blue-500" /> Galeria de Fotos
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFile} />
+                  </label>
+                  <label className="flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl cursor-pointer text-sm font-semibold text-slate-600 border-t border-slate-50">
+                    <FileText size={18} className="text-emerald-500" /> Documento/PDF
+                    <input type="file" className="hidden" onChange={handleFile} />
+                  </label>
+                </motion.div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Se estiver gravando, mostrar barra de gravação */}
+            <textarea
+              rows="1"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Descreva o progresso..."
+              className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] py-3 px-2 resize-none max-h-32 min-h-[44px] outline-none font-medium placeholder:text-slate-400"
+            />
 
-        {recording ? (
-          <div className="flex-1 flex items-center gap-3 p-2 bg-white rounded-full shadow-inner">
-            {/* Ondas animadas */}
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <span
-                  key={i}
-                  className="w-1 h-4 bg-orange-500 rounded animate-bounce"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                />
-              ))}
-            </div>
-            <span className="text-gray-600 text-sm">Gravando...</span>
-            <button
-              onClick={() => { stopRecording(); setPreviewAudio(null); }}
-              className="ml-auto p-1 text-gray-600 hover:text-red-500 transition-colors"
-              title="Cancelar"
-            >
-              ×
-            </button>
-          </div>
-        ) : previewAudio ? (
-          <div className="flex items-center gap-2 p-1 bg-gray-200 rounded-full w-full max-w-md">
-            {/* Balão de áudio pré-visualização */}
-            <audio controls src={previewAudio.url} className="w-88" />
-            <button
-              onClick={sendAudio}
-              className="p-1 text-orange-500 hover:text-orange-600 transition-colors"
-              title="Enviar áudio"
+            <Button
+              onClick={sendMessage}
+              disabled={!input.trim() && previews.length === 0}
+              className={`w-12 h-12 rounded-2xl transition-all shadow-lg p-0 flex-shrink-0
+                  ${(input.trim() || previews.length > 0) ? 'bg-orange-600 text-white' : 'bg-slate-200 text-slate-400'}`}
             >
               <Send size={20} />
-            </button>
-            <button
-              onClick={() => setPreviewAudio(null)}
-              className="p-2 text-red-500 hover:text-red-600 transition-colors"
-              title="Apagar áudio"
-            >
-              ×
-            </button>
+            </Button>
           </div>
-        ) : (
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="Escreve uma mensagem"
-            className="flex-1 px-5 py-3 rounded-full border border-neutral-300 bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
-          />
-        )}
 
-        {/* Botão de enviar ou gravar */}
-        {!recording && !previewAudio && (
           <Button
-            onMouseDown={startRecording}
-            onMouseUp={stopRecording}
-            onClick={input.trim() || previews.length ? sendMessage : undefined}
-            className={`p-3 rounded-full bg-orange-600 text-white shadow-lg hover:scale-105 transition-transform`}
-            title="Segure para gravar"
+            onClick={handleNextStep}
+            disabled={!canAdvance}
+            className={`w-full h-14 rounded-2xl font-bold tracking-tight transition-all
+                ${stepValidated
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-100'
+                : 'bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed'}`}
           >
-            {input.trim() || previews.length ? <Send size={20} /> : <Mic size={20} />}
+            {stepValidated ? (
+              <span className="flex items-center gap-2"><CheckCircle2 size={18} /> Próximo Passo Liberado</span>
+            ) : "Validação pendente..."}
           </Button>
+        </div>
+      </footer>
+
+      {/* --- Overlay de Câmera Minimalista --- */}
+      <AnimatePresence>
+        {cameraStream && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6"
+          >
+            <div className="w-full max-w-lg bg-white rounded-[40px] overflow-hidden shadow-2xl flex flex-col">
+              <div className="p-6 flex justify-between items-center border-b border-slate-50">
+                <div className="flex items-center gap-2 font-bold text-slate-800"><Camera size={20} className="text-orange-500" />Captura de Evidência</div>
+                <button onClick={stopCamera} className="p-2 bg-slate-100 rounded-full text-slate-400 hover:text-slate-600"><X size={20} /></button>
+              </div>
+              <div className="relative aspect-square bg-black">
+                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover shadow-inner" />
+              </div>
+              <div className="p-10 flex flex-col items-center gap-4 bg-white">
+                <button
+                  onClick={capturePhoto}
+                  className="w-20 h-20 rounded-full border-4 border-slate-100 bg-orange-600 shadow-2xl shadow-orange-200 active:scale-90 transition-transform flex items-center justify-center"
+                >
+                  <div className="w-16 h-16 rounded-full border-2 border-white/20"></div>
+                </button>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Tirar Fotografia</span>
+              </div>
+            </div>
+          </motion.div>
         )}
-      </div>
-
-      {/* Modal câmera */}
-      {cameraStream && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg flex flex-col items-center">
-            <video ref={videoRef} autoPlay playsInline className="w-80 h-60 rounded-lg" />
-            <div className="flex gap-2 mt-2">
-              <button onClick={capturePhoto} className="bg-green-500 text-white px-4 py-2 rounded">Tirar Foto</button>
-              <button onClick={() => {
-                cameraStream.getTracks().forEach(t => t.stop());
-                setCameraStream(null);
-                if (videoRef.current) videoRef.current.srcObject = null;
-              }} className="bg-red-500 text-white px-4 py-2 rounded">Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Previews */}
-      {previews.length > 0 && (
-        <div className="flex gap-2 p-2 overflow-x-auto">
-          {previews.map(p => (
-            <div key={p.id} className="relative w-20 h-20 border rounded-lg flex items-center justify-center bg-gray-100">
-              {p.type === "image" ? (
-                <img src={p.data} alt={p.name} className="object-cover w-full h-full rounded-lg" />
-              ) : (
-                <span className="text-xs text-gray-700 px-1 text-center">{p.name}</span>
-              )}
-              <button
-                onClick={() => setPreviews(prev => prev.filter(item => item.id !== p.id))}
-                className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center"
-              >×</button>
-            </div>
-          ))}
-        </div>
-      )}
-
+      </AnimatePresence>
     </div>
   );
 }

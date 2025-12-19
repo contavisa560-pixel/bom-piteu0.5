@@ -66,6 +66,7 @@ function App() {
       setUser(e.detail);
     };
 
+
     window.addEventListener("user_updated", syncUser);
     return () => window.removeEventListener("user_updated", syncUser);
   }, []);
