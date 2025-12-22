@@ -4,8 +4,6 @@ const axios = require("axios");
 const querystring = require("querystring");
 const User = require("../models/User");
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 // -------------------- Google OAuth --------------------
 passport.use(
   new GoogleStrategy(
@@ -17,18 +15,24 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await User.findOne({ email: profile.emails[0].value });
+        
         if (!user) {
+          // Criar novo usuário se não existir
           user = new User({
             name: profile.displayName,
             email: profile.emails[0].value,
             provider: "google",
             picture: profile.photos[0].value,
+            // Importante: Definir uma senha aleatória ou marcar como verificado 
+            // para evitar redirecionamentos indesejados para 'set-password'
+            isVerified: true 
           });
           await user.save();
         }
-        done(null, user);
+        
+        return done(null, user);
       } catch (err) {
-        done(err, null);
+        return done(err, null);
       }
     }
   )
@@ -49,13 +53,16 @@ async function handleTikTokOAuth(code) {
   const data = tokenRes.data.data;
   if (!data) throw new Error("TikTok login failed");
 
-  let user = await User.findOne({ _id: "tiktok_" + data.user_unique_id });
+  // Usamos o email ou um ID único consistente
+  let user = await User.findOne({ email: data.email || `tiktok_${data.user_unique_id}@tiktok.com` });
+  
   if (!user) {
     user = new User({
-      _id: "tiktok_" + data.user_unique_id,
       name: data.display_name || "TikTok User",
+      email: data.email || `tiktok_${data.user_unique_id}@tiktok.com`,
       provider: "tiktok",
       picture: data.avatar_url || "",
+      isVerified: true
     });
     await user.save();
   }
@@ -85,13 +92,15 @@ async function handleInstagramOAuth(code) {
   });
 
   const instaUser = userRes.data;
-  let user = await User.findOne({ _id: "instagram_" + instaUser.id });
+  let user = await User.findOne({ email: `insta_${instaUser.id}@instagram.com` });
+
   if (!user) {
     user = new User({
-      _id: "instagram_" + instaUser.id,
       name: instaUser.name,
+      email: `insta_${instaUser.id}@instagram.com`,
       provider: "instagram",
       picture: `https://graph.facebook.com/${instaUser.id}/picture?type=large`,
+      isVerified: true
     });
     await user.save();
   }

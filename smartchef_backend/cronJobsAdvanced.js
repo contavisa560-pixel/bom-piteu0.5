@@ -1,123 +1,111 @@
-// cronJobsAdvanced.js
 const cron = require("node-cron");
 const fs = require("fs");
 const path = require("path");
-const sharp = require("sharp");
-const { Parser } = require("json2csv");
-
 const User = require("./models/User");
 
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 const BACKUP_DIR = path.join(__dirname, "backups");
 
-// Cria pasta de backups se não existir
+// Garante que a pasta de backups existe
 if (!fs.existsSync(BACKUP_DIR)) fs.mkdirSync(BACKUP_DIR, { recursive: true });
 
-// ===================== 1️⃣ Reset de Limites =====================
-const resetLimits = async () => {
+/**
+ * 1️⃣ MANUTENÇÃO DIÁRIA: RESET DE LIMITES E DOWNGRADE (Ponto 2 do roteiro)
+ * Executa todos os dias às 00:00
+ */
+const dailyUserMaintenance = async () => {
   try {
-    const users = await User.find();
-    for (const u of users) {
-      u.usedDaily = { text: 0, gen: 0, vision: 0 };
-      u.usedWeekly = { text: 0, gen: 0, vision: 0 };
-      u.lastReset = new Date();
-      await u.save();
-    }
-    console.log("✅ Limites diários e semanais resetados");
+    const agora = new Date();
+
+    // Reset de limites diários
+    await User.updateMany(
+      {},
+      {
+        $set: {
+          "usage.dailyTextRequests": 0,
+          "usage.dailyImageGenerations": 0,
+          "usage.dailyImageAnalysis": 0,
+          lastReset: agora,
+        },
+      }
+    );
+
+    // Verificação de Expiração Premium e Downgrade Automático
+    const expired = await User.updateMany(
+      {
+        isPremium: true,
+        premiumExpiresAt: { $lt: agora, $ne: null }
+      },
+      {
+        $set: { 
+          isPremium: false, 
+          premiumExpiresAt: null,
+          // Retorna aos limites básicos de FREE
+          "limits.textLimit": 7,
+          "limits.imageLimit": 2
+        }
+      }
+    );
+
+    console.log(`✅ Manutenção de usuários concluída. Downgrades: ${expired.modifiedCount}`);
   } catch (err) {
-    console.error("Erro ao resetar limites:", err.message);
+    console.error("❌ Erro na manutenção diária:", err.message);
   }
 };
-cron.schedule("0 0 * * *", resetLimits); // Diário à meia-noite
+cron.schedule("0 0 * * *", dailyUserMaintenance);
 
-// ===================== 2️⃣ Compressão de imagens antigas =====================
-const compressOldImages = async () => {
+/**
+ * 2️⃣ LIMPEZA DE FICHEIROS TEMPORÁRIOS (Ponto 2.3 do roteiro)
+ * Remove uploads locais usados apenas para análise de IA após 24h
+ */
+const cleanTempUploads = () => {
   try {
     const files = fs.readdirSync(UPLOAD_DIR);
-    for (const file of files) {
+    const agora = Date.now();
+    let contagem = 0;
+
+    files.forEach(file => {
       const filePath = path.join(UPLOAD_DIR, file);
       const stats = fs.statSync(filePath);
-      const ageInDays = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60 * 24);
-      if (ageInDays > 7) { // compressão apenas de arquivos com mais de 7 dias
-        await sharp(filePath)
-          .resize({ width: 1024 })
-          .jpeg({ quality: 80 })
-          .toBuffer()
-          .then(data => fs.writeFileSync(filePath, data));
+      
+      // Se o ficheiro tem mais de 24 horas, apaga
+      if (agora - stats.mtimeMs > 24 * 60 * 60 * 1000) {
+        fs.unlinkSync(filePath);
+        contagem++;
       }
-    }
-    console.log("🖼️ Imagens antigas comprimidas");
+    });
+    console.log(`🗑️ Limpeza de temporários: ${contagem} ficheiros removidos.`);
   } catch (err) {
-    console.error("Erro ao comprimir imagens:", err.message);
+    console.error("❌ Erro ao limpar ficheiros:", err.message);
   }
 };
-cron.schedule("0 1 * * *", compressOldImages); // Diário 01:00
+cron.schedule("0 1 * * *", cleanTempUploads);
 
-// ===================== 3️⃣ Backup diário organizado por mês =====================
-const backupDB = async () => {
+/**
+ * 3️⃣ BACKUP DIÁRIO E ESTRUTURADO (Ponto 5 - Segurança)
+ * Backup em JSON organizado por pastas de ano-mês
+ */
+const backupDatabase = async () => {
   try {
     const users = await User.find();
-    const now = new Date();
-    const monthDir = path.join(BACKUP_DIR, `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
-    if (!fs.existsSync(monthDir)) fs.mkdirSync(monthDir, { recursive: true });
-    const backupPath = path.join(monthDir, `backup-${Date.now()}.json`);
-    fs.writeFileSync(backupPath, JSON.stringify(users, null, 2));
-    console.log("💾 Backup diário concluído:", backupPath);
+    const agora = new Date();
+    const folderName = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+    const targetDir = path.join(BACKUP_DIR, folderName);
+
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+
+    const fileName = `db-backup-${agora.toISOString().split('T')[0]}.json`;
+    fs.writeFileSync(path.join(targetDir, fileName), JSON.stringify(users, null, 2));
+    
+    console.log("💾 Backup diário concluído.");
   } catch (err) {
-    console.error("Erro ao criar backup:", err.message);
+    console.error("❌ Erro no backup:", err.message);
   }
 };
-cron.schedule("0 2 * * *", backupDB); // Diário 02:00
-
-// ===================== 4️⃣ Relatório de consumo da IA em CSV =====================
-const generateIAReportCSV = async () => {
-  try {
-    const users = await User.find();
-    const report = users.map(u => ({
-      email: u.email,
-      daily_text: u.usedDaily?.text || 0,
-      daily_gen: u.usedDaily?.gen || 0,
-      daily_vision: u.usedDaily?.vision || 0,
-      weekly_text: u.usedWeekly?.text || 0,
-      weekly_gen: u.usedWeekly?.gen || 0,
-      weekly_vision: u.usedWeekly?.vision || 0,
-    }));
-
-    const parser = new Parser();
-    const csv = parser.parse(report);
-
-    const now = new Date();
-    const reportDir = path.join(BACKUP_DIR, "reports");
-    if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
-
-    const reportPath = path.join(reportDir, `IA_report-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${now.getDate()}.csv`);
-    fs.writeFileSync(reportPath, csv);
-    console.log("📊 Relatório de IA gerado:", reportPath);
-  } catch (err) {
-    console.error("Erro ao gerar relatório CSV:", err.message);
-  }
-};
-cron.schedule("0 3 * * *", generateIAReportCSV); // Diário 03:00
-
-// ===================== 5️⃣ Limpeza de usuários inativos =====================
-const cleanInactiveUsers = async () => {
-  try {
-    const threshold = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // 1 ano
-    const inactiveUsers = await User.find({ lastLogin: { $lt: threshold } });
-    for (const u of inactiveUsers) {
-      await User.deleteOne({ _id: u._id });
-    }
-    console.log("🗑️ Usuários inativos removidos:", inactiveUsers.length);
-  } catch (err) {
-    console.error("Erro ao limpar usuários inativos:", err.message);
-  }
-};
-cron.schedule("0 4 * * 0", cleanInactiveUsers); // Semanal aos domingos 04:00
+cron.schedule("0 2 * * *", backupDatabase);
 
 module.exports = {
-  resetLimits,
-  compressOldImages,
-  backupDB,
-  generateIAReportCSV,
-  cleanInactiveUsers,
+  dailyUserMaintenance,
+  cleanTempUploads,
+  backupDatabase
 };

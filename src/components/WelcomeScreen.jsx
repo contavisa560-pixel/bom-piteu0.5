@@ -14,19 +14,19 @@ const WelcomeScreen = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
- 
-  useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const userParam = params.get("user");
 
-  if (token && userParam) {
-    const user = JSON.parse(decodeURIComponent(userParam));
-    onLogin(user); // função que você já passa por props
-    localStorage.setItem("token", token); // opcional
-    window.history.replaceState({}, document.title, "/"); // limpa a URL
-  }
-}, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const userParam = params.get("user");
+
+    if (token && userParam) {
+      const user = JSON.parse(decodeURIComponent(userParam));
+      onLogin(user); // função que você já passa por props
+      localStorage.setItem("token", token); // opcional
+      window.history.replaceState({}, document.title, "/"); // limpa a URL
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -45,6 +45,12 @@ const WelcomeScreen = ({ onLogin }) => {
       onLogin(data.user);
     } catch (err) {
       toast({ title: "Erro de rede", description: "Servidor offline.", variant: "destructive" });
+    }
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token || data.token); // salva token
+      localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
+      onLogin(data.user);
     }
   };
 
@@ -65,6 +71,12 @@ const WelcomeScreen = ({ onLogin }) => {
       onLogin(data.user);
     } catch (err) {
       toast({ title: "Erro", description: "Não foi possível conectar.", variant: "destructive" });
+    }
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token || data.token); // salva token
+      localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
+      onLogin(data.user);
     }
   };
 
