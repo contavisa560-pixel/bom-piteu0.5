@@ -3,7 +3,10 @@ const router = express.Router();
 const adminController = require("../controllers/adminController");
 const { authenticate } = require("../middleware/security/jwtAuth");
 
-// Rota de métricas protegida por Token
-router.get("/metrics", authenticate, adminController.getGlobalMetrics);
+// Apenas uma regra: Todas as rotas de admin precisam de autenticação
+router.use(authenticate);
+
+// Rota de métricas
+router.get("/metrics", adminController.getGlobalMetrics);
 
 module.exports = router;
