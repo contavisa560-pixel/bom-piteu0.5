@@ -11,9 +11,8 @@ import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import { sendTextMessage, sendImageMessage, advanceStep } from "@/services/recipeApi";
 import { useLocation } from "react-router-dom";
-import { sendStepText } from "@/services/recipeChatService";
+import { startRecipeSession, sendStepText } from "@/services/recipeChatService";
 import { sendStepImage } from "@/services/recipeImageService";
-import { startRecipeSession } from '@/services/recipeApi';
 
 
 // --- Waveform Minimalista ---
@@ -56,19 +55,25 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
   const location = useLocation();
 
   const [messages, setMessages] = useState([
-    { id: '1', sender: 'bot', text: `Olá! Sou o seu assistente culinário. Como posso ajudar no seu preparo hoje?` }
+    {
+      id: uuidv4(),
+      sender: "bot",
+      text: "Olá! Sou o seu assistente culinário. Como posso ajudar no seu preparo hoje?"
+    }
   ]);
+
+  const [sessionId, setSessionId] = useState(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [previews, setPreviews] = useState([]);
   const [showMenu, setShowMenu] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
   const [stepValidated, setStepValidated] = useState(false);
-  const [sessionId, setSessionId] = useState(null); // vem do fluxo anterior
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [canAdvance, setCanAdvance] = useState(false);
-  
-
+  //Estado do botão inteligente (3 personalidades)
+  const [actionButtonMode, setActionButtonMode] = useState("START");
+  // START | WAITING | NEXT | END
 
   useEffect(() => {
     console.log("=== DEBUG INFO ===");
@@ -84,37 +89,62 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
   // ChatBot.jsx 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get("token");
-    if (tokenFromUrl) {
-      localStorage.setItem("token", tokenFromUrl);
-      setToken(tokenFromUrl); // ✅ atualizar estado
-      console.log("Token armazenado:", tokenFromUrl);
+    const tokenToUse = token || localStorage.getItem("token");
+    if (!tokenToUse) {
+      alert("Sessão expirada. Faça login novamente.");
+      navigate("/login");
+      return;
     }
+    const url = new URL(window.location);
+    url.searchParams.delete("token");
+    window.history.replaceState({}, "", url);
+
   }, []);
 
 
 
   useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
- useEffect(() => {
-  // Primeiro tenta obter de location.state (quando navegaste com state)
-  if (location.state?.sessionId) {
-    setSessionId(location.state.sessionId);
-    return;
-  }
 
-  // Senão usa sessionId guardado no localStorage (definido pelo Dashboard ao criar sessão)
-  const storedSession = localStorage.getItem("currentSessionId");
-  if (storedSession) {
-    setSessionId(storedSession);
-    return;
-  }
+  const sessionStartedRef = useRef(false);
 
-  // fallback: avisa o utilizador
-  alert("Sessão não iniciada. Por favor, inicie uma receita antes de abrir o chatbot.");
-}, [location.state]);
+  useEffect(() => {
+    if (!token) return;
+    if (sessionStartedRef.current) return;
 
+    sessionStartedRef.current = true;
 
+    const initSession = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/recipe/session/start",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              recipeTitle: "Receita em andamento",
+              fullRecipeData: {},
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Erro ao iniciar sessão");
+        }
+
+        setSessionId(data.sessionId);
+      } catch (err) {
+        console.error("Erro ao iniciar sessão:", err.message);
+      }
+    };
+
+    initSession();
+  }, [token]);
 
 
   // --- Lógica da Câmera ---
@@ -213,27 +243,41 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
     setInput("");
 
     try {
-      // Usar o serviço correto
+      if (!sessionId) {
+        console.error("Sessão ainda não iniciada");
+        return;
+      }
       const response = await sendStepText({
         sessionId,
-        content: input,
-        token
+        content: input
       });
+
+
+      const optionsWithId = (response.options || []).map(opt => ({
+        ...opt,
+        id: opt.id || uuidv4() // cria id único se não houver
+      }));
 
       setMessages(prev => [
         ...prev,
         {
           id: uuidv4(),
           sender: "bot",
-          text: response.chefFeedback || response.reply || "Resposta do chef"
+          text: response.chefFeedback || "Vamos começar!",
+          options: optionsWithId
         }
       ]);
 
-      // Verificar se há validação
-      if (response.validationStatus) {
-        setStepValidated(response.validationStatus === "VALID");
-        setCanAdvance(response.validationStatus === "VALID");
+
+      if (response.validationStatus === "VALID") {
+        setStepValidated(true);
+        setCanAdvance(true);
+        setActionButtonMode("NEXT");
+
+      } else if (response.validationStatus === "END") {
+        setActionButtonMode("END");
       }
+
 
     } catch (err) {
       console.error("Erro ao enviar mensagem:", err);
@@ -251,6 +295,65 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
     setLoading(false);
   };
 
+  // Botão de ação inteligente
+  const handleActionButton = async () => {
+    if (!sessionId) {
+      alert("Sessão ainda não iniciada. Por favor, aguarde.");
+      return;
+    }
+
+    if (actionButtonMode === "START") {
+      // Chamar backend para iniciar cozinha
+      try {
+        setLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/recipe/session/startCooking`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Erro ao iniciar cozinha");
+
+        setMessages(prev => [
+          ...prev,
+          { id: uuidv4(), sender: "bot", text: data.chefFeedback }
+        ]);
+
+        setTimeout(() => {
+          setActionButtonMode("WAITING");
+        }, 0);
+
+      } catch (err) {
+        console.error("Erro iniciar cozinha:", err);
+        alert("Erro ao iniciar modo cozinha: " + err.message);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    if (actionButtonMode === "NEXT") {
+      await handleNextStep();
+      setStepValidated(false);
+      setCanAdvance(false);
+      setActionButtonMode("WAITING");
+      return;
+    }
+
+    // --- Encerrar receita ---
+    if (actionButtonMode === "END") {
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now(), sender: "bot", text: "⛔ Receita encerrada. Quando quiser cozinhar novamente, é só avisar." }
+      ]);
+      setActionButtonMode("START");
+    }
+  };
+
+
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -266,9 +369,51 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
       await advanceStep({ sessionId, token });
       setStepValidated(false);
       setCanAdvance(false);
-      onNextStep();
     } catch {
       alert("Passo ainda não validado pelo chefe.");
+    }
+  };
+  const chooseRecipe = async (recipeTitle) => {
+    if (!sessionId) return;
+
+    try {
+      setLoading(true);
+
+      // mensagem visual do usuário
+      setMessages(prev => [
+        ...prev,
+        {
+          id: uuidv4(),
+          sender: "user",
+          text: recipeTitle
+        }
+      ]);
+
+      const response = await sendStepText({
+        sessionId,
+        content: recipeTitle,
+        intent: "CHOOSE_RECIPE"
+      });
+
+      setMessages(prev => [
+        ...prev,
+        {
+          id: uuidv4(),
+          sender: "bot",
+          text: response.chefFeedback || "Vamos começar!",
+          options: response.options || []
+        }
+      ]);
+
+      if (response.validationStatus === "VALID") {
+        setCanAdvance(true);
+        setActionButtonMode("NEXT");
+      }
+
+    } catch (err) {
+      console.error("Erro ao escolher receita:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -300,29 +445,66 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
       </header>
       {/* Main Chat */}
       <main className="flex-1 overflow-y-auto px-4 py-8 sm:px-[15%] lg:px-[25%] space-y-6 scrollbar-hide">
-        {messages.map((msg) => (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className={`group relative max-w-[85%] ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
-              <div className={`
+        <AnimatePresence mode="wait">
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+
+              <div className={`group relative max-w-[85%] ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
+                <div className={`
                     p-4 rounded-[22px] text-[15px] leading-relaxed
                     ${msg.sender === 'user'
-                  ? 'bg-slate-900 text-white rounded-tr-none shadow-xl shadow-slate-200'
-                  : 'bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-sm'}
+                    ? 'bg-slate-900 text-white rounded-tr-none shadow-xl shadow-slate-200'
+                    : 'bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-sm'}
                   `}>
-                {msg.text}
-                {msg.files?.map(f => (
-                  <img key={f.id} src={f.data} className="mt-3 rounded-xl max-h-64 w-full object-cover border border-white/20 shadow-md" alt="upload" />
-                ))}
+                  {msg.text}
+                  {msg.options && msg.options.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      {msg.options && msg.options.length > 0 && (
+                        <div className="mt-4 space-y-3">
+                          {msg.options.map((option) => (
+                            <motion.div
+                              key={option.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              onClick={() => chooseRecipe(option.title)}
+                              className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-md transition"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-slate-800">{option.title}</h4>
+                                  <p className="text-sm text-slate-500 mt-1">
+                                    {option.description}
+                                  </p>
+                                  <div className="flex gap-4 text-xs text-slate-400 mt-2">
+                                    <span>{option.time || "60 min"}</span>
+                                    <span>{option.difficulty || "Médio"}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {msg.files?.map(f => (
+                    <img key={f.id} src={f.data} className="mt-3 rounded-xl max-h-64 w-full object-cover border border-white/20 shadow-md" alt="upload" />
+                  ))}
+                </div>
+                <div className={`flex items-center gap-2 mt-2 px-1 text-[10px] font-bold text-slate-300 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <Clock size={10} /> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
               </div>
-              <div className={`flex items-center gap-2 mt-2 px-1 text-[10px] font-bold text-slate-300 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <Clock size={10} /> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
         {loading && (
           <div className="flex gap-1.5 px-4 opacity-50">
             <span className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-bounce"></span>
@@ -338,19 +520,23 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
         <div className="max-w-4xl mx-auto space-y-4">
 
           <AnimatePresence>
-            {previews.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {previews.map(p => (
-                  <div key={p.id} className="relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 group flex-shrink-0">
-                    <img src={p.data} className="w-full h-full object-cover" alt="preview" />
-                    <button onClick={() => setPreviews(prev => prev.filter(i => i.id !== p.id))} className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-100">
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
+            {previews.map(p => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="relative w-20 h-20 rounded-2xl overflow-hidden border border-slate-200 group flex-shrink-0"
+              >
+                <img src={p.data} className="w-full h-full object-cover" alt="preview" />
+                <button onClick={() => setPreviews(prev => prev.filter(i => i.id !== p.id))}
+                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1">
+                  <X size={12} />
+                </button>
               </motion.div>
-            )}
+            ))}
           </AnimatePresence>
+
 
           <div className="relative flex items-end gap-3 bg-slate-50 border border-slate-200 rounded-[26px] p-2 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-500/5 focus-within:border-orange-200 transition-all shadow-inner">
             <div className="relative">
@@ -393,25 +579,45 @@ export default function PremiumChat({ userName = "Chef", onBack, onNextStep }) {
           </div>
 
           <Button
-            onClick={handleNextStep}
-            disabled={!canAdvance}
-            className={`w-full h-14 rounded-2xl font-bold tracking-tight transition-all
-                ${stepValidated
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-100'
-                : 'bg-slate-100 text-slate-300 border border-slate-200 cursor-not-allowed'}`}
+            onClick={handleActionButton}
+            disabled={actionButtonMode === "WAITING" || loading}
+            className={`w-full h-14 rounded-2xl font-bold tracking-tight transition-all duration-300
+    ${actionButtonMode === "START" &&
+              "bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-100"
+              }
+    ${actionButtonMode === "WAITING" &&
+              "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+              }
+    ${actionButtonMode === "NEXT" &&
+              "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100"
+              }
+    ${actionButtonMode === "END" &&
+              "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-100"
+              }
+  `}
           >
-            {stepValidated ? (
-              <span className="flex items-center gap-2"><CheckCircle2 size={18} /> Próximo Passo Liberado</span>
-            ) : "Validação pendente..."}
+            {actionButtonMode === "START" && "Iniciar modo cozinha"}
+            {actionButtonMode === "WAITING" && "Validação pendente..."}
+            {actionButtonMode === "NEXT" && (
+              <span className="flex items-center gap-2 justify-center">
+                <CheckCircle2 size={18} />
+                Próximo passo liberado
+              </span>
+            )}
+            {actionButtonMode === "END" && "Encerrar receita"}
           </Button>
+
         </div>
       </footer>
 
       {/* --- Overlay de Câmera Minimalista --- */}
-      <AnimatePresence>
+      <AnimatePresence mode="sync">
         {cameraStream && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            key="camera-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl z-[100] flex flex-col items-center justify-center p-6"
           >
             <div className="w-full max-w-lg bg-white rounded-[40px] overflow-hidden shadow-2xl flex flex-col">

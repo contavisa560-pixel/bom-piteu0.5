@@ -17,6 +17,17 @@ import ImageRecognition from "@/components/ImageRecognition";
 import VoiceRecognition from "@/components/VoiceRecognition";
 import InternationalRecipes from "@/components/InternationalRecipes";
 import "./checkEnv.js";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import TermsOfUse from "@/pages/legal/TermsOfUse";
+import CookiesPolicy from "@/pages/legal/CookiesPolicy";
+import CommunityGuidelines from "@/pages/legal/CommunityGuidelines";
+import PaymentsPolicy from "@/pages/legal/PaymentsPolicy";
+import Support from "@/pages/legal/Support";
+import DataDeletion from "@/pages/legal/DataDeletion";
+import About from "./pages/legal/About";
+import Partnerships from "./pages/legal/Partnerships";
+import LegalCentral from "./pages/legal/LegalCentral";
+
 
 function App() {
   const location = useLocation();
@@ -35,16 +46,16 @@ function App() {
 
     if (token) {
       localStorage.setItem("bomPiteuToken", token);
-      
+
       if (userParam) {
         try {
           const decodedUser = JSON.parse(decodeURIComponent(userParam));
-          
+
           // Salva no storage e atualiza estado imediatamente
           localStorage.setItem("bomPiteuUser", JSON.stringify(decodedUser));
           setUser(decodedUser);
           setCurrentView("dashboard");
-          
+
           // Limpa a URL para segurança
           navigate("/", { replace: true });
         } catch (err) {
@@ -53,22 +64,22 @@ function App() {
       }
     }
   }, [location, navigate]);
-useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const userId = params.get("userId");
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userId = params.get("userId");
 
-  if (userId && window.location.pathname.includes("set-password")) {
-    setUserIdForPassword(userId); // Você precisaria criar esse estado: const [userIdForPassword, setUserIdForPassword] = useState(null);
-    setCurrentView("setPassword");
-  }
-}, [location]);
+    if (userId && window.location.pathname.includes("set-password")) {
+      setUserIdForPassword(userId); // Você precisaria criar esse estado: const [userIdForPassword, setUserIdForPassword] = useState(null);
+      setCurrentView("setPassword");
+    }
+  }, [location]);
 
 
   // ✅ 2. Carregar sessão existente do LocalStorage (Persistência)
   useEffect(() => {
     const storedUser = localStorage.getItem("bomPiteuUser");
     const storedToken = localStorage.getItem("bomPiteuToken");
-    
+
     // Se temos usuário e token, e não estamos no meio de um processo de login da URL
     const params = new URLSearchParams(window.location.search);
     if (storedUser && storedToken && !params.get("token")) {
@@ -153,7 +164,7 @@ useEffect(() => {
 
   const renderContent = () => {
     switch (currentView) {
-      case "welcome": return <WelcomeScreen onLogin={handleLogin} />;
+      case "welcome": return <WelcomeScreen onLogin={handleLogin} onNavigate={handleNavigate} />;
       case "profileSetup": return <ProfileSetup onSave={handleProfileSave} user={user} onNavigate={handleNavigate} />;
       case "chat": return <ChatBot selectedCategory={selectedCategory} onRecipeGenerated={handleRecipeGenerated} onBack={() => handleNavigate("dashboard")} user={user} />;
       case "recipe": return <RecipeDisplay recipe={currentRecipe} onBack={() => handleNavigate("dashboard")} user={user} onToggleFavorite={handleToggleFavorite} />;
@@ -162,6 +173,7 @@ useEffect(() => {
       case "marketplace": return <Marketplace onNavigate={handleNavigate} />;
       case "imageRecognition": return <ImageRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
       case "voiceRecognition": return <VoiceRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
+
       case "internationalRecipes": return <InternationalRecipes onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} />;
       case "dashboard":
       default: return <Dashboard onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} onNavigate={handleNavigate} user={user} />;
@@ -179,16 +191,40 @@ useEffect(() => {
         )}
         <main className="container mx-auto px-4 py-8">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              {renderContent()}
-            </motion.div>
+            <Routes location={location} key={location.pathname}>
+
+              {/* ================= CENTRAL LEGAL ================= */}
+              <Route path="/legal" element={<LegalCentral />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/cookies" element={<CookiesPolicy />} />
+              <Route path="/community" element={<CommunityGuidelines />} />
+              <Route path="/payments" element={<PaymentsPolicy />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/data-deletion" element={<DataDeletion />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/partnerships" element={<Partnerships />} />
+              
+
+
+              {/* ================= APP NORMAL ================= */}
+              <Route
+                path="*"
+                element={
+                  <motion.div
+                    key={currentView}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {renderContent()}
+                  </motion.div>
+                }
+              />
+            </Routes>
           </AnimatePresence>
+
         </main>
         <Toaster />
       </div>
