@@ -22,7 +22,7 @@ const imageRoutes = require("./routes/imageRoutes");
 const visionRoutes = require("./routes/visionRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-
+const recipeSessionRoutes = require("./routes/recipeSessionRoutes");
 const { apiLimiter, authLimiter, aiLimiter } = require("./middleware/security/rateLimiter");
 const { authenticate } = require("./middleware/security/jwtAuth");
 
@@ -38,8 +38,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(passport.initialize());
 
+
 // --- Aplicação de Rate Limits (Ponto 5) ---
-app.use("/api/", apiLimiter); 
+app.use("/api/", apiLimiter);
+app.use("/api/recipe/session", recipeSessionRoutes);
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
 app.use("/api/chat", aiLimiter);   // Protege custos de IA
@@ -127,10 +129,10 @@ app.use("/api/admin", adminRoutes); // Métricas Internas (Ponto 4)
 app.post("/api/users/avatar", authenticate, upload.single("avatar"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "Nenhuma imagem enviada." });
-    
+
     // Sobe para o R2 e recebe a URL
     const imageUrl = await uploadToCloudflare(req.file.buffer, req.file.originalname, "avatars");
-    
+
     await User.findByIdAndUpdate(req.user._id, { avatar: imageUrl });
     res.json({ success: true, avatar: imageUrl });
   } catch (err) {
