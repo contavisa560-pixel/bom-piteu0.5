@@ -1,48 +1,52 @@
 const mongoose = require("mongoose");
 
-const StepSchema = new mongoose.Schema({
-    stepNumber: Number,
-    objective: String,
-    expectedAction: String,
-    expectedVisual: String,
-    warnings: [String],
 
-    userText: String,
-    userImageUrl: String,
-    visionAnalysis: Object,
-
-    validationStatus: {
-        type: String,
-        enum: ["PENDING", "VALID", "INVALID"],
-        default: "PENDING"
+const recipeSessionSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
-
-    chefFeedback: String,
-    completedAt: Date
-});
-
-const RecipeSessionSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    recipeId: String,
-
-    sessionId: {
-        type: String,
-        required: true,
-        unique: true,
-        default: () => new mongoose.Types.ObjectId().toString() // 
+    recipeTitle: {
+      type: String,
+      required: true,
     },
-
+    // Guarda a lista completa de passos vinda da IA
+    steps: [
+      {
+        stepNumber: Number,
+        description: String,
+        completed: { type: Boolean, default: false },
+      },
+    ],
+    // O ponteiro para o passo atual
+    currentStepIndex: {
+      type: Number,
+      default: 0,
+    },
+    // Status da sessão: 'active', 'completed', ou 'abandoned'
     status: {
-        type: String,
-        enum: ["IN_PROGRESS", "COMPLETED", "ABANDONED"],
-        default: "IN_PROGRESS"
+      type: String,
+      enum: ["active", "completed", "abandoned"],
+      default: "active",
     },
+    // Metadados úteis para o dashboard e métricas
+    startTime: { type: Date, default: Date.now },
+    endTime: { type: Date },
+    
+    // Armazena a receita completa em JSON para não ter de gerar novamente
+    fullRecipeData: {
+      type: Object,
+      required: true,
+    }
+  },
+  { timestamps: true }
+);
 
-    currentStep: { type: Number, default: 1 },
-    totalSteps: Number,
-    steps: [StepSchema],
-    startedAt: { type: Date, default: Date.now },
-    finishedAt: Date
-});
+// Index para encontrar rapidamente a sessão ativa do utilizador
+recipeSessionSchema.index({ userId: 1, status: 1 });
 
-module.exports = mongoose.model("RecipeSession", RecipeSessionSchema);
+module.exports = mongoose.model("RecipeSession", recipeSessionSchema);
+

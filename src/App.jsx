@@ -16,12 +16,20 @@ import Marketplace from "@/components/Marketplace";
 import ImageRecognition from "@/components/ImageRecognition";
 import VoiceRecognition from "@/components/VoiceRecognition";
 import InternationalRecipes from "@/components/InternationalRecipes";
-import AuthSuccess from "@/pages/AuthSuccess";
 import "./checkEnv.js";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import TermsOfUse from "@/pages/legal/TermsOfUse";
+import CookiesPolicy from "@/pages/legal/CookiesPolicy";
+import CommunityGuidelines from "@/pages/legal/CommunityGuidelines";
+import PaymentsPolicy from "@/pages/legal/PaymentsPolicy";
+import Support from "@/pages/legal/Support";
+import DataDeletion from "@/pages/legal/DataDeletion";
+import About from "./pages/legal/About";
+import Partnerships from "./pages/legal/Partnerships";
+import LegalCentral from "./pages/legal/LegalCentral";
 
 
 function App() {
-  
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,55 +38,77 @@ function App() {
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // ✅ 1. Quando volta do Google (AuthSuccess redireciona com token e user)
+  // ✅ 1. Processar Login Google/OAuth vindo da URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
     const userParam = params.get("user");
 
-    if (token && userParam) {
-      try {
-        const parsedUser = JSON.parse(decodeURIComponent(userParam));
-        localStorage.setItem("bomPiteuUser", JSON.stringify(parsedUser));
-        localStorage.setItem("bomPiteuToken", token);
-        setUser(parsedUser);
-        setCurrentView("dashboard");
+    if (token) {
+      localStorage.setItem("bomPiteuToken", token);
 
-        navigate("/", { replace: true });
-      } catch (err) {
-        console.error("Erro ao processar user Google:", err);
+      if (userParam) {
+        try {
+          const decodedUser = JSON.parse(decodeURIComponent(userParam));
+
+          // Salva no storage e atualiza estado imediatamente
+          localStorage.setItem("bomPiteuUser", JSON.stringify(decodedUser));
+          setUser(decodedUser);
+          setCurrentView("dashboard");
+
+          // Limpa a URL para segurança
+          navigate("/", { replace: true });
+        } catch (err) {
+          console.error("Erro ao processar dados do utilizador:", err);
+        }
       }
     }
   }, [location, navigate]);
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userId = params.get("userId");
+
+    if (userId && window.location.pathname.includes("set-password")) {
+      setUserIdForPassword(userId); // Você precisaria criar esse estado: const [userIdForPassword, setUserIdForPassword] = useState(null);
+      setCurrentView("setPassword");
+    }
+  }, [location]);
 
 
-  // ✅ 2. Carregar utilizador salvo no localStorage
+  // ✅ 2. Carregar sessão existente do LocalStorage (Persistência)
   useEffect(() => {
     const storedUser = localStorage.getItem("bomPiteuUser");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      setUser(parsed);
-      setCurrentView("dashboard");
+    const storedToken = localStorage.getItem("bomPiteuToken");
+
+    // Se temos usuário e token, e não estamos no meio de um processo de login da URL
+    const params = new URLSearchParams(window.location.search);
+    if (storedUser && storedToken && !params.get("token")) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setCurrentView("dashboard");
+      } catch (err) {
+        console.error("Erro ao recuperar sessão:", err);
+      }
     }
   }, []);
+
+  // ✅ 3. Sincronização de eventos customizados
   useEffect(() => {
     const syncUser = (e) => {
       setUser(e.detail);
     };
-
-
     window.addEventListener("user_updated", syncUser);
     return () => window.removeEventListener("user_updated", syncUser);
   }, []);
 
-  // ✅ Função utilitária para atualizar user global
+  // ✅ Funções utilitárias
   const updateUser = (updatedData) => {
     const updatedUser = { ...user, ...updatedData };
     setUser(updatedUser);
     localStorage.setItem("bomPiteuUser", JSON.stringify(updatedUser));
   };
 
-  // ✅ Funções principais
   const handleLogin = (profile) => {
     const newUser = {
       ...profile,
@@ -108,6 +138,7 @@ function App() {
     localStorage.removeItem("bomPiteuToken");
     setUser(null);
     setCurrentView("welcome");
+    navigate("/", { replace: true });
   };
 
   const handleNavigate = (view) => {
@@ -116,45 +147,36 @@ function App() {
   };
 
   const handleRecipeGenerated = (recipe) => {
-    updateUser({ points: (user.points || 0) + 25 });
+    updateUser({ points: (user?.points || 0) + 25 });
     setCurrentRecipe(recipe);
     setCurrentView("recipe");
   };
 
   const handleToggleFavorite = (recipeTitle) => {
-    const isFavorite = user.favorites.includes(recipeTitle);
+    if (!user) return false;
+    const isFavorite = user.favorites?.includes(recipeTitle);
     const updatedFavorites = isFavorite
       ? user.favorites.filter((fav) => fav !== recipeTitle)
-      : [...user.favorites, recipeTitle];
+      : [...(user.favorites || []), recipeTitle];
     updateUser({ favorites: updatedFavorites });
     return !isFavorite;
   };
 
   const renderContent = () => {
     switch (currentView) {
-      case "welcome":
-        return <WelcomeScreen onLogin={handleLogin} />;
-      case "profileSetup":
-        return <ProfileSetup onSave={handleProfileSave} user={user} onNavigate={handleNavigate} />;
-      case "chat":
-        return <ChatBot selectedCategory={selectedCategory} onRecipeGenerated={handleRecipeGenerated} onBack={() => handleNavigate("dashboard")} user={user} />;
-      case "recipe":
-        return <RecipeDisplay recipe={currentRecipe} onBack={() => handleNavigate("dashboard")} user={user} onToggleFavorite={handleToggleFavorite} />;
-      case "profile":
-        return <UserProfile user={user} onNavigate={handleNavigate} />;
-      case "subscription":
-        return <Subscription user={user} onSubscribe={(plan) => { updateUser({ isPremium: plan !== "free" }); handleNavigate("dashboard"); }} onNavigate={handleNavigate} />;
-      case "marketplace":
-        return <Marketplace onNavigate={handleNavigate} />;
-      case "imageRecognition":
-        return <ImageRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
-      case "voiceRecognition":
-        return <VoiceRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
-      case "internationalRecipes":
-        return <InternationalRecipes onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} />;
+      case "welcome": return <WelcomeScreen onLogin={handleLogin} onNavigate={handleNavigate} />;
+      case "profileSetup": return <ProfileSetup onSave={handleProfileSave} user={user} onNavigate={handleNavigate} />;
+      case "chat": return <ChatBot selectedCategory={selectedCategory} onRecipeGenerated={handleRecipeGenerated} onBack={() => handleNavigate("dashboard")} user={user} />;
+      case "recipe": return <RecipeDisplay recipe={currentRecipe} onBack={() => handleNavigate("dashboard")} user={user} onToggleFavorite={handleToggleFavorite} />;
+      case "profile": return <UserProfile user={user} onNavigate={handleNavigate} />;
+      case "subscription": return <Subscription user={user} onSubscribe={(plan) => { updateUser({ isPremium: plan !== "free" }); handleNavigate("dashboard"); }} onNavigate={handleNavigate} />;
+      case "marketplace": return <Marketplace onNavigate={handleNavigate} />;
+      case "imageRecognition": return <ImageRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
+      case "voiceRecognition": return <VoiceRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
+
+      case "internationalRecipes": return <InternationalRecipes onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} />;
       case "dashboard":
-      default:
-        return <Dashboard onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} onNavigate={handleNavigate} user={user} />;
+      default: return <Dashboard onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} onNavigate={handleNavigate} user={user} />;
     }
   };
 
@@ -162,29 +184,48 @@ function App() {
     <>
       <Helmet>
         <title>Bom Piteu! - A tua Cozinha Inteligente</title>
-        <meta name="description" content="O teu assistente culinário para receitas angolanas e do mundo. Personalizado para ti, com listas de compras e guias passo-a-passo." />
       </Helmet>
-
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
         {user && currentView !== "welcome" && currentView !== "chat" && (
           <Header user={user} onLogout={handleLogout} onNavigate={handleNavigate} />
         )}
-
-
         <main className="container mx-auto px-4 py-8">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              {renderContent()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+            <Routes location={location} key={location.pathname}>
 
+              {/* ================= CENTRAL LEGAL ================= */}
+              <Route path="/legal" element={<LegalCentral />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/cookies" element={<CookiesPolicy />} />
+              <Route path="/community" element={<CommunityGuidelines />} />
+              <Route path="/payments" element={<PaymentsPolicy />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/data-deletion" element={<DataDeletion />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/partnerships" element={<Partnerships />} />
+              
+
+
+              {/* ================= APP NORMAL ================= */}
+              <Route
+                path="*"
+                element={
+                  <motion.div
+                    key={currentView}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {renderContent()}
+                  </motion.div>
+                }
+              />
+            </Routes>
+          </AnimatePresence>
+
+        </main>
         <Toaster />
       </div>
     </>
@@ -192,4 +233,3 @@ function App() {
 }
 
 export default App;
-

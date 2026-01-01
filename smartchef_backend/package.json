@@ -9,7 +9,9 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@google-cloud/vision": "^5.3.4",
+
+    "@aws-sdk/client-s3": "^3.956.0",
+    "@aws-sdk/lib-storage": "^3.956.0",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -41,6 +43,7 @@
     "passport-tiktok": "^0.0.0",
     "querystring": "^0.2.1",
     "react-i18next": "^16.3.3",
+    "react-icons": "^5.5.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0"
   }
