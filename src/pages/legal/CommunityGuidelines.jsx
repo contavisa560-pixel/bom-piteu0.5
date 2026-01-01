@@ -208,7 +208,7 @@ const CommunityGuidelines = () => {
         <div className="flex items-center gap-4 mt-6">
           <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white">B</div>
           <p className="text-sm text-gray-600">
-            <strong>Equipa Bom Piteu</strong> · Última revisão: Dezembro 2025
+            <strong>Equipa Bom Piteu</strong> · Última revisão: Dezembro 2026
           </p>
         </div>
       </section>

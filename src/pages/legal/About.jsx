@@ -1,5 +1,33 @@
 import LegalLayout from "./LegalLayout";
 import { Brain, Users, RefreshCw, BarChart2, Rocket, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
+const CentaurusAIcon = ({ className }) => (
+    <svg
+        viewBox="0 0 120 104"
+        className={className}
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+    >
+        {/* Contorno do A */}
+        <path
+            d="M60 4 L116 100 H4 L60 4 Z"
+            stroke="currentColor"
+            strokeWidth="6"
+            strokeLinejoin="round"
+        />
+
+        {/* Barra superior azul */}
+        <rect
+            x="44"
+            y="38"
+            width="32"
+            height="6"
+            fill="#22d3ee"
+            rx="2"
+        />
+    </svg>
+);
+
 
 
 const About = () => {
@@ -8,12 +36,46 @@ const About = () => {
             title="Sobre Nós"
             description="Conheça a história, missão e equipa por trás do Bom Piteu."
         >
+            {/* LOGOTIPO CENTAURUS OFICIAL */}
+            <section className="relative mb-16 flex justify-center">
+                <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.9, ease: "easeOut" }}
+                    className="absolute -top-14 md:-top-18 z-20"
+                >
+                    <div className="flex items-center gap-4 text-slate-500">
+
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[0.28em]">
+                            C
+                        </span>
+
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[0.28em]">
+                            ENT
+                        </span>
+
+                        {/* A estilizado central */}
+                        <CentaurusAIcon className="w-7 sm:w-8 md:w-9 text-slate-400" />
+
+                        <span className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[0.28em]">
+                            URUS
+                        </span>
+
+                        {/* A estilizado final */}
+                        <CentaurusAIcon className="w-7 sm:w-8 md:w-9 text-slate-400 opacity-80" />
+
+                    </div>
+
+                    {/* Linha premium */}
+                    <div className="mt-3 h-px w-full bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+                </motion.div>
+            </section>
+
             <section className="mb-12">
                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-3xl p-8 md:p-12">
-                    <h2 className="!mt-0 text-orange-900 text-center">A Nossa História!</h2>
+                    <h2 className="!mt-0 text-orange-900 text-center">Visão & Compromisso</h2>
                     <p className="text-lg text-orange-800 text-center max-w-3xl mx-auto">
-                        Nascemos em 2025 com uma simples missão: tornar a culinária acessível,
-                        saudável e divertida para todos os portugueses, através da inteligência artificial.
+                        A Centaurus A nasceu em 2025 com uma missão clara: democratizar a cozinha inteligente. Acreditamos que a tecnologia deve servir para unir pessoas, combater o desperdício e celebrar a cultura gastronómica local e global.
                     </p>
                 </div>
             </section>
@@ -59,7 +121,7 @@ const About = () => {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
                     <div className="bg-white p-6 rounded-2xl text-center">
-                        <p className="text-3xl font-bold text-orange-600">50K+</p>
+                        <p className="text-3xl font-bold text-orange-600">10K+</p>
                         <p className="text-sm text-gray-600 mt-2">Utilizadores Ativos</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl text-center">
@@ -83,28 +145,28 @@ const About = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 my-12">
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
                         <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full mx-auto mb-4"></div>
-                        <h3 className="font-bold text-lg text-slate-900">Maria Silva</h3>
-                        <p className="text-sm text-orange-600 mb-2">CEO & Fundadora</p>
+                        <h3 className="font-bold text-lg text-slate-900">Joaquim Carruagem</h3>
+                        <p className="text-sm text-orange-600 mb-2">CEO & Fundador</p>
                         <p className="text-sm text-gray-600">
-                            Chef profissional com 15 anos de experiência e paixão por tecnologia.
+                            Chef profissional com 10 anos de experiência e paixão por tecnologia.
                         </p>
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
                         <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full mx-auto mb-4"></div>
-                        <h3 className="font-bold text-lg text-slate-900">João Santos</h3>
-                        <p className="text-sm text-blue-600 mb-2">CTO</p>
+                        <h3 className="font-bold text-lg text-slate-900"> Santos Pedro </h3>
+                        <p className="text-sm text-blue-600 mb-2">Lead Software Architect</p>
                         <p className="text-sm text-gray-600">
-                            Engenheiro de IA especializado em algoritmos de recomendação alimentar.
+                            Arquiteto de Sistemas escaláveis e especialista em infraestrutura de dados.
                         </p>
                     </div>
 
                     <div className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
                         <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-400 rounded-full mx-auto mb-4"></div>
-                        <h3 className="font-bold text-lg text-slate-900">Ana Rodrigues</h3>
-                        <p className="text-sm text-green-600 mb-2">Nutricionista Chefe</p>
+                        <h3 className="font-bold text-lg text-slate-900">Mauricio Carruagem</h3>
+                        <p className="text-sm text-green-600 mb-2">Product Engineer</p>
                         <p className="text-sm text-gray-600">
-                            Doutorada em Nutrição e especialista em dietas personalizadas.
+                            Engenheiro de Produto focado em interfaces de alta fidelidade e otimização da jornada do usuário.
                         </p>
                     </div>
                 </div>
@@ -130,13 +192,13 @@ const About = () => {
 
             <section className="mt-12 pt-8 border-t border-gray-200">
                 <h3><MapPin size={28} className="inline-block mr-2" />
- Onde Estamos</h3>
+                    Onde Estamos</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                     <div className="bg-gray-50 p-6 rounded-2xl">
                         <h4 className="font-bold text-gray-800 mb-4">Sede Principal</h4>
                         <p className="text-gray-600">
-                            Av. da Liberdade 123, 4º Andar<br />
-                            1250-140 Lisboa, Portugal
+                            Benfica, Zona verde 3<br />
+                            0000-000 Luanda, Angola
                         </p>
                         <p className="text-sm text-gray-500 mt-2">
                             Segunda a Sexta: 9h00 - 18h00
@@ -146,8 +208,8 @@ const About = () => {
                     <div className="bg-gray-50 p-6 rounded-2xl">
                         <h4 className="font-bold text-gray-800 mb-4">Contactos Empresariais</h4>
                         <p className="text-gray-600">
-                            <strong>Email:</strong> geral@bompitieu.com<br />
-                            <strong>Telefone:</strong> +351 211 234 567<br />
+                            <strong>Email:</strong> centaurosa@gmail.com<br />
+                            <strong>Telefone:</strong> +244 958 999 999<br />
                             <strong>NIF:</strong> PT 123 456 789
                         </p>
                     </div>

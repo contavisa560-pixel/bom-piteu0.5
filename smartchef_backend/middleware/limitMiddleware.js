@@ -1,6 +1,7 @@
 const limitService = require("../services/limitService");
 
-async function checkLimitsMiddleware(type) {
+
+function checkLimitsMiddleware(type) {
   return async (req, res, next) => {
     const userId = req.body.userId || req.query.userId;
 
@@ -24,5 +25,8 @@ async function checkLimitsMiddleware(type) {
     }
   };
 }
+
+module.exports = { checkLimitsMiddleware };
+
 
 module.exports = { checkLimitsMiddleware };

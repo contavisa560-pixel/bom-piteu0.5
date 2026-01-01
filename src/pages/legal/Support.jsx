@@ -83,8 +83,8 @@ const Support = () => {
             </div>
             <h4 className="font-bold text-slate-900 mb-2">Email de Suporte</h4>
             <p className="text-sm text-gray-600 mb-4">Resposta em 24 horas</p>
-            <a href="mailto:support@bompitieu.com" className="block w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-xl hover:shadow-md transition-shadow">
-              support@bompitieu.com
+            <a href="mailto:suporte@bompiteu.com" className="block w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-xl hover:shadow-md transition-shadow">
+              suporte@bompiteu.com
             </a>
           </div>
 
@@ -95,8 +95,8 @@ const Support = () => {
             </div>
             <h4 className="font-bold text-slate-900 mb-2">Telefone</h4>
             <p className="text-sm text-gray-600 mb-4">Seg-Sex, 9h-18h (GMT)</p>
-            <a href="tel:+351211234567" className="block w-full py-3 bg-gradient-to-r from-purple-500 to-violet-500 text-white font-medium rounded-xl hover:shadow-md transition-shadow">
-              +351 211 234 567
+            <a href="tel:+244958999999" className="block w-full py-3 bg-gradient-to-r from-purple-500 to-violet-500 text-white font-medium rounded-xl hover:shadow-md transition-shadow">
+              +244 958 999 999
             </a>
           </div>
         </div>

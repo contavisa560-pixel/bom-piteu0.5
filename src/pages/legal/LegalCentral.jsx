@@ -58,7 +58,7 @@ const LegalCentral = () => {
                                 Documentos Legais
                             </button>
                             <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition-all">
-                                Relatório de Transparência 2025
+                                Relatório de Transparência 2026
                             </button>
                         </div>
                     </div>
@@ -329,10 +329,12 @@ const LegalCentral = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Dr. Miguel Santos</h3>
                         <p className="text-blue-600 font-medium mb-4">Encarregado de Proteção de Dados (DPO)</p>
                         <p className="text-gray-600 mb-6">
-                            Com 15 anos de experiência em compliance de dados e certificações CIPP/E e CIPM.
+                          <hr />
+                          <hr />
+
                         </p>
-                        <a href="mailto:dpo@bompitieu.com" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                            dpo@bompitieu.com
+                        <a href="mailto:centaurosa@gmail.com" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                            centaurosa@gmail.com
                         </a>
                     </div>
 
@@ -348,10 +350,11 @@ const LegalCentral = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Dra. Sofia Almeida</h3>
                         <p className="text-green-600 font-medium mb-4">Chefe de Segurança da Informação</p>
                         <p className="text-gray-600 mb-6">
-                            Especialista em cibersegurança com certificações CISSP e CISM, ex-consultora da PwC.
+                            <hr />
+                            <hr />
                         </p>
-                        <a href="mailto:security@bompitieu.com" className="text-green-600 hover:text-green-700 font-medium text-sm">
-                            security@bompitieu.com
+                        <a href="mailto:centaurosa@gmail.com" className="text-green-600 hover:text-green-700 font-medium text-sm">
+                             centaurosa@gmail.com
                         </a>
                     </div>
 
@@ -367,10 +370,11 @@ const LegalCentral = () => {
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Eng. Ricardo Costa</h3>
                         <p className="text-purple-600 font-medium mb-4">Diretor de Conformidade Legal</p>
                         <p className="text-gray-600 mb-6">
-                            Advogado especializado em direito digital e proteção de dados, mestre em Direito da UE.
+                            <hr />
+                            <hr />
                         </p>
-                        <a href="mailto:compliance@bompitieu.com" className="text-purple-600 hover:text-purple-700 font-medium text-sm">
-                            compliance@bompitieu.com
+                        <a href="mailto:centaurosa@gmail.com" className="text-purple-600 hover:text-purple-700 font-medium text-sm">
+                             centaurosa@gmail.com
                         </a>
                     </div>
                 </div>
@@ -403,7 +407,7 @@ const LegalCentral = () => {
                     <div className="bg-white p-6 rounded-2xl border border-gray-200 flex items-center justify-center">
                         <div className="text-center">
                             <Award className="w-10 h-10 mx-auto mb-2 text-amber-600" />
-                            <p className="text-sm font-medium text-gray-800">Best Startup 2024</p>
+                            <p className="text-sm font-medium text-gray-800">Best Startup 2026</p>
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-2xl border border-gray-200 flex items-center justify-center">
@@ -441,7 +445,7 @@ const LegalCentral = () => {
                 <div className="mt-10 pt-8 border-t border-white/20">
                     <p className="text-white/80">
                         <strong>Horário de Contacto DPO:</strong> Segunda a Sexta, 9h00-18h00 (GMT) |
-                        <strong> Emergências:</strong> +351 211 234 568 (24/7)
+                        <strong> Emergências:</strong> +244 958 999 999 (24/7)
                     </p>
                 </div>
             </section>

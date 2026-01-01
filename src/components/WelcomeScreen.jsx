@@ -32,7 +32,7 @@ const WelcomeScreen = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/api//auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -70,7 +70,7 @@ const WelcomeScreen = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      const res = await fetch(`${API_URL}/api//auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -166,7 +166,7 @@ const WelcomeScreen = ({ onLogin }) => {
 
             <Button
               onClick={() =>
-                (window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`)
+                (window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`)
               }
               className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-medium py-3 rounded-xl shadow-sm transition"
             >

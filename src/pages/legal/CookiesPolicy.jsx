@@ -7,9 +7,10 @@ const CookiesPolicy = () => {
       description="Entenda como usamos cookies para tornar a sua experiência no Bom Piteu mais rápida e personalizada."
     >
       <section>
-        <h2>O que são cookies?</h2>
+        <p>Esta Política de Cookies explica como a Bom Piteu utiliza cookies e tecnologias semelhantes para o reconhecer quando visita o nosso website ou utiliza a nossa app.</p>
+        <h2><strong>O que são cookies?</strong></h2>
         <p>
-          Cookies são pequenos ficheiros de texto enviados para o seu navegador pelos websites que visita. Eles ajudam o Bom Piteu a lembrar informações sobre a sua visita, como o seu idioma preferido e outras definições.
+          Cookies são pequenos ficheiros de dados que são colocados no seu computador ou dispositivo móvel quando visita um website. Os cookies são amplamente utilizados pelos proprietários de websites para fazer com que os seus websites funcionem, ou funcionem de forma mais eficiente, bem como para fornecer informações de relatórios.
         </p>
       </section>
 
@@ -18,23 +19,27 @@ const CookiesPolicy = () => {
         <div className="space-y-6">
           <div className="bg-white p-5 rounded-xl border border-gray-200">
             <h4 className="font-bold text-slate-900 mb-1"> Cookies Essenciais</h4>
-            <p className="text-sm text-gray-500">Obrigatórios para o funcionamento do login e segurança da sua conta. Sem eles, o site não funciona.</p>
+            <p className="text-sm text-gray-500">Necessários para o funcionamento básico do site. Sem estes cookies, o site não funciona corretamente.</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-200">
-            <h4 className="font-bold text-slate-900 mb-1"> Cookies de Análise</h4>
-            <p className="text-sm text-gray-500">Ajudam-nos a entender quais receitas são as mais populares para podermos criar conteúdo melhor para si.</p>
+            <h4 className="font-bold text-slate-900 mb-1"> Cookies de Desempenho</h4>
+            <p className="text-sm text-gray-500">Recolhem informações sobre como os visitantes utilizam o site, ajudando-nos a melhorar a funcionalidade.</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-gray-200">
-            <h4 className="font-bold text-slate-900 mb-1"> Cookies de Personalização</h4>
-            <p className="text-sm text-gray-500">Lembram-se das suas preferências alimentares (ex: se é vegetariano) para filtrar o conteúdo automaticamente.</p>
+            <h4 className="font-bold text-slate-900 mb-1"> Cookies Analíticos</h4>
+            <p className="text-sm text-gray-500">Permitem-nos contar visitas e fontes de tráfego para medir e melhorar o desempenho do nosso site.</p>
+          </div>
+          <div className="bg-white p-5 rounded-xl border border-gray-200">
+            <h4 className="font-bold text-slate-900 mb-1"> Cookies de Marketing</h4>
+            <p className="text-sm text-gray-500">Utilizados para rastrear visitantes em websites. A intenção é exibir anúncios relevantes para o utilizador individual..</p>
           </div>
         </div>
       </section>
 
       <section>
-        <h2>Como gerir os seus cookies?</h2>
+        <h2><strong>Como gerir os seus cookies?</strong></h2>
         <p>
-          Pode alterar as suas preferências de cookies a qualquer momento através das definições do seu navegador. Note que a desativação de certos cookies pode afetar a funcionalidade da plataforma.
+         Tem o direito de decidir se aceita ou rejeita cookies. Pode definir ou alterar os controlos do seu navegador para aceitar ou recusar cookies. Se optar por rejeitar cookies, ainda poderá utilizar o nosso website, embora o seu acesso a algumas funcionalidades e áreas do nosso website possa ser restringido.
         </p>
       </section>
     </LegalLayout>

@@ -236,8 +236,8 @@ const Partnerships = () => {
                     <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl">
                         <h4 className="font-bold text-blue-900 mb-3">Contacto de Parcerias</h4>
                         <p className="text-sm text-blue-800">
-                            <strong>Email:</strong> partnerships@bompitieu.com<br />
-                            <strong>Telefone:</strong> +351 211 234 568
+                            <strong>Email:</strong> centaurosa@gmail.com<br />
+                            <strong>Telefone:</strong> +244 958 999 999
                         </p>
                     </div>
 

@@ -83,10 +83,6 @@ const Header = ({ user, onLogout, onNavigate }) => {
               <Button variant="ghost" onClick={() => onNavigate('dashboard')}>
                 <Home className="mr-2 h-4 w-4" /> {t("header.home")}
               </Button>
-
-              <Button variant="ghost" onClick={() => onNavigate('marketplace')}>
-                <ShoppingCart className="mr-2 h-4 w-4" /> {t("header.marketplace")}
-              </Button>
             </nav>
 
             {/* PREMIUM */}

@@ -196,7 +196,7 @@ const DataDeletion = () => {
         </div>
 
         <p className="text-xs text-gray-500 mt-6 text-center">
-          Para assistência, contacte: <a href="mailto:privacy@bompitieu.com" className="text-orange-600 hover:underline">privacy@bompitieu.com</a>
+          Para assistência, contacte: <a href="mailto:suporte@bompiteu.com" className="text-orange-600 hover:underline">suport@bompiteu.com</a>
         </p>
       </section>
     </LegalLayout>

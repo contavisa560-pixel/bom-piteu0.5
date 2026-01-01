@@ -12,10 +12,10 @@ const LegalLayout = ({ title, description, children }) => {
   // Links expandidos para a sidebar lateral
   const navLinks = [
     { name: "Página Inicial", path: "/legal", badge: "" },
-    { name: "Política de Privacidade", path: "/privacy", badge: "Atualizado" },
+    { name: "Privacidade", path: "/privacy", badge: "Atualizado" },
     { name: "Termos de Uso", path: "/terms", badge: "" },
     { name: "Política de Cookies", path: "/cookies", badge: "" },
-    { name: "Diretrizes da Comunidade", path: "/community", badge: "Novo" },
+    { name: "Comunidade", path: "/community", badge: "Novo" },
     { name: "Política de Pagamentos", path: "/payments", badge: "" },
     { name: "Ajuda & Suporte", path: "/support", badge: "" },
     { name: "Exclusão de Dados", path: "/data-deletion", badge: "" },
@@ -156,27 +156,11 @@ const LegalLayout = ({ title, description, children }) => {
                     Documento Legal
                   </span>
                   <span className="bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-                    Versão 3.2.1
+                    Versão 1.2
                   </span>
                   <span className="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full">
                     Em vigor
                   </span>
-                </div>
-              </div>
-
-              <div className="lg:w-96">
-                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl p-5 shadow-sm">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-xl">
-                      BP
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-800 leading-relaxed">
-                        <strong className="font-bold">Última Atualização:</strong> 28 de dezembro de 2025
-                      </p>
-                      <p className="text-sm text-blue-600 mt-2">{description}</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -248,7 +232,7 @@ const LegalLayout = ({ title, description, children }) => {
             </div>
 
             <div className="mt-10 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
-              <p>Para questões legais, contacte: <a href="mailto:legal@bompitieu.com" className="text-orange-600 hover:underline">legal@bompitieu.com</a></p>
+              <p>Para questões legais, contacte: <a href="mailto:suporte@bompiteu.com" className="text-orange-600 hover:underline">suporte@bompiteu.com</a></p>
             </div>
           </footer>
         </div>

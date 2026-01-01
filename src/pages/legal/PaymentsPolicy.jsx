@@ -48,7 +48,7 @@ const PaymentsPolicy = () => {
             { name: "Apple Pay", icon: Wallet },
             { name: "Google Pay", icon: Wallet },
             { name: "Multibanco", icon: CreditCard },
-            { name: "Transferência", icon: Repeat },
+            { name: "Referência", icon: Repeat },
           ].map((method, index) => (
             <div
               key={index}
@@ -82,7 +82,7 @@ const PaymentsPolicy = () => {
                 <td className="p-4">Grátis</td>
                 <td className="p-4">
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• 50 receitas/mês</li>
+                    <li>• 7 receitas/semanana</li>
                     <li>• Lista de compras básica</li>
                   </ul>
                 </td>
@@ -92,10 +92,10 @@ const PaymentsPolicy = () => {
               </tr>
               <tr className="border-b border-gray-200 hover:bg-gray-50/50">
                 <td className="p-4 font-medium">Premium</td>
-                <td className="p-4">€9,99/mês</td>
+                <td className="p-4">1.499 Kzs/mês</td>
                 <td className="p-4">
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Receitas ilimitadas</li>
+                    <li>• 50 Receitas/mês</li>
                     <li>• Planeador de refeições</li>
                     <li>• Nutricionista IA</li>
                   </ul>
@@ -106,7 +106,7 @@ const PaymentsPolicy = () => {
               </tr>
               <tr className="hover:bg-gray-50/50">
                 <td className="p-4 font-medium">Família</td>
-                <td className="p-4">€19,99/mês</td>
+                <td className="p-4">7.999 Kzs/mês</td>
                 <td className="p-4">
                   <ul className="text-sm text-gray-600 space-y-1">
                     <li>• 6 perfis</li>
@@ -188,7 +188,7 @@ const PaymentsPolicy = () => {
           <div className="bg-gray-50 p-5 rounded-2xl">
             <p className="font-medium text-gray-800 mb-2">Suporte Financeiro</p>
             <p className="text-sm text-gray-600">Para questões sobre faturas, reembolsos ou pagamentos:</p>
-            <a href="mailto:billing@bompitieu.com" className="text-orange-600 hover:underline font-medium">billing@bompitieu.com</a>
+            <a href="mailto:billing@bompitieu.com" className="text-orange-600 hover:underline font-medium">centaurosa@gmail.com</a>
           </div>
           <div className="bg-gray-50 p-5 rounded-2xl">
             <p className="font-medium text-gray-800 mb-2">NIF Empresarial</p>

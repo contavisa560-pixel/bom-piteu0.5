@@ -1,7 +1,9 @@
-
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingCart, ExternalLink, MapPin, Star, Search, Carrot, Apple, Leaf } from 'lucide-react';
+import React, { useState } from 'react'; // Adicionado useState
+import { motion, AnimatePresence } from 'framer-motion'; // Adicionado AnimatePresence
+import { 
+  ArrowLeft, ShoppingCart, ExternalLink, MapPin, Star, 
+  Search, Carrot, Apple, Leaf, Construction, X 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from '@/components/ui/input';
 
 const Marketplace = ({ onNavigate }) => {
+  // Alterado para true para aparecer logo ao abrir a página
+  const [showMaintenance, setShowMaintenance] = useState(true);
+
   const partners = [
     {
       name: 'Tupuca',
@@ -61,138 +66,171 @@ const Marketplace = ({ onNavigate }) => {
 
   const handlePartnerClick = (partner) => {
     if (partner.url === '#') {
-      toast({
-        title: `Parceria em breve: ${partner.name}`,
-        description: 'Estamos a trabalhar para integrar esta loja. Fica atento!',
-      });
+      setShowMaintenance(true);
     } else {
       toast({
         title: `A redirecionar para ${partner.name}`,
-        description: 'Serás levado para o site do nosso parceiro para fazeres as tuas compras.',
+        description: 'Serás levado para o site do nosso parceiro.',
       });
       window.open(partner.url, '_blank');
     }
   };
 
   const handleMapClick = () => {
-    toast({
-      title: '🚧 Mapa em Construção!',
-      description: 'Em breve poderás ver as lojas mais próximas de ti e traçar rotas!',
-    });
+    setShowMaintenance(true);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-7xl mx-auto"
-    >
-      <Button variant="ghost" onClick={() => onNavigate('dashboard')} className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Início
-      </Button>
-
-      <div className="text-center mb-12">
-        <ShoppingCart className="h-16 w-16 mx-auto text-orange-500" />
-        <h1 className="text-4xl font-bold text-gray-800 mt-4">Marketplace Bom Piteu</h1>
-        <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
-          Falta-te um ingrediente? Compra vegetais e produtos frescos dos nossos parceiros e recebe em casa.
-        </p>
-      </div>
-
-      <Tabs defaultValue="stores" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="stores"><ShoppingCart className="mr-2 h-4 w-4"/>Lojas Parceiras</TabsTrigger>
-          <TabsTrigger value="products"><Carrot className="mr-2 h-4 w-4"/>Produtos Frescos</TabsTrigger>
-          <TabsTrigger value="map"><MapPin className="mr-2 h-4 w-4"/>Mapa</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="stores">
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input placeholder="Procurar loja ou produto..." className="pl-10" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partners.map((partner, index) => (
-              <motion.div
-                key={partner.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+    <div className="relative min-h-screen"> 
+      
+      {/* OVERLAY PROFISSIONAL - APARECE LOGO AO ABRIR */}
+      <AnimatePresence>
+        {showMaintenance && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-white/40 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border border-gray-100"
+            >
+              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Construction className="h-10 w-10 text-orange-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Em Breve!</h2>
+              <p className="text-gray-600 mb-8">
+                Estamos a preparar uma experiência incrível para si. Esta funcionalidade estará disponível muito em breve.
+              </p>
+              
+              {/* Único botão disponível leva à página inicial */}
+              <Button 
+                onClick={() => onNavigate('dashboard')} 
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-6 rounded-xl font-bold hover:shadow-lg transition-all"
               >
-                <Card className="bg-white hover:shadow-xl transition-shadow duration-300 flex flex-col h-full overflow-hidden">
-                  <div className="h-40 overflow-hidden">
-                    <img src={partner.image} alt={partner.name} className="w-full h-full object-cover"/>
-                  </div>
-                  <CardHeader>
-                    <CardTitle>{partner.name}</CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 pt-1">
-                      <span className="flex items-center"><MapPin className="h-4 w-4 mr-1"/>{partner.distance}</span>
-                      <span className="flex items-center"><Star className="h-4 w-4 mr-1 text-yellow-500 fill-yellow-500"/>{partner.rating}</span>
+                Voltar ao Início
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CONTEÚDO ORIGINAL - TOTALMENTE PRESERVADO */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto"
+      >
+        <Button variant="ghost" onClick={() => onNavigate('dashboard')} className="mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Início
+        </Button>
+
+        <div className="text-center mb-12">
+          <ShoppingCart className="h-16 w-16 mx-auto text-orange-500" />
+          <h1 className="text-4xl font-bold text-gray-800 mt-4">Marketplace Bom Piteu</h1>
+          <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
+            Falta-te um ingrediente? Compra vegetais e produtos frescos dos nossos parceiros e recebe em casa.
+          </p>
+        </div>
+
+        <Tabs defaultValue="stores" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="stores"><ShoppingCart className="mr-2 h-4 w-4"/>Lojas Parceiras</TabsTrigger>
+            <TabsTrigger value="products"><Carrot className="mr-2 h-4 w-4"/>Produtos Frescos</TabsTrigger>
+            <TabsTrigger value="map"><MapPin className="mr-2 h-4 w-4"/>Mapa</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="stores">
+            <div className="relative mb-6">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input placeholder="Procurar loja ou produto..." className="pl-10" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {partners.map((partner, index) => (
+                <motion.div
+                  key={partner.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="bg-white hover:shadow-xl transition-shadow duration-300 flex flex-col h-full overflow-hidden">
+                    <div className="h-40 overflow-hidden">
+                      <img src={partner.image} alt={partner.name} className="w-full h-full object-cover"/>
                     </div>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <p className="text-gray-600">{partner.description}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      onClick={() => handlePartnerClick(partner)}
-                      className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
-                    >
-                      Visitar Loja <ExternalLink className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </TabsContent>
+                    <CardHeader>
+                      <CardTitle>{partner.name}</CardTitle>
+                      <div className="flex items-center gap-4 text-sm text-gray-500 pt-1">
+                        <span className="flex items-center"><MapPin className="h-4 w-4 mr-1"/>{partner.distance}</span>
+                        <span className="flex items-center"><Star className="h-4 w-4 mr-1 text-yellow-500 fill-yellow-500"/>{partner.rating}</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <p className="text-gray-600">{partner.description}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button
+                        onClick={() => handlePartnerClick(partner)}
+                        className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white"
+                      >
+                        Visitar Loja <ExternalLink className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
 
-        <TabsContent value="products">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Produtos em Destaque</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {featuredProducts.map((product, index) => (
-              <motion.div
-                key={product.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="overflow-hidden group cursor-pointer">
-                  <div className="h-40 overflow-hidden relative">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"/>
-                    <div className="absolute inset-0 bg-black/20"></div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-gray-800">{product.name}</h3>
-                    <p className="text-orange-600 font-bold">{product.price}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </TabsContent>
+          <TabsContent value="products">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Produtos em Destaque</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {featuredProducts.map((product, index) => (
+                <motion.div
+                  key={product.name}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card className="overflow-hidden group cursor-pointer">
+                    <div className="h-40 overflow-hidden relative">
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"/>
+                      <div className="absolute inset-0 bg-black/20"></div>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-gray-800">{product.name}</h3>
+                      <p className="text-orange-600 font-bold">{product.price}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
 
-        <TabsContent value="map">
-          <Card>
-            <CardContent className="p-0">
-              <div 
-                className="h-[60vh] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-300 transition-colors relative overflow-hidden"
-                onClick={handleMapClick}
-              >
-                <img src="https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2022/07/what-is-openstreetmap.webp" alt="Mapa placeholder" className="w-full h-full object-cover opacity-50"/>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
-                  <div className="text-center bg-white/80 p-8 rounded-lg shadow-xl backdrop-blur-sm">
-                    <MapPin className="h-12 w-12 mx-auto mb-2 text-orange-500"/>
-                    <p className="font-semibold text-xl text-gray-800">Ver mapa de lojas</p>
-                    <p className="text-sm text-gray-600">(Funcionalidade em breve)</p>
+          <TabsContent value="map">
+            <Card>
+              <CardContent className="p-0">
+                <div 
+                  className="h-[60vh] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-300 transition-colors relative overflow-hidden"
+                  onClick={handleMapClick}
+                >
+                  <img src="https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2022/07/what-is-openstreetmap.webp" alt="Mapa placeholder" className="w-full h-full object-cover opacity-50"/>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
+                    <div className="text-center bg-white/80 p-8 rounded-lg shadow-xl backdrop-blur-sm">
+                      <MapPin className="h-12 w-12 mx-auto mb-2 text-orange-500"/>
+                      <p className="font-semibold text-xl text-gray-800">Ver mapa de lojas</p>
+                      <p className="text-sm text-gray-600">(Funcionalidade em breve)</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </div>
   );
 };
 
