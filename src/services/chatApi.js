@@ -1,15 +1,19 @@
-export async function sendChatMessage({ message, userId }) {
+export async function sendChatMessage({ message, token }) {
   const response = await fetch("http://localhost:5000/api/chat/text", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, userId }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ message }),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Fetch error from http://localhost:5000/api/chat:", errorData);
-    throw new Error(errorData.error || "Erro ao enviar mensagem");
+    console.error("Fetch error from /api/chat:", data);
+    throw new Error(data.error || "Erro ao enviar mensagem");
   }
 
-  return await response.json();
+  return data;
 }

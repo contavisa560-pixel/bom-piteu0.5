@@ -1,13 +1,10 @@
 
 require("dotenv").config();
 require("./cronJobsAdvanced"); 
-
+const { connectDB } = require("./db");
 const express = require("express");
 const cors = require("cors");
-const { connectDB, readUsers, writeUsers } = require("./db");
 const passport = require("passport");
-
-const connectDB = require("./db");
 
 // Importação de Estratégias Passport (Movidas para um config separado para não poluir aqui)
 require("./config/passport")(passport); 

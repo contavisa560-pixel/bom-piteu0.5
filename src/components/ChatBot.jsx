@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, ArrowLeft, ChefHat, User, Sparkles, Camera, Mic, AlertTriangle, Headphones, FileText } from 'lucide-react';
+import { Send, ArrowLeft, ChefHat, User, Sparkles, Camera, Mic, AlertTriangle, Headphones, FileText, Image, Paperclip } from 'lucide-react';
 import { FiBarChart2 } from "react-icons/fi";
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -8,7 +8,9 @@ import { angolanRecipes } from '@/data/recipes';
 import { internationalRecipes } from '@/data/internationalRecipes';
 import { cocktails } from '@/data/cocktails';
 import { sendChatMessage } from "../services/chatApi";
-import SupportScreen from './SupportScreen';                
+import SupportScreen from './SupportScreen';
+import CameraModal from "./CameraModal";
+
 
 const allRecipes = [...angolanRecipes, ...internationalRecipes, ...cocktails];
 
@@ -20,7 +22,50 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   const [showHistory, setShowHistory] = useState(false);
   const [recipeHistory, setRecipeHistory] = useState([]);
   const [showSupport, setShowSupport] = useState(false);
+  const fileInputRef = useRef(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("prompt", "O que posso cozinhar com isto?");
+
+    setIsTyping(true);
+
+    try {
+      const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+      const res = await fetch("/api/chat/file", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          type: "bot",
+          content: data.reply,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Falha ao enviar o ficheiro",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   useEffect(() => {
     let initialMessage = `Olá, ${user.name.split(' ')[0]}! 😊 Sou o teu Chef IA, pronto para a ação. O que vamos criar hoje? Podes dizer-me os ingredientes que tens (ex: "tenho frango e batatas"), pedir um tipo de prato (ex: "quero um jantar rápido") ou até uma receita de um país específico.`;
@@ -31,6 +76,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
         setTimeout(() => handleSendMessage(selectedCategory.query), 500);
       }
     }
+
 
     setMessages([
       {
@@ -50,7 +96,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     scrollToBottom();
   }, [messages]);
 
-
+  const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
   const handleSendMessage = async (messageOverride) => {
     const currentInput = messageOverride || inputMessage;
     if (!currentInput.trim()) return;
@@ -70,6 +116,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
       const data = await sendChatMessage({
         message: currentInput,
         userId: user._id,
+        token,
       });
 
 
@@ -95,10 +142,6 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     }
   };
 
-  const [showUsageMobile, setShowUsageMobile] = useState(false);
-  const handleCameraClick = () => onBack('imageRecognition');
-  const handleMicClick = () => onBack('voiceRecognition');
-
   return (
     <div className="flex-1 flex overflow-hidden relative">
       <motion.div
@@ -106,6 +149,53 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
         className="fixed inset-0 w-screen h-screen bg-white flex flex-col">
+        {/* INPUT INVISÍVEL PARA UPLOAD DE IMAGEM */}
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("image", file);
+            formData.append("prompt", "O que posso cozinhar com isto?");
+
+            setIsTyping(true);
+
+            try {
+              const res = await fetch("/api/chat/image", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+              });
+
+              const data = await res.json();
+
+              setMessages(prev => [
+                ...prev,
+                {
+                  id: Date.now(),
+                  type: "bot",
+                  content: data.reply,
+                  timestamp: new Date(),
+                },
+              ]);
+            } catch (err) {
+              toast({
+                title: "Erro",
+                description: "Falha ao analisar a imagem",
+                variant: "destructive",
+              });
+            } finally {
+              setIsTyping(false);
+            }
+          }}
+        />
         <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4 text-white flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button variant="ghost" size="icon" onClick={() => onBack('dashboard')} className="text-white hover:bg-white/20 h-8 w-8">
@@ -173,12 +263,32 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                       }
   `}
                   >
+                   
+                    {message.image && (
+                      <div className="mb-3 overflow-hidden rounded-xl border border-white/20 shadow-sm bg-black/5">
+                        <img
+                          src={message.image}
+                          alt="Captura de ingredientes"
+                          className="w-full h-auto object-cover max-h-72 rounded-lg block"
+                        />
+                      </div>
+                    )}
 
-                    <p className="text-sm sm:text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: message.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/⚠️/g, '<span class="flex items-center text-yellow-600 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>$&</span>') }} />
+                    <p
+                      className="text-sm sm:text-base leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: message.content
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/⚠️/g, '<span class="flex items-center text-yellow-600 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>$&</span>')
+                      }}
+                    />
 
                     {message.recipeContext && (message.content.toLowerCase().includes('passo a passo') || message.content.toLowerCase().includes('preparação')) && (
-                      <Button size="sm" className="mt-2 bg-green-600 hover:bg-green-700" onClick={() => handleSendMessage("Sim, vamos começar a cozinhar")}>Sim, vamos a isso!</Button>
+                      <Button size="sm" className="mt-2 bg-green-600 hover:bg-green-700" onClick={() => handleSendMessage("Sim, vamos começar a cozinhar")}>
+                        Sim, vamos a isso!
+                      </Button>
                     )}
+
                     <div className="text-xs opacity-70 mt-1 text-right">
                       {message.timestamp.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -187,26 +297,76 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
               </motion.div>
             ))}
           </AnimatePresence>
+
           {isTyping && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start"><div className="flex items-center space-x-2"><div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center"><ChefHat className="h-4 w-4 text-white" /></div><div className="bg-white rounded-2xl p-3 shadow-sm"><div className="flex space-x-1"><div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div><div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div><div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div></div></div></div></motion.div>}
           <div ref={messagesEndRef} />
         </div>
 
         <div className="border-t p-4 bg-white sticky bottom-0">
-          <div className="relative">
-            <input type="text" value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} placeholder="Tenho frango, tomate e cebola..." className="w-full border border-gray-300 rounded-full px-4 py-3 pr-20 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow" />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <Button onClick={() => handleSendMessage()} disabled={!inputMessage.trim()} className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-full h-9 w-9 p-0 flex items-center justify-center shadow-md hover:shadow-lg transition-all transform hover:scale-105">
+          <div className="relative flex items-center">
+            {/* BOTÃO PAPERCLIP */}
+            <div className="relative">
+              <Button
+                onClick={() => setShowMenu(!showMenu)}
+                variant="ghost"
+                size="icon"
+                className="rounded-full w-9 h-9 hover:bg-white text-slate-400"
+              >
+                <Paperclip size={20} />
+              </Button>
+
+              {/* MENU DE ANEXOS */}
+              {showMenu && (
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  className="absolute bottom-12 left-full -translate-x-72 bg-white border border-slate-100 shadow-2xl rounded-3xl p-2 min-w-[220px] z-50 overflow-hidden flex flex-col"
+                >
+                  {/* Câmera */}
+                  <button
+                    onClick={() => setShowCamera(true)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-2xl text-sm font-semibold text-slate-600 transition-colors"
+                  >
+                    <Camera size={18} className="text-orange-500" /> Tirar Foto Agora
+                  </button>
+
+
+                  {/* Galeria */}
+                  <label className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-2xl cursor-pointer text-sm font-semibold text-slate-600 border-t border-slate-50">
+                    <Image size={18} className="text-orange-500" /> Galeria de Fotos
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFile} />
+                  </label>
+
+                  {/* Documento/PDF */}
+                  <label className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-2xl cursor-pointer text-sm font-semibold text-slate-600 border-t border-slate-50">
+                    <FileText size={18} className="text-orange-500" /> Documento/PDF
+                    <input type="file" className="hidden" onChange={handleFile} />
+                  </label>
+                </motion.div>
+              )}
+            </div>
+            {/* INPUT DE TEXTO */}
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Tenho frango, tomate e cebola..."
+              className="flex-1 border border-gray-300 rounded-full px-4 py-3 pr-20 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow"
+            />
+
+            {/* BOTÃO ENVIAR */}
+            <div className="absolute right-0 inset-y-0 flex items-center pr-2 gap-2">
+              <Button
+                onClick={() => handleSendMessage()}
+                disabled={!inputMessage.trim()}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-full h-9 w-9 p-0 flex items-center justify-center shadow-md hover:shadow-lg transition-all transform hover:scale-105"
+              >
                 <Send className="h-4 w-4 text-white" />
               </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {['Próximo passo', 'Quero uma receita japonesa', 'Jantar para dois', 'Cocktail com manga'].map((suggestion) => (
-              <button key={suggestion} onClick={() => { setInputMessage(suggestion); handleSendMessage(suggestion); }} className="text-xs bg-gray-100 hover:bg-orange-100 text-gray-700 hover:text-orange-700 rounded-full px-3 py-1 transition-colors font-medium">
-                {suggestion}
-              </button>
-            ))}
-          </div>
+
         </div>
       </motion.div>
 
@@ -262,7 +422,64 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
           </div>
         )}
       </motion.div>
+
       <SupportScreen open={showSupport} onClose={() => setShowSupport(false)} />
+
+      // No ChatBot.jsx, encontre o componente CameraModal e atualize:
+
+      <CameraModal
+      
+        open={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={async (dataUrl) => {
+          setShowCamera(false);
+          // 1. Adiciona a imagem visualmente ao chat imediatamente
+          const userMessage = {
+            id: Date.now(),
+            type: "user",
+            content: "Foto de ingredientes enviada",
+            image: dataUrl, // Adicionamos um campo image para renderizar melhor
+            timestamp: new Date()
+          };
+
+          setMessages(prev => [...prev, userMessage]);
+          setIsTyping(true);
+
+          try {
+            // 2. Converter base64 para Blob para enviar ao servidor
+            const resBlob = await fetch(dataUrl);
+            const blob = await resBlob.blob();
+            const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+
+            const formData = new FormData();
+            formData.append("image", file);
+            formData.append("prompt", "O que posso cozinhar com estes ingredientes da foto?");
+
+            const res = await fetch("/api/chat/image", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+              body: formData,
+            });
+
+            const data = await res.json();
+
+            setMessages(prev => [
+              ...prev,
+              {
+                id: Date.now() + 1,
+                type: "bot",
+                content: data.reply,
+                timestamp: new Date(),
+              },
+            ]);
+          } catch (err) {
+            toast({ title: "Erro", description: "Falha ao analisar imagem.", variant: "destructive" });
+          } finally {
+            setIsTyping(false);
+          }
+        }}
+      />
+
     </div>
   );
 };
