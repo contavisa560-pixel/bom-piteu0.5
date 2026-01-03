@@ -25,6 +25,35 @@ router.post(
     const { message } = req.body;
     const userId = req.user._id;
 
+    // Detectar se a mensagem do usuário é um pedido de geração de imagem
+    const isImageRequest = /(desenhe|desenha|gera.*imagem|mostre.*imagem|ilustre|crie.*imagem)/i.test(message);
+
+    if (isImageRequest) {
+      try {
+        // Gerar imagem usando OpenAI Images
+        const result = await openai.images.generate({
+          prompt: message,
+          size: "1024x1024",
+        });
+
+        const imageUrl = result.data[0].url;
+
+        // Salvar mensagem da IA com a imagem
+        await Message.create({
+          userId,
+          role: "assistant",
+          content: `<img src="${imageUrl}" />`,
+        });
+
+        // Retornar a resposta para o frontend
+        return res.json({
+          reply: `<img src="${imageUrl}" />`
+        });
+      } catch (err) {
+        console.error("Erro ao gerar imagem:", err);
+        return res.status(500).json({ error: "image_generation_failed" });
+      }
+    }
 
     try {
       const completion = await openai.chat.completions.create({
