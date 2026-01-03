@@ -25,19 +25,21 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   const fileInputRef = useRef(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("prompt", "O que posso cozinhar com isto?");
+    formData.append("image", file);
+    formData.append("prompt", "O que posso cozinhar com estes ingredientes da foto?");
 
     setIsTyping(true);
 
     try {
       const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
-      const res = await fetch("/api/chat/file", {
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/image-chat`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -53,13 +55,14 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
           id: Date.now(),
           type: "bot",
           content: data.reply,
+          image: data.imageUrl,
           timestamp: new Date(),
         },
       ]);
     } catch (err) {
       toast({
         title: "Erro",
-        description: "Falha ao enviar o ficheiro",
+        description: "Falha ao analisar a imagem da galeria",
         variant: "destructive",
       });
     } finally {
@@ -166,7 +169,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
             setIsTyping(true);
 
             try {
-              const res = await fetch("/api/chat/image", {
+              const res = fetch(`${import.meta.env.VITE_API_URL}/api/chat/image-chat`, {
                 method: "POST",
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -263,7 +266,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                       }
   `}
                   >
-                   
+
                     {message.image && (
                       <div className="mb-3 overflow-hidden rounded-xl border border-white/20 shadow-sm bg-black/5">
                         <img
@@ -277,8 +280,10 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                     <p
                       className="text-sm sm:text-base leading-relaxed"
                       dangerouslySetInnerHTML={{
-                        __html: message.content
-                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        __html: (typeof message.content === "string"
+                          ? message.content
+                          : message.content?.text || ""
+                        ).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                           .replace(/⚠️/g, '<span class="flex items-center text-yellow-600 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>$&</span>')
                       }}
                     />
@@ -428,25 +433,24 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
       // No ChatBot.jsx, encontre o componente CameraModal e atualize:
 
       <CameraModal
-      
+
         open={showCamera}
         onClose={() => setShowCamera(false)}
+
         onCapture={async (dataUrl) => {
           setShowCamera(false);
-          // 1. Adiciona a imagem visualmente ao chat imediatamente
+
           const userMessage = {
             id: Date.now(),
             type: "user",
-            content: "Foto de ingredientes enviada",
-            image: dataUrl, // Adicionamos um campo image para renderizar melhor
-            timestamp: new Date()
+            content: { text: "Foto de ingredientes enviada", image: dataUrl },
+            timestamp: new Date(),
           };
-
           setMessages(prev => [...prev, userMessage]);
           setIsTyping(true);
 
           try {
-            // 2. Converter base64 para Blob para enviar ao servidor
+            // Converter base64 para Blob
             const resBlob = await fetch(dataUrl);
             const blob = await resBlob.blob();
             const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
@@ -455,7 +459,8 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
             formData.append("image", file);
             formData.append("prompt", "O que posso cozinhar com estes ingredientes da foto?");
 
-            const res = await fetch("/api/chat/image", {
+            // Enviar ao backend
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/image-chat`, {
               method: "POST",
               headers: { Authorization: `Bearer ${token}` },
               body: formData,
@@ -463,6 +468,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
 
             const data = await res.json();
 
+            // Mostrar resposta no chat
             setMessages(prev => [
               ...prev,
               {
@@ -473,11 +479,16 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
               },
             ]);
           } catch (err) {
-            toast({ title: "Erro", description: "Falha ao analisar imagem.", variant: "destructive" });
+            toast({
+              title: "Erro",
+              description: "Falha ao analisar imagem.",
+              variant: "destructive",
+            });
           } finally {
             setIsTyping(false);
           }
         }}
+
       />
 
     </div>

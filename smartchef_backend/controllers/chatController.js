@@ -64,3 +64,39 @@ exports.handleChat = async (req, res) => {
   }
 };
 
+const { uploadToCloudflare } = require("../services/storageService");
+const { analyzeFoodImage } = require("../services/visionService");
+
+exports.handleImageChat = async (req, res) => {
+  try {
+    const { userId, prompt } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ error: "Imagem não enviada" });
+    }
+
+    // 1️⃣ Upload no Cloudflare R2
+    const imageUrl = await uploadToCloudflare(
+      req.file.buffer,
+      req.file.originalname,
+      "recipes"
+    );
+
+    // 2️⃣ Análise Vision (SÓ URL)
+    const analysis = await analyzeFoodImage(
+      imageUrl,
+      prompt || "Analisar ingredientes da imagem"
+    );
+
+    return res.json({
+      imageUrl,
+      reply: analysis.notes,
+      canAdvance: analysis.canAdvance,
+      state: analysis.state
+    });
+
+  } catch (err) {
+    console.error("IMAGE CHAT ERROR:", err);
+    res.status(500).json({ error: "Erro ao processar imagem" });
+  }
+};

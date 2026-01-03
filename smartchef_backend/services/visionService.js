@@ -44,7 +44,13 @@ ${stepContext}
     ],
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  let raw = response.choices[0].message.content;
+
+  // Remove ```json e ```
+  raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  return JSON.parse(raw);
+
 }
 
 module.exports = { analyzeFoodImage };
