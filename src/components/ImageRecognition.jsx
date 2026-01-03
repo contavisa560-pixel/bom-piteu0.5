@@ -15,19 +15,38 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
 
   const startCamera = async () => {
     if (!user.isPremium) return showPremiumToast();
+
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' }, 
-        audio: false 
-      });
-      setStream(mediaStream);
-      if (videoRef.current) videoRef.current.srcObject = mediaStream;
-      setIsCameraActive(true);
       setCapturedImage(null);
+      setIsCameraActive(true); // 1️⃣ renderiza o vídeo PRIMEIRO
+
+      // espera o React montar o <video>
+      setTimeout(async () => {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+        setStream(mediaStream);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.play();
+        }
+      }, 50);
     } catch (err) {
-      toast({ title: "Câmara indisponível", description: "Verifica as permissões do teu navegador.", variant: "destructive" });
+      toast({
+        title: "Câmara indisponível",
+        description: "Verifica as permissões do teu navegador.",
+        variant: "destructive",
+      });
     }
   };
+
 
   const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
@@ -36,8 +55,9 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
-      setCapturedImage(canvas.toDataURL('image/jpeg'));
-      stopCamera();
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      setCapturedImage(dataUrl); // só salva a imagem
+      stopCamera(); // para a câmera, não envia nada ainda
     }
   };
 
@@ -62,7 +82,7 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
 
   return (
     /* Ajuste para centralização total e evitar scroll */
-    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-50/50 overflow-hidden">
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-gray-50/50 overflow-y-auto md:overflow-hidden">
       <div className="w-full max-w-4xl px-6 flex flex-col max-h-[95vh]">
         <canvas ref={canvasRef} className="hidden" />
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
@@ -90,16 +110,15 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
         <Card className="border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] rounded-[32px] md:rounded-[40px] overflow-hidden bg-white relative">
           <CardContent className="p-2 md:p-3">
             <div className="relative aspect-[4/5] md:aspect-video bg-gray-50 rounded-[28px] md:rounded-[32px] overflow-hidden">
-              
               <AnimatePresence mode="wait">
                 {!isCameraActive && !capturedImage && (
-                  <motion.div 
-                    key="menu" 
+                  <motion.div
+                    key="menu"
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     className="absolute inset-0 flex flex-col items-center justify-center p-6 space-y-6"
                   >
                     <div className="flex flex-col md:flex-row gap-4 w-full max-w-xl">
-                      <button 
+                      <button
                         onClick={startCamera}
                         className="flex-1 group bg-gradient-to-b from-orange-500 to-orange-600 p-6 md:p-8 rounded-[24px] flex flex-col items-center justify-center shadow-lg shadow-orange-200 transition-transform active:scale-95"
                       >
@@ -107,7 +126,7 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
                         <span className="text-white font-bold text-base md:text-lg">Câmara</span>
                       </button>
 
-                      <button 
+                      <button
                         onClick={() => fileInputRef.current.click()}
                         className="flex-1 group bg-white border-2 border-gray-100 p-6 md:p-8 rounded-[24px] flex flex-col items-center justify-center transition-all active:scale-95 hover:bg-orange-50/30"
                       >
@@ -123,14 +142,20 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
 
                 {isCameraActive && (
                   <motion.div key="camera" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
-                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center translate-y-[-40px] md:translate-y-0">
                       <div className="w-48 h-48 md:w-64 md:h-64 border-2 border-white/40 rounded-3xl backdrop-blur-[1px] relative">
                         <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-orange-500 -mt-1 -ml-1 rounded-tl-lg" />
                         <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-orange-500 -mb-1 -mr-1 rounded-br-lg" />
                       </div>
                     </div>
-                    <div className="absolute bottom-6 md:bottom-10 left-0 right-0 flex justify-center items-center gap-8">
+                    <div className="absolute bottom-40 md:bottom-10 left-0 right-0 flex justify-center items-center gap-6">
                       <button onClick={stopCamera} className="p-3 md:p-4 rounded-full bg-black/30 backdrop-blur-xl text-white">
                         <X className="h-5 w-5" />
                       </button>
@@ -147,17 +172,23 @@ const ImageRecognition = ({ onNavigate, onStartChat, user }) => {
                 {capturedImage && (
                   <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-gray-900">
                     <img src={capturedImage} alt="Captured" className="w-full h-full object-cover opacity-80" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-end p-6 md:p-10 bg-gradient-to-t from-black/80 via-transparent">
+                    <div className="absolute inset-0 flex flex-col items-center justify-end p-6 md:p-10 bg-gradient-to-t from-black/80 via-transparent translate-y-[-92px] md:translate-y-0">
                       <div className="w-full max-w-sm bg-white/10 backdrop-blur-2xl p-1 border border-white/20 rounded-[32px] flex items-center justify-between shadow-2xl">
                         <button onClick={() => setCapturedImage(null)} className="px-6 py-4 text-white font-bold text-sm md:text-base flex items-center gap-2">
                           <RotateCcw className="h-4 w-4" /> Repetir
                         </button>
-                        <button 
-                          onClick={() => onStartChat({ title: "Análise Real", query: "O que faço com estes ingredientes?" })}
-                          className="bg-orange-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-[26px] font-bold text-sm md:text-base flex items-center gap-2"
+                        <button
+                          onClick={() => {
+                            if (!capturedImage) return;
+
+                            onStartChat(capturedImage); // 👈 envia a imagem
+                            setCapturedImage(null);
+                          }}
+                          className="bg-orange-500 text-white px-6 py-4 rounded-[26px] font-bold flex items-center gap-2"
                         >
                           Analisar <Check className="h-4 w-4" />
                         </button>
+
                       </div>
                     </div>
                   </motion.div>
