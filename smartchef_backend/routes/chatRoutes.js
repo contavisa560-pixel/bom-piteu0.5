@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const OpenAI = require("openai");
 const Message = require("../models/Message");
 const AuditLog = require("../models/AuditLog");
 const { checkLimitsMiddleware } = require("../middleware/limitMiddleware");
@@ -9,7 +8,7 @@ const { uploadToCloudflare } = require("../services/storageService");
 const { analyzeFoodImage } = require("../services/visionService");
 
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { openaiText, openaiImage } = require("../services/openaiClients");
 
 const { authenticate } = require("../middleware/security/jwtAuth");
 
@@ -31,7 +30,7 @@ router.post(
     if (isImageRequest) {
       try {
         // Gerar imagem usando OpenAI Images
-        const result = await openai.images.generate({
+        const result = await openaiImage.images.generate({
           prompt: message,
           size: "1024x1024",
         });
@@ -56,7 +55,7 @@ router.post(
     }
 
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await openaiText.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: message }],
         max_tokens: 600,
@@ -141,7 +140,7 @@ router.post(
     const userId = req.user._id;
 
     try {
-      const result = await openai.images.generate({
+      const result = await openaiImage.images.generate({
         prompt,
         size: "1024x1024",
       });

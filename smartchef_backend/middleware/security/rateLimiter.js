@@ -35,7 +35,7 @@ const authLimiter = rateLimit({
  */
 const aiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 15, // Máximo de 15 interações pesadas com IA por hora por IP
+  max: 1500, // Máximo de 15 interações pesadas com IA por hora por IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {

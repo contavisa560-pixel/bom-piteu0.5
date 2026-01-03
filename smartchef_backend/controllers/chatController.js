@@ -1,10 +1,7 @@
-const OpenAI = require("openai");
 const { saveMessage } = require("../services/messageService");
 const Message = require("../models/Message");
 // Inicializa o OpenAI com a chave do .env
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const { openaiText } = require("../services/openaiClients");
 
 exports.handleChat = async (req, res) => {
   try {
@@ -41,7 +38,7 @@ exports.handleChat = async (req, res) => {
     });
 
     // 4️⃣ Chamada OpenAI
-    const response = await openai.chat.completions.create({
+    const response = await openaiText.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages,
       max_tokens: 500
