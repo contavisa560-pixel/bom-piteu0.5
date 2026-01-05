@@ -10,7 +10,7 @@ const { analyzeFoodImage } = require("../services/visionService");
 
 const { openaiText, openaiImage } = require("../services/openaiClients");
 
-const { authenticate } = require("../middleware/security/jwtAuth");
+const { authenticate ,authenticateOptional} = require("../middleware/security/jwtAuth");
 
 const { upload } = require("../middleware/uploadValidator");
 const { handleImageChat } = require("../controllers/chatController");
@@ -204,4 +204,82 @@ router.post("/image-chat-test", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+router.post(
+  "/select-recipe",
+  authenticate,
+  async (req, res) => {
+    const { optionId } = req.body;
+    const userId = req.user._id;
+
+    if (!optionId) {
+      return res.status(400).json({ error: "optionId é obrigatório" });
+    }
+
+    try {
+      const completion = await openaiText.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+Você é um chef profissional.
+Gere a receita COMPLETA da opção escolhida.
+Responda em JSON neste formato:
+
+{
+  "title": "Nome da receita",
+  "steps": [
+    {
+      "objective": "",
+      "expectedAction": "",
+      "expectedVisual": "",
+      "warnings": []
+    }
+  ]
+}
+          `.trim()
+          },
+          {
+            role: "user",
+            content: `Opção escolhida: ${optionId}`
+          }
+        ],
+        temperature: 0.4
+      });
+
+      const recipe = JSON.parse(
+        completion.choices[0].message.content
+          .replace(/```json|```/g, "")
+          .trim()
+      );
+
+      //  INICIAR SESSION
+      const cookingSession = await recipeService.startSession(userId, recipe);
+
+      res.json({ recipe, cookingSession });
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "failed_to_generate_recipe" });
+    }
+  }
+);
+router.get("/session/active", authenticateOptional, async (req, res) => {
+  const userId = req.user?._id || req.query.userId;
+
+  const session = await RecipeSession.findOne({
+    userId,
+    status: "active"
+  });
+
+  if (!session) {
+    return res.json({ active: false });
+  }
+
+  res.json({
+    active: true,
+    session
+  });
+});
+
 module.exports = router;

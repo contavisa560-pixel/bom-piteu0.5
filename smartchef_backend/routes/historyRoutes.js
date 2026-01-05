@@ -3,6 +3,12 @@ const express = require("express");
 const router = express.Router();
 const History = require("../models/History");
 const authMiddleware = require("../middleware/auth");
+const {
+  authenticate,
+  authenticateOptional
+} = require("../middleware/security/jwtAuth");
+
+const RecipeSession = require("../models/RecipeSession");
 
 // Histórico geral
 router.get("/", authMiddleware, async (req, res) => {
@@ -39,6 +45,17 @@ router.get("/:type", authMiddleware, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Erro ao buscar histórico" });
   }
+});
+
+router.get("/recipes", authenticateOptional, async (req, res) => {
+  const userId = req.user?._id || req.query.userId;
+
+  const history = await RecipeSession.find({
+    userId,
+    status: "completed"
+  }).sort({ endTime: -1 });
+
+  res.json(history);
 });
 
 module.exports = router;

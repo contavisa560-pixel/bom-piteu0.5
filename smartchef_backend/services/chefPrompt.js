@@ -1,25 +1,57 @@
-function buildStepPrompt(step, extraContext = "") {
+function visionOptionsPrompt() {
   return `
-Você é um CHEF DIGITAL PROFISSIONAL.
+Analisa a imagem enviada.
 
-PASSO ${step.stepNumber}
-Objetivo: ${step.objective}
-Ação esperada: ${step.expectedAction}
-Visual esperado: ${step.expectedVisual}
+1. Identifica os ingredientes visíveis.
+2. Sugere exatamente 3 receitas possíveis com esses ingredientes.
+3. Cada receita deve conter:
+- nome
+- descrição curta (1 linha)
 
-Avisos importantes:
-${step.warnings?.join("\n") || "Nenhum"}
-
-Contexto técnico adicional:
-${extraContext}
-
-REGRAS:
-- NÃO avance o passo
-- Apenas valide ou corrija
-- Seja claro, direto e educativo
-- Se estiver correto, diga: "PASSO VALIDADO"
-- Se estiver errado, explique o erro
+No final escreve exatamente:
+"Escolhe uma opção: 1, 2 ou 3."
 `;
 }
 
-module.exports = { buildStepPrompt };
+function recipePrompt(recipeName) {
+  return `
+Gera uma receita profissional para: ${recipeName}
+
+Inclui:
+- Nome
+- Tempo estimado
+- Ingredientes
+- Passos numerados (máx. 6)
+
+No final pergunta:
+"Queres começar a cozinhar agora?"
+`;
+}
+
+function stepValidationPrompt(step, extraContext = "") {
+  return `
+Você é um CHEF PROFISSIONAL.
+
+PASSO ${step.stepNumber}
+Descrição: ${step.description}
+
+Contexto adicional:
+${extraContext}
+
+Regras:
+- Analise a imagem
+- Diga se está correto
+- Responda APENAS em JSON:
+{
+  "state": "bom | aceitável | errado",
+  "notes": "...",
+  "canAdvance": true | false
+}
+`;
+}
+
+module.exports = {
+  visionOptionsPrompt,
+  recipePrompt,
+  stepValidationPrompt
+};

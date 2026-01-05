@@ -25,21 +25,26 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   const fileInputRef = useRef(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [options, setOptions] = useState([]);
+  const [recipe, setRecipe] = useState(null);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [loading, setLoading] = useState(false);
+
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("image", file);
-    formData.append("prompt", "O que posso cozinhar com estes ingredientes da foto?");
+    formData.append("image", file); // só a imagem, sem prompt
 
     setIsTyping(true);
 
     try {
       const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/image-chat`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/options`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,26 +54,95 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
 
       const data = await res.json();
 
+      // data.options é uma string com as 3 receitas
       setMessages(prev => [
         ...prev,
         {
           id: Date.now(),
           type: "bot",
-          content: data.reply,
-          image: data.imageUrl,
+          content: data.options, // mostra as opções
           timestamp: new Date(),
         },
       ]);
     } catch (err) {
       toast({
         title: "Erro",
-        description: "Falha ao analisar a imagem da galeria",
+        description: "Falha ao gerar opções de receita",
         variant: "destructive",
       });
     } finally {
       setIsTyping(false);
     }
   };
+
+
+
+  const fetchRecipeOptions = async (ingredients, category) => {
+    const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/text-options`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ingredientsDescription: ingredients }), // <--- use 'ingredients', não 'currentInput'
+      });
+
+      const data = await res.json();
+      return data.options || [];
+    } catch (err) {
+      console.error("Erro ao buscar opções:", err);
+      return [];
+    }
+  };
+  const selectRecipe = async (optionId) => {
+    setIsTyping(true);
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/chat/select-recipe`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ optionId }),
+      }
+    );
+
+    const data = await res.json();
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: "bot",
+        content: ` <strong>${data.recipe.title}</strong><br/>Vamos começar a cozinhar!`,
+        timestamp: new Date(),
+      },
+    ]);
+
+    setIsTyping(false);
+  };
+
+  useEffect(() => {
+    async function checkActiveSession() {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/recipes/session/active`
+      );
+      const data = await res.json();
+
+      if (data.active) {
+        setSessionId(data.session._id);
+        setRecipe(data.session.fullRecipeData);
+        setCurrentStep(data.session.steps[data.session.currentStepIndex]);
+      }
+    }
+
+    checkActiveSession();
+  }, []);
 
   useEffect(() => {
     let initialMessage = `Olá, ${user.name.split(' ')[0]}! 😊 Sou o teu Chef IA, pronto para a ação. O que vamos criar hoje? Podes dizer-me os ingredientes que tens (ex: "tenho frango e batatas"), pedir um tipo de prato (ex: "quero um jantar rápido") ou até uma receita de um país específico.`;
@@ -104,46 +178,63 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     const currentInput = messageOverride || inputMessage;
     if (!currentInput.trim()) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: "user",
-      content: currentInput,
-      timestamp: new Date(),
-    };
-
+    // mensagem do usuário
+    const userMessage = { id: Date.now(), type: "user", content: currentInput, timestamp: new Date() };
     setMessages(prev => [...prev, userMessage]);
     if (!messageOverride) setInputMessage("");
     setIsTyping(true);
 
     try {
-      const data = await sendChatMessage({
-        message: currentInput,
-        userId: user._id,
-        token,
-      });
+      // buscar receitas do backend
+      const options = await fetchRecipeOptions(currentInput, selectedCategory?.title);
 
+      if (options.length === 0) {
+        setMessages(prev => [
+          ...prev,
+          { id: Date.now() + 1, type: "bot", content: "Desculpa, não consegui sugerir receitas.", timestamp: new Date() }
+        ]);
+      } else {
+        options.forEach((opt, index) => {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: Date.now() + Math.random(),
+              type: "bot",
+              content: `
+            <strong>${index + 1}. ${opt.name}</strong><br/>
+            ${opt.shortDescription}
+            <br/><br/>
+            <button class="choose-btn" data-option="${opt.id}">
+            Escolher opção ${index + 1}
+            </button>
+      `,
+              timestamp: new Date(),
+            },
+          ]);
+        });
 
-      const botMessage = {
-        id: Date.now() + 1,
-        type: "bot",
-        content: data.reply,
-        timestamp: new Date(),
-      };
-
-      if (data.cookingSession) {
-        onRecipeGenerated(data.cookingSession);
       }
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Erro",
-        description: "O Chef IA teve um problema. Tenta novamente.",
+        description: "Não foi possível buscar receitas.",
         variant: "destructive",
       });
     } finally {
       setIsTyping(false);
     }
   };
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.target.classList.contains("choose-btn")) {
+        selectRecipe(e.target.dataset.option);
+      }
+    };
+
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
+
 
   return (
     <div className="flex-1 flex overflow-hidden relative">
@@ -287,6 +378,79 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                           .replace(/⚠️/g, '<span class="flex items-center text-yellow-600 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>$&</span>')
                       }}
                     />
+                    {options.length > 0 && (
+                      <div className="space-y-3">
+                        {options.map((opt, i) => (
+                          <button
+                            key={i}
+                            onClick={async () => {
+                              setLoading(true);
+                              const data = await selectRecipe(sessionId, i + 1);
+                              setRecipe(data.recipe);
+                              setOptions([]);
+                              setLoading(false);
+                            }}
+                            className="p-4 border rounded-lg text-left hover:bg-gray-50"
+                          >
+                            <strong>{i + 1}. {opt.title}</strong>
+                            <p className="text-sm text-gray-600">{opt.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {recipe && (
+                      <div className="space-y-4">
+                        <h2 className="text-xl font-bold">{recipe.title}</h2>
+                        <p><strong>Tempo:</strong> {recipe.time}</p>
+
+                        <ul className="list-disc pl-5">
+                          {recipe.ingredients.map((ing, i) => (
+                            <li key={i}>{ing}</li>
+                          ))}
+                        </ul>
+
+                        <button
+                          className="bg-black text-white px-6 py-3 rounded-lg"
+                          onClick={async () => {
+                            setLoading(true);
+                            const data = await generateStep(sessionId);
+                            setCurrentStep(data.step);
+                            setLoading(false);
+                          }}
+                        >
+                          Vamos
+                        </button>
+                      </div>
+                    )}
+                    {currentStep && (
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">
+                          Passo {currentStep.stepNumber}
+                        </h3>
+
+                        <p>{currentStep.description}</p>
+
+                        {currentStep.imageUrl && (
+                          <img
+                            src={currentStep.imageUrl}
+                            alt="Passo da receita"
+                            className="rounded-lg"
+                          />
+                        )}
+
+                        <button
+                          className="bg-green-600 text-white px-6 py-3 rounded-lg"
+                          onClick={async () => {
+                            setLoading(true);
+                            const data = await generateStep(sessionId);
+                            setCurrentStep(data.step);
+                            setLoading(false);
+                          }}
+                        >
+                          Próximo passo →
+                        </button>
+                      </div>
+                    )}
 
                     {message.recipeContext && (message.content.toLowerCase().includes('passo a passo') || message.content.toLowerCase().includes('preparação')) && (
                       <Button size="sm" className="mt-2 bg-green-600 hover:bg-green-700" onClick={() => handleSendMessage("Sim, vamos começar a cozinhar")}>
@@ -339,7 +503,21 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                   {/* Galeria */}
                   <label className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-2xl cursor-pointer text-sm font-semibold text-slate-600 border-t border-slate-50">
                     <Image size={18} className="text-orange-500" /> Galeria de Fotos
-                    <input type="file" className="hidden" accept="image/*" onChange={handleFile} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        setLoading(true);
+                        const data = await uploadImageForOptions(file);
+                        setSessionId(data.sessionId);
+                        setOptions(data.options);
+                        setLoading(false);
+                      }}
+                    />
+
                   </label>
 
                   {/* Documento/PDF */}
@@ -433,10 +611,8 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
       // No ChatBot.jsx, encontre o componente CameraModal e atualize:
 
       <CameraModal
-
         open={showCamera}
         onClose={() => setShowCamera(false)}
-
         onCapture={async (dataUrl) => {
           setShowCamera(false);
 
@@ -456,11 +632,9 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
             const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
 
             const formData = new FormData();
-            formData.append("image", file);
-            formData.append("prompt", "O que posso cozinhar com estes ingredientes da foto?");
+            formData.append("image", file); // apenas a imagem
 
-            // Enviar ao backend
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat/image-chat`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/options`, {
               method: "POST",
               headers: { Authorization: `Bearer ${token}` },
               body: formData,
@@ -468,28 +642,28 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
 
             const data = await res.json();
 
-            // Mostrar resposta no chat
+            // Adiciona mensagem da IA com as opções de receita
             setMessages(prev => [
               ...prev,
               {
                 id: Date.now() + 1,
                 type: "bot",
-                content: data.reply,
+                content: data.options, // mostra as 3 receitas
                 timestamp: new Date(),
               },
             ]);
           } catch (err) {
             toast({
               title: "Erro",
-              description: "Falha ao analisar imagem.",
+              description: "Falha ao gerar opções de receita",
               variant: "destructive",
             });
           } finally {
             setIsTyping(false);
           }
         }}
-
       />
+
 
     </div>
   );
