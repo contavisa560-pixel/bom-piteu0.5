@@ -24,9 +24,9 @@ const RecipeSessionSchema = new mongoose.Schema(
 
     // imagem enviada pelo utilizador
     sourceImage: {
-      type: String, // base64 ou URL
-      required: true,
+      type: String,  // ← SEM required: true
     },
+
 
     // opções sugeridas pela IA
     recipeOptions: [
@@ -35,6 +35,11 @@ const RecipeSessionSchema = new mongoose.Schema(
         description: String,
       },
     ],
+    
+    recipeFinalImage: {
+      type: String,
+      default: null
+    },
 
     // receita escolhida
     selectedRecipe: {

@@ -22,12 +22,12 @@ const BASE_PROMPT = `
 Tu és um assistente culinário inteligente.
 
 Tarefa:
-1. Analisa cuidadosamente os ingredientes fornecidos (texto, imagem ou áudio).
+1. Analisa cuidadosamente os  fornecidos (texto, imagem ou áudio).
 2. Assume que o utilizador quer cozinhar apenas ou principalmente com esses ingredientes.
 3. Sugere exatamente 3 receitas possíveis.
 
 Regras para as 3 receitas:
-- Simples
+- Simplesingredientes
 - Práticas
 - Adequadas para cozinhar em casa
 - Não inventes ingredientes complexos
@@ -77,7 +77,7 @@ async function callOpenAIText(userPrompt, imageBase64 = null) {
         {
           type: "image_url",
           image_url: {
-            url: `data:image/jpeg;base64,${imageBase64}`  // ✅ OBJETO
+            url: imageBase64,
           },
         },
       ],
@@ -96,25 +96,39 @@ async function callOpenAIText(userPrompt, imageBase64 = null) {
 }
 
 /**
- * 🍽️ IMAGEM (prato final ou passo)
+ *  IMAGEM (prato final ou passo)
  */
-async function callOpenAIImage(prompt) {
+async function callOpenAIImage(recipeName, stepDescription = "") {
+  const HUMAN_REALIST_PROMPT = `Fotografia profissional tirada com Canon EOS R5, lente 85mm f/1.2, ISO 100.
+
+${recipeName}${stepDescription ? ` - ${stepDescription}` : ''}
+
+✨ REALIDADE HUMANA:
+• Luz natural dourada 17h30, sombras orgânicas suaves
+• Vapor natural subindo dos alimentos quentes  
+• Texturas hiper-realistas: carne suculenta, vegetais crocantes
+• Molhos brilhando com reflexos orgânicos
+• Fundo bokeh cremoso f/1.2, grãos de filme Kodak Portra 400
+• Empratamento restaurante 2 Michelin 
+
+ NUNCA: arte digital, 3D render, AI art, cartoon, CGI, perfeição plástica
+ SIM: foto Instagram @ottolenghi, revista Saveur 2025, foto celular iPhone 16 Pro
+
+1024x1024, qualidade hd, sem pessoas, sem texto, sem logos.`;
+
   const response = await openaiImage.images.generate({
     model: "dall-e-3",
-    prompt: `
-Imagem realista de culinária.
-${prompt}
-Sem texto, sem marcas, sem pessoas.
-Fotografia profissional, luz natural.
-`,
+    prompt: HUMAN_REALIST_PROMPT,
+    n: 1,
     size: "1024x1024",
+    quality: "hd"  
   });
 
-  return response.data[0];
+  return response.data[0].url;  
 }
 
 /**
- * 🔎 Parser simples
+ *  Parser simples
  */
 function parseAIResponse(text) {
   return {

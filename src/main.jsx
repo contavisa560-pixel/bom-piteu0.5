@@ -16,7 +16,7 @@ import { ensureDemoUser } from "@/services/authFix";
 ensureDemoUser();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+ 
     <I18nextProvider i18n={i18n}>
       <BrowserRouter>
         <ThemeProvider>
@@ -24,5 +24,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </ThemeProvider>
       </BrowserRouter>
     </I18nextProvider>
-  </React.StrictMode>
+  
 );
