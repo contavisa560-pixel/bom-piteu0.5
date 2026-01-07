@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -6,15 +6,26 @@ import { toast } from '@/components/ui/use-toast';
 import { Leaf, Heart, WheatOff, MilkOff, FishOff, Shell, NutOff as PeanutOff, Sparkles, ArrowLeft, UserPlus, Globe } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import UserProfile from '@/components/UserProfile';
 
 const ProfileSetup = ({ onSave, user, onNavigate }) => {
+  // Garantir que os estados iniciais nunca sejam undefined ou null
   const [selectedProfiles, setSelectedProfiles] = useState(user?.foodProfile || []);
-  const [age, setAge] = useState(user?.age || '');
+  const [age, setAge] = useState(user?.age || "");
   const [bloodType, setBloodType] = useState(user?.bloodType || 'A+');
   const [country, setCountry] = useState(user?.country || 'AO');
   const [language, setLanguage] = useState(user?.language || 'pt');
   const [otherAllergy, setOtherAllergy] = useState('');
+
+  // Sincronizar estados se o 'user' demorar a carregar do Atlas
+  useEffect(() => {
+    if (user) {
+      setSelectedProfiles(user.foodProfile || []);
+      setAge(user.age || "");
+      setBloodType(user.bloodType || 'A+');
+      setCountry(user.country || 'AO');
+      setLanguage(user.language || 'pt');
+    }
+  }, [user]);
 
   const profiles = [
     { id: 'vegetariano', label: 'Vegetariano', icon: Leaf },
@@ -36,15 +47,40 @@ const ProfileSetup = ({ onSave, user, onNavigate }) => {
     );
   };
 
-  const handleSaveProfile = () => {
-    const finalProfiles = [...selectedProfiles];
-    if (otherAllergy.trim()) finalProfiles.push(`outro: ${otherAllergy.trim()}`);
-    onSave({ foodProfile: finalProfiles, age, bloodType, country, language });
-    toast({
-      title: "Perfil guardado!",
-      description: "As tuas preferências foram atualizadas.",
-    });
-    onNavigate('/profile'); // volta para perfil
+  const handleSaveProfile = async () => {
+    try {
+      const finalProfiles = [...selectedProfiles];
+      if (otherAllergy.trim()) {
+        const allergyLabel = `outro: ${otherAllergy.trim()}`;
+        if (!finalProfiles.includes(allergyLabel)) {
+          finalProfiles.push(allergyLabel);
+        }
+      }
+
+      // Envia os dados estruturados para o componente pai (App.jsx ou similar)
+      await onSave({ 
+        foodProfile: finalProfiles, 
+        age: String(age), // Garantir que vai como string se necessário
+        bloodType, 
+        country, 
+        language 
+      });
+
+      toast({
+        title: "Perfil guardado!",
+        description: "As tuas preferências foram atualizadas com sucesso.",
+      });
+
+      // Pequeno delay para garantir que o utilizador vê o feedback antes de mudar de página
+      setTimeout(() => onNavigate('/profile'), 500);
+      
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao guardar",
+        description: "Não foi possível atualizar o teu perfil no servidor.",
+      });
+    }
   };
 
   return (
@@ -67,12 +103,25 @@ const ProfileSetup = ({ onSave, user, onNavigate }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="age">Idade</Label>
-                  <Input id="age" type="number" value={age} onChange={e => setAge(e.target.value)} />
+                  <Input 
+                    id="age" 
+                    type="number" 
+                    value={age || ""} 
+                    onChange={e => setAge(e.target.value)} 
+                    placeholder="Ex: 25"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="bloodType">Tipo Sanguíneo</Label>
-                  <select id="bloodType" value={bloodType} onChange={e => setBloodType(e.target.value)} className="w-full h-10 border border-input rounded-md px-3">
-                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(type => <option key={type} value={type}>{type}</option>)}
+                  <select 
+                    id="bloodType" 
+                    value={bloodType || "A+"} 
+                    onChange={e => setBloodType(e.target.value)} 
+                    className="w-full h-10 border border-input rounded-md px-3 bg-white"
+                  >
+                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -83,7 +132,7 @@ const ProfileSetup = ({ onSave, user, onNavigate }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="country">País</Label>
-                  <select id="country" value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 border border-input rounded-md px-3">
+                  <select id="country" value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 border border-input rounded-md px-3 bg-white">
                     <option value="AO">Angola</option>
                     <option value="BR">Brasil</option>
                     <option value="PT">Portugal</option>
@@ -91,7 +140,7 @@ const ProfileSetup = ({ onSave, user, onNavigate }) => {
                 </div>
                 <div>
                   <Label htmlFor="language">Idioma</Label>
-                  <select id="language" value={language} onChange={e => setLanguage(e.target.value)} className="w-full h-10 border border-input rounded-md px-3">
+                  <select id="language" value={language} onChange={e => setLanguage(e.target.value)} className="w-full h-10 border border-input rounded-md px-3 bg-white">
                     <option value="pt">Português</option>
                     <option value="en">English</option>
                   </select>
@@ -104,25 +153,31 @@ const ProfileSetup = ({ onSave, user, onNavigate }) => {
             <h2 className="font-semibold text-xl text-gray-700 flex items-center"><Heart className="mr-2"/> Alergias e Intolerâncias</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {profiles.map(p => (
-                <motion.div key={p.id} whileHover={{ scale: 1.05 }}
+                <motion.div key={p.id} whileHover={{ scale: 1.02 }}
                   className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${selectedProfiles.includes(p.id) ? 'border-orange-500 bg-orange-50' : 'border-gray-200'}`}
                   onClick={() => handleToggleProfile(p.id)}
                 >
-                  <Checkbox id={p.id} checked={selectedProfiles.includes(p.id)} className="mr-3" />
+                  <Checkbox id={p.id} checked={selectedProfiles.includes(p.id)} onCheckedChange={() => handleToggleProfile(p.id)} className="mr-3" />
                   <p.icon className={`h-5 w-5 mr-2 ${selectedProfiles.includes(p.id) ? 'text-orange-600' : 'text-gray-500'}`} />
-                  <label htmlFor={p.id} className="text-sm font-medium text-gray-800 cursor-pointer">{p.label}</label>
+                  <label className="text-sm font-medium text-gray-800 cursor-pointer">{p.label}</label>
                 </motion.div>
               ))}
             </div>
             <div>
               <Label htmlFor="otherAllergy" className="flex items-center"><Sparkles className="h-4 w-4 mr-2"/> Outra Alergia</Label>
-              <Input id="otherAllergy" type="text" value={otherAllergy} onChange={e => setOtherAllergy(e.target.value)} />
+              <Input 
+                id="otherAllergy" 
+                type="text" 
+                value={otherAllergy || ""} 
+                onChange={e => setOtherAllergy(e.target.value)} 
+                placeholder="Ex: Alergia a Morangos"
+              />
             </div>
           </div>
         </div>
 
         <div className="text-center">
-          <Button onClick={handleSaveProfile} size="lg" className="mt-12 w-full md:w-1/2 mx-auto bg-gradient-to-r from-orange-500 to-red-500 text-white">
+          <Button onClick={handleSaveProfile} size="lg" className="mt-12 w-full md:w-1/2 mx-auto bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 transition-opacity">
             Guardar Alterações
           </Button>
         </div>

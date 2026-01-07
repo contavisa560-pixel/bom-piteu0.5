@@ -24,7 +24,7 @@ exports.uploadToCloudflare = async (fileBuffer, fileName, folder = "uploads") =>
     Bucket: process.env.R2_BUCKET_NAME,
     Key: fileKey,
     Body: fileBuffer,
-    ContentType: "image/jpeg", // Ou detectar dinamicamente
+    ContentType: "image/jpeg", 
   };
 
   try {

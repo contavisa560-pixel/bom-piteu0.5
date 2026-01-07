@@ -86,12 +86,10 @@ router.post("/update-avatar", authenticate, upload.single("image"), async (req, 
 // 1. Inicia a autenticação (O que tu estás a tentar aceder)
 router.get("/google", passport.authenticate("google", { 
   scope: ["profile", "email"],
-  prompt: "select_account" // Força a escolha de conta para evitar loops
+  prompt: "select_account" 
 }));
 
-// 2. Callback (Para onde o Google envia o utilizador)
-// No routes/auth.js (ou onde unificaste as rotas)
-// No routes/auth.js
+// 2. Callback do Google (Para onde o Google redireciona após login)
 router.get("/google/callback", 
   passport.authenticate("google", { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed` }),
   async (req, res) => {

@@ -12,7 +12,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import App from "./App";
 import { ensureDemoUser } from "@/services/authFix";
 
-// Garantir utilizador demo
+
 ensureDemoUser();
 
 ReactDOM.createRoot(document.getElementById("root")).render(

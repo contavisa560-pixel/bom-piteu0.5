@@ -3,7 +3,13 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      lowercase: true, 
+      trim: true 
+    },
     password: {
       type: String,
       required: function () { return this.provider === "local"; },
@@ -16,15 +22,15 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: "" },
     needsPassword: { type: Boolean, default: false },
 
-    // --- 🏆 Gamificação ---
+    // 🏆 Gamificação
     level: { type: Number, default: 1 },
     points: { type: Number, default: 0 },
 
-    // --- 💎 Gestão Premium (Para o Job de Verificação Diária) ---
+    // 💎 Gestão Premium
     isPremium: { type: Boolean, default: false },
-    premiumExpiresAt: { type: Date, default: null }, // Essencial para o Ponto 2 do roteiro
+    premiumExpiresAt: { type: Date, default: null },
 
-    // --- 📊 Limites de Uso Detalhados (Para o Reset Diário Automático) ---
+    // 📊 Limites de Uso
     usage: {
       dailyTextRequests: { type: Number, default: 0 },
       dailyImageGenerations: { type: Number, default: 0 },
@@ -37,7 +43,7 @@ const userSchema = new mongoose.Schema(
     },
     lastReset: { type: Date, default: Date.now },
 
-    // --- 🥗 Preferências (Ponto 1 do roteiro - Perfil Alimentar) ---
+    // 🥗 Preferências Alimentares
     preferences: {
       dietaryRestrictions: [{ type: String }], // ex: "Vegano", "Sem Glúten"
       allergies: [{ type: String }],           // ex: "Marisco", "Lactose"
@@ -49,11 +55,23 @@ const userSchema = new mongoose.Schema(
       }
     },
 
+    // 🔧 Configurações
+    settings: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {
+        theme: "light",
+        language: "pt",
+        notifications: true,
+        privacy: "public"
+      }
+    },
+
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
   },
   { timestamps: true }
 );
 
+// Indexação para busca rápida por email
 userSchema.index({ email: 1 });
 
 module.exports = mongoose.model("User", userSchema);

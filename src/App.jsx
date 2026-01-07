@@ -17,6 +17,16 @@ import ImageRecognition from "@/components/ImageRecognition";
 import VoiceRecognition from "@/components/VoiceRecognition";
 import InternationalRecipes from "@/components/InternationalRecipes";
 import "./checkEnv.js";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import TermsOfUse from "@/pages/legal/TermsOfUse";
+import CookiesPolicy from "@/pages/legal/CookiesPolicy";
+import CommunityGuidelines from "@/pages/legal/CommunityGuidelines";
+import PaymentsPolicy from "@/pages/legal/PaymentsPolicy";
+import Support from "@/pages/legal/Support";
+import DataDeletion from "@/pages/legal/DataDeletion";
+import About from "./pages/legal/About";
+import Partnerships from "./pages/legal/Partnerships";
+import LegalCentral from "./pages/legal/LegalCentral";
 
 function App() {
   const location = useLocation();
@@ -27,7 +37,44 @@ function App() {
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // ✅ 1. Processar Login Google/OAuth vindo da URL
+  // ✅ 1. Sincronização com o Backend (MongoDB Atlas)
+  const syncWithBackend = async (userId, updatedData) => {
+    const token = localStorage.getItem("bomPiteuToken");
+    if (!userId) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/${userId}/settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) throw new Error("Erro ao salvar no servidor");
+      
+      const data = await response.json();
+      console.log("✅ Sincronizado com Atlas:", data);
+    } catch (err) {
+      console.error("❌ Erro ao sincronizar com backend:", err);
+    }
+  };
+
+  // ✅ 2. Atualizar Usuário (Local + Remoto)
+  const updateUser = async (updatedData) => {
+    const updatedUser = { ...user, ...updatedData };
+    setUser(updatedUser);
+    localStorage.setItem("bomPiteuUser", JSON.stringify(updatedUser));
+
+    // Se o usuário estiver logado, envia para o Atlas
+    const userId = user?.id || user?._id;
+    if (userId) {
+      await syncWithBackend(userId, updatedData);
+    }
+  };
+
+  // ✅ 3. Processar Login OAuth da URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
@@ -35,17 +82,12 @@ function App() {
 
     if (token) {
       localStorage.setItem("bomPiteuToken", token);
-      
       if (userParam) {
         try {
           const decodedUser = JSON.parse(decodeURIComponent(userParam));
-          
-          // Salva no storage e atualiza estado imediatamente
           localStorage.setItem("bomPiteuUser", JSON.stringify(decodedUser));
           setUser(decodedUser);
           setCurrentView("dashboard");
-          
-          // Limpa a URL para segurança
           navigate("/", { replace: true });
         } catch (err) {
           console.error("Erro ao processar dados do utilizador:", err);
@@ -53,28 +95,16 @@ function App() {
       }
     }
   }, [location, navigate]);
-useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const userId = params.get("userId");
 
-  if (userId && window.location.pathname.includes("set-password")) {
-    setUserIdForPassword(userId); // Você precisaria criar esse estado: const [userIdForPassword, setUserIdForPassword] = useState(null);
-    setCurrentView("setPassword");
-  }
-}, [location]);
-
-
-  // ✅ 2. Carregar sessão existente do LocalStorage (Persistência)
+  // ✅ 4. Persistência da Sessão
   useEffect(() => {
     const storedUser = localStorage.getItem("bomPiteuUser");
     const storedToken = localStorage.getItem("bomPiteuToken");
-    
-    // Se temos usuário e token, e não estamos no meio de um processo de login da URL
     const params = new URLSearchParams(window.location.search);
+
     if (storedUser && storedToken && !params.get("token")) {
       try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
+        setUser(JSON.parse(storedUser));
         setCurrentView("dashboard");
       } catch (err) {
         console.error("Erro ao recuperar sessão:", err);
@@ -82,22 +112,7 @@ useEffect(() => {
     }
   }, []);
 
-  // ✅ 3. Sincronização de eventos customizados
-  useEffect(() => {
-    const syncUser = (e) => {
-      setUser(e.detail);
-    };
-    window.addEventListener("user_updated", syncUser);
-    return () => window.removeEventListener("user_updated", syncUser);
-  }, []);
-
-  // ✅ Funções utilitárias
-  const updateUser = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData };
-    setUser(updatedUser);
-    localStorage.setItem("bomPiteuUser", JSON.stringify(updatedUser));
-  };
-
+  // ✅ Funções de Ação
   const handleLogin = (profile) => {
     const newUser = {
       ...profile,
@@ -110,15 +125,14 @@ useEffect(() => {
       bloodType: "A+",
       country: "AO",
       language: "pt",
-      interests: [],
     };
     localStorage.setItem("bomPiteuUser", JSON.stringify(newUser));
     setUser(newUser);
     setCurrentView("dashboard");
   };
 
-  const handleProfileSave = (profileData) => {
-    updateUser(profileData);
+  const handleProfileSave = async (profileData) => {
+    await updateUser(profileData);
     setCurrentView("dashboard");
   };
 
@@ -153,7 +167,7 @@ useEffect(() => {
 
   const renderContent = () => {
     switch (currentView) {
-      case "welcome": return <WelcomeScreen onLogin={handleLogin} />;
+      case "welcome": return <WelcomeScreen onLogin={handleLogin} onNavigate={handleNavigate} />;
       case "profileSetup": return <ProfileSetup onSave={handleProfileSave} user={user} onNavigate={handleNavigate} />;
       case "chat": return <ChatBot selectedCategory={selectedCategory} onRecipeGenerated={handleRecipeGenerated} onBack={() => handleNavigate("dashboard")} user={user} />;
       case "recipe": return <RecipeDisplay recipe={currentRecipe} onBack={() => handleNavigate("dashboard")} user={user} onToggleFavorite={handleToggleFavorite} />;
@@ -179,15 +193,30 @@ useEffect(() => {
         )}
         <main className="container mx-auto px-4 py-8">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
-              {renderContent()}
-            </motion.div>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/legal" element={<LegalCentral />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/cookies" element={<CookiesPolicy />} />
+              <Route path="/community" element={<CommunityGuidelines />} />
+              <Route path="/payments" element={<PaymentsPolicy />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/data-deletion" element={<DataDeletion />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/partnerships" element={<Partnerships />} />
+              
+              <Route path="*" element={
+                <motion.div
+                  key={currentView}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  {renderContent()}
+                </motion.div>
+              } />
+            </Routes>
           </AnimatePresence>
         </main>
         <Toaster />

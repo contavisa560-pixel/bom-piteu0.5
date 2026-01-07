@@ -7,19 +7,21 @@ const limitService = require("../services/limitService");
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Rota principal do chat
 router.post("/", async (req, res) => {
   try {
     const { message, userId, profile } = req.body;
     if (!message || !message.trim()) return res.status(400).json({ error: "missing_message" });
 
-    // ✅ Checa limites
+    // ✅ Checa limites de uso do usuário
     const canUse = await limitService.checkLimits(userId, "text");
     if (!canUse.allowed) return res.status(403).json({ error: "limit_reached", message: canUse.message });
 
     const systemPrompt = `
 Tu és o SmartChef — assistente de cozinha inteligente, direto e amigável.
 Adapta-te ao utilizador quando o perfil for fornecido.
-    `;
+`;
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -32,10 +34,22 @@ Adapta-te ao utilizador quando o perfil for fornecido.
 
     const reply = completion.choices?.[0]?.message?.content || "Erro ao gerar resposta.";
 
-    // ✅ Salva mensagem
-    await Message.create({ user: userId, content: message, response: reply });
+    // Salva mensagem do usuário
+    await Message.create({
+      userId,
+      role: "user",
+      content: message
+    });
 
-    // ✅ Incrementa limite
+    // Salva resposta da IA
+    await Message.create({
+      userId,
+      role: "assistant",
+      content: reply
+    });
+
+
+    // ✅ Incrementa limite do usuário
     await limitService.increment(userId, "text");
 
     res.json({ reply });

@@ -1,7 +1,7 @@
 // src/components/UserProfile.jsx
 import { useTheme } from "@/context/ThemeContext";
 import { getUser, updateUser, uploadAvatar, deleteUser } from '@/services/api';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { User, Award, Heart, ChefHat, Mail, Info, BookOpen, Shield, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
   const { theme, setTheme } = useTheme();
   const [otherAllergy, setOtherAllergy] = useState("");
   const [otherIntolerance, setOtherIntolerance] = useState("");
-
+const [loading, setLoading] = useState(false);
 
   const alergias = [
     { id: "alergia_amendoim", label: "Alergia a Amendoim", icon: Nut },
@@ -225,47 +225,52 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
       throw err;
     }
   };
-
-  // salvar settings completos (conveniência)
   // salva settings local + backend e atualiza localStorage
-  const saveSettings = async (patch) => {
-    try {
-      const updated = { ...settings, ...patch };
-      setSettings(updated);
 
-      // envia para o backend
-      await updateUserSettings(user.id, updated);
+const saveSettings = async () => {
+  // ✅ FIX: Usa id OU _id
+  const userId = user?.id || user?._id;
+  console.log('👤 User ID usado:', userId);
+  
+  if (loading || !userId) {
+    console.log('⏳ Sem user ID:', userId);
+    return;
+  }
 
-      // actualiza localStorage user
-      const stored = JSON.parse(localStorage.getItem(LOCAL_USER_KEY) || "{}");
-      const merged = { ...stored, settings: updated };
-      localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(merged));
-      localStorage.setItem('bomPiteuUser', JSON.stringify(merged));
+  setLoading(true);
+  
+  try {
+    const result = await updateUserSettings(userId, userSettings); // ✅ userId
 
-      toast({ title: "Guardado", description: "Configurações guardadas com sucesso." });
-    } catch (err) {
-      console.error("Erro ao guardar settings:", err);
-      toast({ title: "Erro", description: "Falha ao gravar settings", variant: "destructive" });
+    console.log('✅ Sucesso:', result);
+
+    // 1️⃣ Atualiza user no estado
+    setUser(prev => ({
+      ...prev,
+      settings: result.settings
+    }));
+
+    // 2️⃣ Salva no localStorage
+    localStorage.setItem('userSettings', JSON.stringify(result.settings));
+
+    // 3️⃣ Feedback
+    toast.success('✅ Configurações salvas!');
+
+  } catch (error) {
+    console.error('❌ Erro:', error);
+    
+    if (error.message.includes('Token')) {
+      toast.error('Sessão expirada');
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    } else {
+      toast.error(error.message || 'Erro ao salvar');
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // avatar upload
-  const handleImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const res = await uploadAvatar(user.id, file);
-      if (!res.imageUrl) throw new Error('Sem imageUrl');
-      const updatedUser = await saveToServer({ picture: res.imageUrl }, false);
-      setProfileImage(res.imageUrl);
-      persistLocalUser(updatedUser);
-      window.dispatchEvent(new CustomEvent("user_updated", { detail: updatedUser }));
-      toast({ title: "Foto atualizada!", description: "Imagem alterada com sucesso." });
-    } catch (err) {
-      console.error(err);
-      toast({ title: "Erro", description: "Falha ao enviar imagem", variant: "destructive" });
-    }
-  };
 
   // --- ALIMENTAÇÃO: helpers (diets, allergies, goals, macros)
   const toggleDiet = (diet) => {
@@ -503,17 +508,51 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
   };
 
   const handleSaveProfile = async () => {
-    const updated = { ...user, ...profileData };
+  setLoading(true);
+  try {
+    const updated = { 
+      ...user, 
+      ...profileData,
+      // Garante que campos extras não travem o envio
+      otherAllergy: otherAllergy,
+      otherIntolerance: otherIntolerance
+    };
+    
     const res = await saveToServer(updated);
     setUser(res);
-    toast({ title: 'Perfil actualizado', description: 'Dados guardados.' });
-    if (otherAllergy.trim())
-      finalProfiles.push(`outra_alergia: ${otherAllergy}`);
+    toast({ title: 'Sucesso', description: 'Perfil atualizado!' });
+  } catch (err) {
+    console.error("Erro ao salvar:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    if (otherIntolerance.trim())
-      finalProfiles.push(`outra_intolerancia: ${otherIntolerance}`);
+// 3. Corrija o upload de imagem para não travar com HTML
+const handleImageChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  };
+  try {
+    setLoading(true);
+    const res = await uploadAvatar(user.id, file);
+    
+    // Verifique se res existe e tem a imagem
+    if (res && res.imageUrl) {
+      setProfileImage(res.imageUrl);
+      toast({ title: "Sucesso", description: "Foto atualizada!" });
+    }
+  } catch (err) {
+    console.error("Erro no upload:", err);
+    toast({ 
+      title: "Erro de Conexão", 
+      description: "O servidor não respondeu corretamente.", 
+      variant: "destructive" 
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   // export account (gera JSON com dados do user e força download)
   const exportAccount = () => {
@@ -643,7 +682,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                   <label className="text-gray-600 font-semibold">Nome completo</label>
                   <input
                     type="text"
-                    value={profileData.name}
+                    value={profileData.name || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, name: e.target.value })
                     }
@@ -656,7 +695,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                   <label className="text-gray-600 font-semibold">E-mail</label>
                   <input
                     type="email"
-                    value={profileData.email}
+                    value={profileData.email || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, email: e.target.value })
                     }
@@ -669,7 +708,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                   <label className="text-gray-600 font-semibold">Data de Nascimento</label>
                   <input
                     type="date"
-                    value={profileData.date}
+                    value={profileData.date || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, date: e.target.value })
                     }
@@ -680,7 +719,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 <div>
                   <label className="text-gray-600 font-semibold">Tipo Sanguíneo</label>
                   <select
-                    value={profileData.gender}
+                    value={profileData.gender || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, gender: e.target.value })
                     }
@@ -702,7 +741,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                   <label className="text-gray-600 font-semibold">Contacto</label>
                   <input
                     type="tel"
-                    value={profileData.Number}
+                    value={profileData.Number || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, Number: e.target.value })
                     }
@@ -715,7 +754,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 <div>
                   <label className="text-gray-600 font-semibold">Gênero</label>
                   <select
-                    value={profileData.gender}
+                    value={profileData.gender || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, gender: e.target.value })
                     }
@@ -738,7 +777,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 <div>
                   <label className="text-gray-600 font-semibold">País</label>
                   <select
-                    value={profileData.country}
+                    value={profileData.country || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, country: e.target.value })
                     }
@@ -757,7 +796,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 <div>
                   <label className="text-gray-600 font-semibold">Idioma</label>
                   <select
-                    value={profileData.language}
+                    value={profileData.language || ""}
                     onChange={(e) =>
                       setProfileData({ ...profileData, language: e.target.value })
                     }
@@ -778,7 +817,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 <label className="text-gray-600 font-semibold">Sobre você</label>
                 <textarea
                   rows="4"
-                  value={profileData.bio}
+                  value={profileData.bio || ""} 
                   onChange={(e) =>
                     setProfileData({ ...profileData, bio: e.target.value })
                   }
@@ -829,7 +868,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
               <div>
                 <label className=" text-gray-600 font-semibold ">Dieta Estilo de Vida</label>
                 <select
-                  value={profileData.dieta1}
+                  value={profileData.dieta1 || ""}
                   onChange={(e) =>
                     setProfileData({ ...profileData, dieta1: e.target.value })
                   }
@@ -847,7 +886,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
               <div>
                 <label className=" text-gray-600 font-semibold">Controle Calórico</label>
                 <select
-                  value={profileData.dieta2}
+                  value={profileData.dieta2 || ""}
                   onChange={(e) =>
                     setProfileData({ ...profileData, dieta2: e.target.value })
                   }
@@ -865,7 +904,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
               <div>
                 <label className=" text-gray-600 font-semibold">Dietas Terapêuticas</label>
                 <select
-                  value={profileData.dieta3}
+                  value={profileData.dieta3 || ""}
                   onChange={(e) =>
                     setProfileData({ ...profileData, dieta3: e.target.value })
                   }
@@ -883,7 +922,7 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
               <div>
                 <label className=" text-gray-600 font-semibold">Dietas Tradicionais</label>
                 <select
-                  value={profileData.diet4}
+                  value={profileData.diet4 || ""}
                   onChange={(e) =>
                     setProfileData({ ...profileData, dieta4: e.target.value })
                   }
@@ -951,7 +990,6 @@ const UserProfile = ({ user: initialUser, onNavigate }) => {
                 onChange={(e) => setOtherAllergy(e.target.value)}
               />
             </div>
-
 
             <h3 className="font-semibold text-xl text-gray-700 flex items-center mb-3 mt-6">
               Intolerâncias Alimentares

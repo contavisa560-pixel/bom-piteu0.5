@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const recipeSessionSchema = new mongoose.Schema(
   {
     userId: {
@@ -48,3 +49,4 @@ const recipeSessionSchema = new mongoose.Schema(
 recipeSessionSchema.index({ userId: 1, status: 1 });
 
 module.exports = mongoose.model("RecipeSession", recipeSessionSchema);
+

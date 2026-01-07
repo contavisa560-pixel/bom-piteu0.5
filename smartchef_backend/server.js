@@ -1,29 +1,30 @@
+
 require("dotenv").config();
 require("./cronJobsAdvanced"); 
 
 const express = require("express");
 const cors = require("cors");
+const { connectDB, readUsers, writeUsers } = require("./db");
 const passport = require("passport");
-const connectDB = require("./db");
+
+
 
 // Importação de Estratégias Passport (Movidas para um config separado para não poluir aqui)
 require("./config/passport")(passport); 
 
 // Importação de Rotas
+const chatRoutes = require("./routes/chatRoutes");
 const recipeRoutes = require("./routes/recipeRoutes");
 const auth = require("./routes/auth");
  // Criamos este para limpar o server
-const openaiChatRoutes = require("./routes/openaiChat");
 const imageRoutes = require("./routes/imageRoutes");
 const visionRoutes = require("./routes/visionRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const admin = require("./routes/admin");
 
 const { apiLimiter, authLimiter, aiLimiter } = require("./middleware/security/rateLimiter");
-
+const userRoutes = require("./routes/userRoutes");
 const app = express();
-
-// ===================== DATABASE =====================
 connectDB();
 
 // ===================== MIDDLEWARES =====================
@@ -40,14 +41,14 @@ app.use("/api/vision", aiLimiter);
 app.use("/api/image", aiLimiter);
 
 // ===================== ROTAS DEFINITIVAS =====================
-app.use("/api/auth", auth);   // Email/Senha/Me/Avatar
- // Google/Facebook/Insta/TikTok
-app.use("/api/chat", openaiChatRoutes);
+app.use("/api/auth", auth);   
 app.use("/api/image", imageRoutes);
 app.use("/api/vision", visionRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/admin", admin);
 app.use("/api/recipes", recipeRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/users", userRoutes);
 
 // Health Check
 app.get("/api/health", (req, res) => res.json({ status: "OK", timestamp: new Date() }));
@@ -57,6 +58,7 @@ app.use((err, req, res, next) => {
   console.error(`[ERROR]: ${err.message}`);
   res.status(500).json({ error: "Erro interno no servidor Bom Piteu." });
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Bom Piteu Backend rodando em http://localhost:${PORT}`));
