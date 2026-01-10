@@ -1,0 +1,2741 @@
+[
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693b3da169d3c752654e4bd3",
+    "name": "jfsvn",
+    "email": "jksc@gmail.com",
+    "passwordHash": "$2a$10$kdO4e3jOUaJwOulCbicDzO8D3cqMHZyWkwhn89N4S5Kuz8adDmaTe",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "createdAt": "2025-12-11T21:54:41.837Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 12,
+    "usedWeekly": 40,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693b641455b1b167611a49bf",
+    "name": "jkjsdcn",
+    "email": "hkjsdc@gmail.com",
+    "passwordHash": "$2a$10$PemGfgoyDeITPec4kLZ0UeeGRAFZQPpWSMWXSCeiNOb7QqeT3ZkNe",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "createdAt": "2025-12-12T00:38:44.664Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693b662a55b1b167611a49c3",
+    "name": "kkuiyghjuiysd",
+    "email": "jkdknk@gmail.com",
+    "passwordHash": "$2a$10$Y4B1noTR5SG1Sx7sHLO8yOfrWr55yKssUep.4gD6mPOGM8CZ827rm",
+    "provider": "local",
+    "picture": "http://localhost:5000/uploads/693b662a55b1b167611a49c3_1765507570114.png",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "createdAt": "2025-12-12T00:47:38.063Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693b82642163b891fe1bfa2d",
+    "name": "hjnb",
+    "email": "hjbb@gmail.com",
+    "passwordHash": "$2a$10$boXaWwRgQ6ge65zUyqpT2eq8porlwITvW.mH1hgve35w2/Uzh.IKu",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "createdAt": "2025-12-12T02:48:04.684Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693c28efa98e38a4e67e5278",
+    "name": "jgjhh",
+    "email": "hjbjh@gmail.com",
+    "passwordHash": "$2a$10$ugSphRQr1o6VmLyULQKfRexQVwD.cEA.sgb6MqCNLcwer0EDjeM7a",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "createdAt": "2025-12-12T14:38:39.974Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "messages": 82,
+      "images": 0,
+      "vision": 0,
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693d7a2baef7b580df21c5a1",
+    "name": "jksdvns",
+    "email": "jkhgjkh@gmai.com",
+    "passwordHash": "$2a$10$7bNlMb12I5n44Nw0gB2O1OzVeZxU0U5bw9L26l2Qg0.t2LP4IZcYu",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "plan": {
+      "type": "FREE",
+      "startedAt": "2025-12-13T14:37:31.301Z"
+    },
+    "createdAt": "2025-12-13T14:37:31.301Z",
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "messages": 0,
+      "images": 0,
+      "vision": 0,
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693e1a8aa773af2916d3c68d",
+    "name": "jskd",
+    "email": "jkahc@gamil.com",
+    "passwordHash": "$2a$10$uzKCqL.sa64S06aYUT.F2.Exw/1Pyo9iq9vWhoGvWHo10KELqInL6",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "plan": {
+      "type": "PREMIUM",
+      "startedAt": "2025-12-14T02:03:06.835Z"
+    },
+    "createdAt": "2025-12-14T02:01:46.332Z",
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "isPremium": false,
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "messages": 0,
+      "images": 0,
+      "vision": 0,
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693e2abe13e07ecec4ffc642",
+    "name": "kjnkjn",
+    "email": "mnbs@gmail.com",
+    "passwordHash": "$2a$10$Q3Z/UqRmjU0HW7IMCGFP6u4Kw5syuGBSHE4qO5Rjg.6gA1Flp5.Ze",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "plan": {
+      "type": "FREE",
+      "startedAt": "2025-12-14T03:10:54.538Z"
+    },
+    "createdAt": "2025-12-14T03:10:54.538Z",
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "isPremium": false,
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "messages": 0,
+      "images": 0,
+      "vision": 0,
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "693f3ea7360e48a202cd8a38",
+    "name": "jkwdwn",
+    "email": "jwkf@gmail.com",
+    "passwordHash": "$2a$10$VCB3k3DEBLYjhoznS7nx5OCzXF7GTIHYMCBemzXgOKcVn8sRNe14S",
+    "provider": "local",
+    "picture": "",
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "plan": {
+      "type": "FREE",
+      "startedAt": "2025-12-14T22:48:07.108Z"
+    },
+    "createdAt": "2025-12-14T22:48:07.108Z",
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "__v": 0,
+    "avatar": "",
+    "dailyLimit": 7,
+    "isPremium": false,
+    "needsPassword": false,
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "weeklyLimit": 50
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "analysisLimit": 3,
+      "imageLimit": 2,
+      "textLimit": 7
+    },
+    "preferences": {
+      "allergies": [],
+      "dietaryRestrictions": [],
+      "experienceLevel": "iniciante",
+      "goals": "Saudável"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69400bf47abab5147cce2e0c",
+    "name": "Maurício Carruagem",
+    "email": "mauriciocarruagem@gmail.com",
+    "provider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLLemI7QGj8PDJyx4fAaldTeDUW9dXGsxiTaZBCkoP5aoVHnWNo=s96-c",
+    "needsPassword": true,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T13:24:04.114Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 1
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69400c107abab5147cce2e0f",
+    "name": "mauricio",
+    "email": "kjhjds@gmail.com",
+    "password": "$2b$10$0yVBfvmazKaScWdBJ3HJUODgZp04JH88DbbAptIRFyewvcwPzh0I.",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T13:24:32.443Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69400c987abab5147cce2e12",
+    "name": "khgjiuhjd",
+    "email": "kuhjnmjh@gmail.com",
+    "password": "$2b$10$cpSErZL/erfWhIufqDIG4uO475iDFgQuxCBmTEsQR/hp.meF78AEa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T13:26:48.017Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694016a9e74400f23615d25f",
+    "name": "egtbs",
+    "email": "bgegs@gmail.com",
+    "password": "$2b$10$zaOeZIvc.Z5mNI5B8Spmf.mBFZ37X/tXzmWCAurVHVoEOFWj2L/Ue",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T14:09:45.525Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694028939fb693193cdd4e47",
+    "name": "sfgregef",
+    "email": "fbfeb@gamil.com",
+    "password": "$2b$10$dKDjpmn7MnxCMQvL991wSeqhfRIAOIs0pPkUuDwSPnmYRCe2ldTZO",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T15:26:11.183Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69402c5a9fb693193cdd4e4b",
+    "name": "sfgv",
+    "email": "nvas@gamil.com",
+    "password": "$2b$10$5zdyOFldilvC6C/m5oO.XO4u3sZX7GiDDia2NDjMcqGe7TU1WBxRi",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T15:42:18.404Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694035f9c363d3310e869498",
+    "name": "qewrtg4yh",
+    "email": "hgbrvfed@gmail.com",
+    "password": "$2b$10$kodmQ5G0eCXyqcEo.LZpbuM7H3BCOjt5LeCvY6cbF8.ez2azRnqNa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T16:23:21.039Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69403763c363d3310e86949d",
+    "name": "hgfcvb",
+    "email": "gfv@gamil.com",
+    "password": "$2b$10$BTV4ETW6jPJeOpMhv67QQuHa/CpBZoFyDBLBGDLN.NsMwViIFjlJ2",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T16:29:23.719Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69403ac726cf686387f973ac",
+    "name": "efvf",
+    "email": "nhgf@gmail.com",
+    "password": "$2b$10$zzDO40enRo3ZAhZhsyKOkO1DjxBmWt6FqOaEWZk7g9jOiNJqcDWNe",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T16:43:51.993Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69403ac726cf686387f973ae",
+    "name": "efvf",
+    "email": "nhgf@gmail.com",
+    "password": "$2b$10$hqB6xiWyqteErVm1DKB1G.2MqvhuqStb/p82A/emUqsxdkHdptts6",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 7,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-15T16:43:52.000Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940a8057b4ac798395b9b5a",
+    "name": "kjnmcd",
+    "email": "sdcsdcs@gmail.com",
+    "password": "$2b$10$/1qAldRT6fcXdCSRFvHLMuk/JeKgbso26VjsFvBdUerEs41FtKZau",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 7,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T00:29:57.083Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940b0197b4ac798395b9ba7",
+    "name": "KJH",
+    "email": "kjhgfdf@gmail.com",
+    "password": "$2b$10$Nh9OmlicChGtRWPfEfqyU.dLqZBBcPvoSdV2Zep9F4hI0TiSzA5jS",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 7,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T01:04:25.262Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "analysisLimit": 3,
+      "imageLimit": 2,
+      "textLimit": 7
+    },
+    "preferences": {
+      "allergies": [],
+      "dietaryRestrictions": [],
+      "experienceLevel": "iniciante",
+      "goals": "Saudável"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940b64d7b4ac798395b9bf0",
+    "name": "Conta Visa",
+    "email": "contavisa560@gmail.com",
+    "provider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLTSrgURArfFEBl-AVzD7rS8nprclL58Q_WYcjtzxY5I382JA=s96-c",
+    "needsPassword": true,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T01:30:54.048Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 1
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940b73a7b4ac798395b9bf4",
+    "name": "JHGFD",
+    "email": "jhgfd@gmail.com",
+    "password": "$2b$10$8AvoigaC762sB0DlahyvKOZCyxTCI9H64hUHZvyHzsAQbjTEjkeAC",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T01:34:50.354Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940b79c7b4ac798395b9bf9",
+    "name": "XGHJK",
+    "email": "mauricio@gamil.com",
+    "password": "$2b$10$oi8.S.g7..gxUADgLWxJA.tVIB3kflx/sUcLRIiaBNQo/B8wBVglS",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T01:36:28.464Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940d328cae524ad0d0b9f73",
+    "name": "uygfgh",
+    "email": "kjhgvds@gmail.com",
+    "password": "$2b$10$maC9leNZtyhE5HEEGaETlepDrgPiaiD0fazDNc6CQnmDje3wQAwkW",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T03:34:00.974Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940d326cae524ad0d0b9f70",
+    "name": "uygfgh",
+    "email": "kjhgvds@gmail.com",
+    "password": "$2b$10$wXyu2JbA9mHeg/Jd9s1Cbepe1vHY.fC7eEnJ243dg5JXTI0kt0vl6",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 4,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T03:33:58.499Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940de335a13c48de7e465b1",
+    "name": "jhgv c",
+    "email": "uhdsjc@gmail.com",
+    "password": "$2b$10$E/R6r8D/cdP7IP0VIl6oTOoNvWABFTe7/n1CmOy/Kzd/sza8tA7b6",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 3,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T04:21:07.155Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940f837a4a59702bb33893b",
+    "name": "szfgxdhcg",
+    "email": "nghgfb@gmail.com",
+    "password": "$2b$10$SGtkgwOwwhTqe6ICNUrJfeGxUkjIhXjp68S38HdsJB7HxXjC0o6Be",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 7,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T06:12:07.462Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6940fdfe9526e4dda6be4f60",
+    "name": "uytrew",
+    "email": "uytrd@gmail.com",
+    "password": "$2b$10$RJR.QaNLCZ67eLrpaeheHOug6u5RrZgR.tL6/Y.UTa3f7fkipXPoa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 29,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T06:36:46.886Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6941b8a7eeaf98d85a6bf723",
+    "name": "jyg",
+    "email": "hgb@gamil.com",
+    "password": "$2b$10$0xJ.5cQdIc4zfM.vDkWl0uv8wgWWXT9SRVwLRQuH052fToiDJCLB2",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 14,
+    "usedWeekly": 39,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-16T19:53:11.024Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6942265cf30d101e4b1c120e",
+    "name": "jhgfd",
+    "email": "bgeg@gmail.com",
+    "password": "$2b$10$8CywuKcvpwGFyZ8A/KFrpOCZksblSEhQoa.rnag9YSl5197kDY0IG",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 11,
+    "usedWeekly": 11,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-17T03:41:16.161Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6942f333bb6ed6d257f57509",
+    "name": "Usuário Teste",
+    "email": "teste@teste.com",
+    "password": "$2b$10$THZiShOueYL/KU692Z9VIuUNjo0WZh8nRcMJqnmhYyAloGFKVE4Fa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-17T18:15:15.090Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694300aeb45e2ef3351d3101",
+    "name": "mnadcad",
+    "email": "kjhgf@gmail.com",
+    "password": "$2b$10$SnJgsZTQoDX0eU1E7kIm/eBEYBVi8MO07mJNimUos3KPsN4Rgf8U2",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-17T19:12:46.533Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694309b17fd4fbdede96b8f6",
+    "name": "jbn",
+    "email": "jhbndw@gmail.com",
+    "password": "$2b$10$9qoB6qLNPwNGeMJn.yLC8ezf093KTUuh5aiduE7nfN5ZY..PpHvYS",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-17T19:51:13.159Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6943aabab979c26f49bc6a37",
+    "name": "gtfhgjm",
+    "email": "sfdgbn@gmail.com",
+    "password": "$2b$10$xvp060HFa6kM7X.22SLGT.ncH4oyE22j5UvjDPQpJsmCR4t2XcQDq",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T07:18:18.861Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6943b465babe23f108fa4c0d",
+    "name": "cdfg",
+    "email": "sdcdv2@gmail.com",
+    "password": "$2b$10$HDIiDVHrbDxFbKWlUufSu.lPZv1gsSrRfyj67c8EMpPOlYjKOfGxm",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T07:59:33.363Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6943bb0c39b67f4f962b2492",
+    "name": "xcv",
+    "email": "maulombeinternationalschool@gmail.com",
+    "password": "$2b$10$PMgyhZuYApw0Y7j3JxAQJ.8VflSBqkCUudjLuz1UOprU6FsYPWiy2",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T08:27:56.100Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6944100adfddd6b82709901d",
+    "name": "jhgvcvg",
+    "email": "kjhg@gmail.com",
+    "password": "$2b$10$ttP/B.jxYrYmstKJ1eOnvuVUa66xgSzhcbzzElwDAJdbkVbsieItK",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T14:30:34.503Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6944191bbec04df8f6380a0e",
+    "name": "uyhgf",
+    "email": "jkhg@gmail.com",
+    "password": "$2b$10$imWfqKOx3/lVF372EI08i.ZoGw1gx.b3XOQmgv.DvGziI/1FldFaS",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T15:09:15.340Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69442ee88898d20a90a4a884",
+    "name": "kiuytf",
+    "email": "liuy@gmail.com",
+    "password": "$2b$10$DldXHjm67vG6ybUNr.7yeu29BJk1wQcaGFxotrLnrD3IwP09EW/aa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T16:42:16.256Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69445b39fdbc30665afdd8b1",
+    "name": "frgtfh",
+    "email": "wdesfdg@gmail.com",
+    "password": "$2b$10$17DY0s0G2eeOSjjNS5BfUORj2AX.HpTf4637qoysODiwYQwzgLi8u",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-18T19:51:21.042Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6945b69148a7ab3a8fffd024",
+    "name": "uytr",
+    "email": "kjhjd@gmail.com",
+    "password": "$2a$10$cjQq1WzA1153W8LQqJVPvePZRpKNXyoT5uM6x25xA5Ags8HnjQQJG",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-19T20:33:21.686Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6945b69148a7ab3a8fffd026",
+    "name": "uytr",
+    "email": "kjhjd@gmail.com",
+    "password": "$2a$10$K6NPjT3B9dyetSJ/aR8UhOhSZ5w29KV7iAqhGjT/uqZp1ScTHn7ay",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-19T20:33:21.696Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6945b89d356a4d3dd58f4b2b",
+    "name": "Novo Chef",
+    "email": "novochef1766176921233@test.com",
+    "password": "$2a$10$yV.US/ahzDwFH.zEa2HKqOEGbqPgL0p0sUOVIX0EbLprhXAdhQ8eG",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-19T20:42:05.790Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6945c1ea6f0296cb2c8e4cbe",
+    "name": "Test User",
+    "email": "user9428@test.com",
+    "password": "$2a$10$xBVGKHZex/WiptvF6/B2e.6r2sOTVN4MTJpuYe/fWu85T4Rqd66SS",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-19T21:21:46.490Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6945c1f06f0296cb2c8e4cc0",
+    "name": "Test User",
+    "email": "user4419@test.com",
+    "password": "$2a$10$58Lf6YmofRqGokZ3uBtf1.4fPhasw0aHgWhrY4hpg9vmIeKFdU2W6",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-19T21:21:52.750Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694692e1425e797e876141ef",
+    "name": "jkhgf",
+    "email": "jhg@gamil.com",
+    "password": "$2a$10$Jbse8APY4T9ioVKiMNbrCuNjoRHmHK9bGPuGY0gYlAJ2IQHOCSNg6",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-20T12:13:21.531Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6946fcb106efd78abdf091a0",
+    "name": "jhgf",
+    "email": "jhg@gmail.com",
+    "password": "$2a$10$jW9ydaFgdKtvVahaAZE/rOfxWMojqR4l4oObbRj7SOBdgqCeck04S",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-20T19:44:49.705Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694720a00412d3ac614f9f7b",
+    "name": "ojwe",
+    "email": "jhnbew@gmail.com",
+    "password": "$2a$10$zotJuJm4vFVQUnte1lIJc.3AWFt6loAjhYDgH6SnkwsbRbmiVhXJe",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-20T22:18:08.669Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69472975c4e0884a30bebb9b",
+    "name": "likujhgf",
+    "email": "kjhf@gmail.com",
+    "password": "$2a$10$ryXUjk0H1jsPJe.m73fRPO6Nj8v9ikgpG2S6w2OfHvorHkeJPhvRi",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-20T22:55:49.866Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6947654f95ef18fc2c356fa1",
+    "name": "kjfe",
+    "email": "kjhj@gmail.com",
+    "password": "$2a$10$togQ9NryCvWglfhUgNI2zefTAGL5lnOyXkHG1Qd92mV20ZkJ4icdW",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-21T03:11:11.328Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69483e8e2c7059e428f513ab",
+    "name": "sasdfg",
+    "email": "yg@gnail.com",
+    "password": "$2a$10$yPT9FnK6oxOeTUfrJPaZSuguFpfa5abC7OvLhY9atzpZR0kJ/.m4u",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-21T18:38:06.530Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "69485b14db30387aac820372",
+    "name": "sdfghj",
+    "email": "hgf@gmail.com",
+    "password": "$2a$10$fVmSBE661FG7tIQBbXTgA.PNgUQQdWk3Eee7KihCB53.XeFzyKfru",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-21T20:39:48.195Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6948d9e139aefc2902ce4357",
+    "name": "cvbnm",
+    "email": "ghjk@gmail.com",
+    "password": "$2a$10$I8dngp3VM5s0KFVg/8U3G.gmODBeRZ2Hq4YCHCeS2Ot0DW/QgXf2.",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-22T05:40:49.064Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "6948e6ecad112df01a1ce104",
+    "name": "kljhgf",
+    "email": "jhklg@gmail.com",
+    "password": "$2a$10$k6R6qnYGpwRjjvg6qpyi6.NlFhG4xRUDWg//0qmGFi0P2Z8kg5oWa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-22T06:36:28.899Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyImageAnalysis": 0,
+      "dailyImageGenerations": 0,
+      "dailyTextRequests": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "premiumExpiresAt": null,
+    "_id": "694a3282774b894e2e8df518",
+    "name": "jkhgf",
+    "email": "nbvcx@gmail.com",
+    "password": "$2a$10$SiidW09jj6XoROMndBNey.GkouPRSJqG8lP9pDGviZL5qmNXgfHhG",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "favorites": [],
+    "isPremium": false,
+    "usedDaily": 0,
+    "usedWeekly": 0,
+    "dailyLimit": 7,
+    "weeklyLimit": 50,
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-23T06:11:14.799Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694b22535ee748f59079447b",
+    "name": "Evanilson D Jesus",
+    "email": "evanilsondjesus2@gmail.com",
+    "provider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocI878ohsu56F3ZsQun4xWtc7-17T6vcoodZ3A7GUZkQ0nUEAgF2=s96-c",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-23T23:14:27.629Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694b24c1d5b54c6deff46da3",
+    "name": "iuyg",
+    "email": "jh@gmail.com",
+    "password": "$2b$10$B5OVCBdCOt3cbBYeNvVEJOhI8BeZFvoBm.sjf/1tm6QtihaB3cj4e",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-23T23:24:49.645Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694b363b2e964edd7a094784",
+    "name": "hgfdx",
+    "email": "jhgfds@gmail.com",
+    "password": "$2b$10$Q2f3.aSAacTwbVSJiHsboOuy6cSmHaiRvfLp0abUGhLCrJNJNJSKC",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-24T00:39:23.342Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694b437ec04ba3115fde2e24",
+    "name": "mauricio",
+    "email": "mmmm@gmail.com",
+    "password": "$2b$10$Wh9UgrowLnPGM/sqhjVtNODdSCDUPEggyaGgemHn7RHKdIzlWhB0K",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-24T01:35:58.107Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694b4b9cc04ba3115fde2e2f",
+    "name": "dsf",
+    "email": "hjds@gmail.com",
+    "password": "$2b$10$m4pteylA7F3mXvlHm2AH9eLREXRkRSM.wEgvVkx.nmP7qncAayfvG",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-24T02:10:36.481Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694c013e5d7ef1a4018743f7",
+    "name": "Quim Carruagem",
+    "email": "quimcarruagem@gmail.com",
+    "provider": "google",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJvzRBzfhXmfQeiQCIKgIim5-rFhT8Pb4gCw7IqxvzgdYEEA9ff=s96-c",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-24T15:05:34.583Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "694e9f4c9497ed1433fed945",
+    "name": "sdfghj",
+    "email": "3w4etryrew2@gmail.com",
+    "password": "$2b$10$INEzKfxEz6nHCxneK62c5eHSEQlw7gtEYiha5PIzweyvABKUVNv7e",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2025-12-26T14:44:28.150Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "6956cdf28937d3355c81807d",
+    "name": "mmm",
+    "email": "mauro@gmail.com",
+    "password": "$2a$10$.PwgVnKz5pz.Er1/.YNkSuTyDIY7EdVPuInmVSXjoynGBxA93BLNC",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-01T19:41:38.094Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "6956ce9e8937d3355c818080",
+    "name": "jhj",
+    "email": "mama@gmail.com",
+    "password": "$2a$10$OGF5L1RrDrZ/qFLmdW8UfeF06Mw0HzLKf0I/xSmmgbe2knugy5HKO",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-01T19:44:30.285Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "69573dcdb6264fadde3e026e",
+    "name": "Maurício Test",
+    "email": "mauricio.test@example.com",
+    "password": "123456",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-02T03:38:53.606Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "6957404e0c2af7ee69fb0b3f",
+    "name": "Mauricio Test",
+    "email": "mauricio.teste@example.com",
+    "password": "123456",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-02T03:49:34.770Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "695874491e84161e22366677",
+    "name": "daniel",
+    "email": "maur@gmail.com",
+    "password": "$2a$10$TRmyyldHd.56uFYtia5wAO8J/r8TY2V40VwXu.qnSYFw3XJFD8iXm",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-03T01:43:37.662Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "6958770b1e84161e2236667a",
+    "name": "dfg",
+    "email": "mar@gmail.com",
+    "password": "$2a$10$WmO24/gcEhcpLHDVutczTOW5FijKPOTNNSnMMCV6vpVdlq55tSZBa",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-03T01:55:23.497Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "69587fd836bb98c8c8887622",
+    "name": "mnbvcx",
+    "email": "uro@gmail.com",
+    "password": "$2a$10$s6UMYn65uj2AW4lGHmsWfenn96XXVRCDpUxhvE.WwvEasfnlb5.16",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-03T02:32:56.152Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "6959734609d5b22fa09ae5d5",
+    "name": "maur",
+    "email": "mao@gmail.com",
+    "password": "$2a$10$n/OBsttMQqhwQqTXmHyzjOAmvxhLknaZSLfsPG34Jhy29otMyskA.",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-03T19:51:34.274Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "695b30561c098245b50f31d4",
+    "name": "Mauricio",
+    "email": "mauricio@test.com",
+    "password": "$2a$10$ix686VXoHK6MUlpDG1gUh.dI31N9e1YHfJClmJbiaDA5LEIJDLLI.",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-05T03:30:30.243Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  },
+  {
+    "usage": {
+      "dailyTextRequests": 0,
+      "dailyImageGenerations": 0,
+      "dailyImageAnalysis": 0
+    },
+    "limits": {
+      "textLimit": 7,
+      "imageLimit": 2,
+      "analysisLimit": 3
+    },
+    "preferences": {
+      "dietaryRestrictions": [],
+      "allergies": [],
+      "goals": "Saudável",
+      "experienceLevel": "iniciante"
+    },
+    "_id": "695bd4b02f317e1888de21b9",
+    "name": "Test User",
+    "email": "test@smartchef.com",
+    "password": "$2a$10$/qnqNFGUVRC7mDzE6GxdxuIgshH2eW.A7oba.4dQEPLP2IdkyLyIq",
+    "provider": "local",
+    "avatar": "",
+    "needsPassword": false,
+    "level": 1,
+    "points": 0,
+    "isPremium": false,
+    "premiumExpiresAt": null,
+    "favorites": [],
+    "lastReset": "2026-01-06T23:00:01.629Z",
+    "createdAt": "2026-01-05T15:11:44.882Z",
+    "updatedAt": "2026-01-06T23:00:01.716Z",
+    "__v": 0
+  }
+]

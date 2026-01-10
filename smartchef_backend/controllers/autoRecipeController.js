@@ -97,11 +97,23 @@ exports.selectRecipe = async (req, res) => {
     console.log(" Escolheu:", chosenRecipe.title);
 
     //  IMAGEM DO PRATO FINAL 
-    const finalImagePrompt = ` Gera uma imagem gastronómica profissional ultra-realista de uma receita [ O nome da receita ], "${chosenRecipe.title}"
-texturas extremamente detalhadas, iluminação perfeita e cinematográfica, profundidade de campo rasa (fundo desfocado), cores vibrantes e naturais, vapor realista subindo do alimento, superfícies brilhantes e suculentas, composição cinematográfica, resolução 8K, empratamento meticulosamente estilizado, qualidade de câmara DSLR profissional, foco ultra-nítido no prato, atmosfera quente, sombras suaves e reflexos realistas, fundo suavemente desfocado, estilo editorial de revista gastronómica,sem textos, sem pessoas , sem marcas. `;
+    const finalImagePrompt = ` Gera uma imagem do prato final:"${chosenRecipe.title}"
+    REALIDADE HUMANA:
+    Gera uma imagem gastronómica profissional ultra-realista de uma receita [ O nome da receita ], texturas extremamente detalhadas, iluminação perfeita e cinematográfica, profundidade de campo rasa (fundo desfocado), cores vibrantes e naturais, vapor realista subindo do alimento, superfícies brilhantes e suculentas, composição cinematográfica, resolução 8K, empratamento meticulosamente estilizado, qualidade de câmara DSLR profissional, foco ultra-nítido no prato, atmosfera quente, sombras suaves e reflexos realistas, fundo suavemente desfocado, estilo editorial de revista gastronómica.
+
+    NUNCA: arte digital, 3D render, AI art, cartoon, CGI, perfeição plástica
+
+    1024x1024, sem pessoas,sem logo, somente com texo minimalista no canto superior direito da imagem escrito: Bom Piteu! texto pequeno sofisticado, simples, moderno e suave. `;
 
     const finalImageUrl = await callOpenAIImage(chosenRecipe.title);
-    console.log("✅ PRATO FINAL:", finalImageUrl?.slice(0, 50));
+    if (!finalImageUrl) {
+      console.log("Imagem final não foi gerada");
+    } else {
+      console.log(" PRATO FINAL:", finalImageUrl.slice(0, 50));
+    }
+
+    session.recipeFinalImage = finalImageUrl || null;
+
 
     // Receita como ANTES 
     const prompt = `Gera JSON válido EXATO para receita: "${chosenRecipe.title}"
@@ -110,7 +122,11 @@ FORMATO OBRIGATÓRIO SEMPRE:
 {
   "title": "${chosenRecipe.title}",
   "time": "X horas ou X minutos", 
-  "ingredients": ["ingrediente 1", "ingrediente 2"],
+  "ingredients": [
+    "quantidade + unidade + ingrediente",
+    "quantidade + unidade + ingrediente",
+    "ingrediente sem quantidade (se aplicável)"
+  ],
   "steps": [
     {"stepNumber":1,"description":"Passo 1"},
     {"stepNumber":2,"description":"Passo 2"}
@@ -127,20 +143,31 @@ FORMATO OBRIGATÓRIO SEMPRE:
     let recipeData;
     try {
       recipeData = JSON.parse(cleanResponse);
-    } catch (e) {
-      console.log("⚠️ JSON falhou, usando fallback...");
+    }
+    catch (e) {
+      console.log("⚠️ JSON falhou, usando TEXTO IA...");
+
       recipeData = {
         title: chosenRecipe.title,
-        time: aiResponse.raw.match(/(\d+[\s\.]*(?:min|minutes?|h|hours?))/i)?.[1] || "30 min",
-        ingredients: ["ingredientes da foto"],
-        steps: [{ stepNumber: 1, description: `Preparar ${chosenRecipe.title}` }]
+        time: "30 min",
+        ingredients: aiResponse.raw
+          .split("\n")
+          .filter(l => l.toLowerCase().includes("ingrediente"))
+          .map(l => l.replace(/[-•]/g, "").trim())
+          .slice(0, 8),
+
+        steps: aiResponse.raw
+          .split("\n")
+          .filter(l => /^\d+/.test(l))
+          .map((l, i) => ({
+            stepNumber: i + 1,
+            description: l.replace(/^\d+[\).\s]/, "").trim()
+          }))
       };
     }
 
-
     // SALVA COM IMAGEM FINAL
     session.selectedRecipe = recipeData;
-    session.recipeFinalImage = finalImageUrl;  // ← NOVA!
     session.currentStep = 0;
     session.status = "SELECTED";
     await session.save();
@@ -189,17 +216,47 @@ exports.generateStep = async (req, res) => {
     }
 
     const currentStep = recipeSteps[stepIndex];
+    const stepPrompt = `
+Tu és um chef profissional a orientar alguém sem experiência.
+
+Objetivo:
+Explicar este passo de forma clara, organizada e fácil de seguir, usando linguagem simples e profissional.
+
+Regras obrigatórias:
+- Linguagem natural e do dia a dia
+- Frases curtas e bem organizadas
+- Uma ação por frase
+- Seguir uma ordem lógica de execução
+- Incluir tempo aproximado quando fizer sentido
+- Indicar sinais claros de controlo (ex: dourado, cozido, macio)
+- Ajudar a evitar erros comuns (ex: não queimar)
+- Não usar palavras técnicas complicadas
+- Não usar listas, números ou emojis
+- Não mencionar o nome da receita
+- Não mencionar outros passos
+- Texto em um único parágrafo
+- Entre 4 e 7 frases no máximo
+
+Conteúdo do passo:
+${currentStep.description}
+`;
+
+
     console.log("✅ Passo atual:", currentStep.description.slice(0, 50));
 
-    // ✅ IMAGEM DALL-E REAL
+    // ✅ IMAGEM  REAL
     const imagePrompt = `Imagem realista cozinhando: ${session.selectedRecipe.title}
 Passo ${currentStep.stepNumber}: ${currentStep.description.slice(0, 100)}
 Cozinha caseira, sem pessoas, luz natural, simples, apetitoso`;
 
-    const image = await callOpenAIImage(imagePrompt);
-    console.log("✅ Imagem DALL-E:", image.url.slice(0, 50));
+    const imageUrl = await callOpenAIImage(
+      session.selectedRecipe.title,
+      currentStep.description
+    );
 
-    // ✅ Avança passo
+    console.log("✅ Imagem passo:", imageUrl?.slice(0, 50));
+
+    // Avança passo
     session.currentStep = stepIndex + 1;
     session.status = "IN_PROGRESS";
     await session.save();
@@ -207,8 +264,8 @@ Cozinha caseira, sem pessoas, luz natural, simples, apetitoso`;
     res.json({
       step: {
         stepNumber: currentStep.stepNumber,
-        description: currentStep.description,
-        imageUrl: image.url
+        description: (await callOpenAIText(stepPrompt)).raw,
+        imageUrl: imageUrl
       },
       next: "Diz 'vamos' para próximo passo",
       progress: `${session.currentStep}/${recipeSteps.length}`

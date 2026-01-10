@@ -26,7 +26,7 @@ async function testTextOptions() {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            ingredients: "arroz,frango,cebola,alho"
+            ingredients: "banana,pão,oleo"
         })
     });
 

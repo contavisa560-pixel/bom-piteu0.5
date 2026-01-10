@@ -13,6 +13,17 @@ import CameraModal from "./CameraModal";
 
 const allRecipes = [...angolanRecipes, ...internationalRecipes, ...cocktails];
 
+// Formata texto do passo como receita culinária
+const formatCulinaryStep = (text) => {
+  if (!text) return [];
+
+  return text
+    .replace(/\s+/g, ' ')
+    .split('. ')
+    .map(sentence => sentence.trim())
+    .filter(Boolean);
+};
+
 const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   let stepLock = false;
   const [messages, setMessages] = useState([]);
@@ -173,6 +184,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   // ESCOLHER RECEITA (1, 2 ou 3)
   const selectRecipeOption = async (choice) => {
     setLoading(true);
+
     const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
 
     try {
@@ -186,21 +198,21 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
       });
 
       const data = await res.json();
-      setRecipe(data.recipe);
 
-      // 🔥 MOSTRA RECEITA + IMAGEM FINAL
-      addMessage("bot", `🍽️ ${data.recipe.title}`, {
-        recipe: data.recipe,
-        finalImage: data.finalImage,  // ← NOVA!
-        type: "recipe-with-final-image"
+      // ✅ SÓ TÍTULO + BOTÃO (sem duplicação!)
+      addMessage("bot", data.recipe.title, {
+        finalImage: data.finalImage,
+        ingredients: data.recipe.ingredients,
+        type: "simple-recipe-start"
       });
-      setCookingMode(true);
+
     } catch (err) {
       console.error("Erro:", err);
     } finally {
       setLoading(false);
     }
   };
+
 
   // PRÓXIMO PASSO
   const generateStep = async () => {
@@ -226,7 +238,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
         // CHAVE TOTALMENTE ÚNICA
         const uniqueId = `step_${Date.now()}_${data.step.stepNumber}_${Math.random().toString(36).substr(2, 5)}`;
 
-        addMessage("bot", `Passo ${data.step.stepNumber}/${data.progress}`, {
+        addMessage("bot", `Passo ${data.step.stepNumber} • ${data.progress.split('/')[1]} etapas`, {
           id: uniqueId,
           step: data.step,
           imageUrl: data.step.imageUrl || '',
@@ -573,47 +585,42 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                         .replace(/⚠️/g, '<span class="flex items-center text-yellow-600 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mr-1"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>$&</span>')
                     }}
                   />
-                  {message.type === "recipe-with-final-image" && (
-                    <div className="space-y-6 p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl">
-                      {/*  IMAGEM FINAL DO PRATO */}
-                      {message.finalImage && (
-                        <div className="text-center">
-                          <div className="w-full max-w-2xl mx-auto">
-                            <img
-                              src={message.finalImage}
-                              alt={`Prato final: ${message.recipe.title}`}
-                              className="w-full h-80 object-cover rounded-3xl shadow-2xl border-8 border-white"
-                            />
-                          </div>
-                          <p className="mt-4 text-lg font-semibold text-gray-700">
-                            Assim fica o teu {message.recipe.title} FINAL!
-                          </p>
+                  {message.type === "simple-recipe-start" && (
+                    <div className="p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl text-center">
+                      {message.ingredients && (
+                        <div className="mt-4 mb-6 text-left">
+                          <h4 className="font-semibold text-green-800 mb-2"> Ingredientes:</h4>
+                          <ul className="list-disc list-inside text-green-700 space-y-1">
+                            {message.ingredients.map((ing, i) => (
+                              <li key={i}>{ing}</li>
+                            ))}
+                          </ul>
                         </div>
                       )}
 
-                      {/*  Ingredientes */}
-                      <div className="bg-white p-6 rounded-2xl shadow-lg">
-                        <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
-                          {message.recipe.ingredients?.length || 0} Ingredientes:
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {message.recipe.ingredients?.map((ing, i) => (
-                            <div key={i} className="p-3 bg-green-50 rounded-xl text-sm border">
-                              {ing}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <h2 className="text-2xl font-bold text-green-800 mb-4">
+                        {message.content}
+                      </h2>
 
-                      {/*  Botão Iniciar */}
-                      <Button
+                      {message.finalImage && (
+                        <div className="max-w-md mx-auto mb-6">
+                          <img
+                            src={message.finalImage}
+                            alt="Prato final"
+                            className="w-full h-64 object-cover rounded-2xl shadow-xl"
+                          />
+                        </div>
+                      )}
+
+                      <button
                         onClick={generateStep}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-8 text-xl font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all"
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-8 rounded-2xl text-xl font-bold shadow-xl hover:shadow-2xl"
                       >
-                        {currentStep ? 'PRÓXIMO PASSO' : 'COMEÇAR PASSO 1'}
-                      </Button>
+                        COZINHAR AGORA
+                      </button>
                     </div>
                   )}
+
 
                   {message.options && message.options.length > 0 && (
                     <div className="space-y-4 mt-6 p-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-3xl border-4 border-orange-200 shadow-2xl">
@@ -622,7 +629,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                           <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-xl text-orange-800">Receitas IA para tua foto</h3>
+                          <h3 className="font-bold text-xl text-orange-800">Aqui estão algumas receitas:  </h3>
                           <p className="text-sm text-orange-700">Clica numa para começar a cozinhar!</p>
                         </div>
                       </div>
@@ -658,11 +665,11 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                       <h3 className="text-2xl font-bold text-green-800 mb-4">{message.recipe.title}</h3>
                       <div className="grid md:grid-cols-2 gap-4 mb-6">
                         <div>
-                          <h4 className="font-semibold text-green-700 mb-2">⏰ Tempo:</h4>
+                          <h4 className="font-semibold text-green-700 mb-2"> Tempo:</h4>
                           <p className="text-lg">{message.recipe.time || '30 min'}</p>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-green-700 mb-2">🥘 Ingredientes:</h4>
+                          <h4 className="font-semibold text-green-700 mb-2"> Ingredientes:</h4>
                           <div className="flex flex-wrap gap-1">
                             {message.recipe.ingredients?.slice(0, 6).map((ing, i) => (
                               <span key={i} className="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm">
@@ -690,11 +697,11 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                       </h2>
                       <div className="grid md:grid-cols-2 gap-4 mb-6">
                         <div>
-                          <h3 className="font-semibold text-green-700 mb-2">⏰ Tempo:</h3>
+                          <h3 className="font-semibold text-green-700 mb-2"> Tempo:</h3>
                           <p className="text-lg">{recipe.time}</p>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-green-700 mb-2">🥘 Ingredientes:</h3>
+                          <h3 className="font-semibold text-green-700 mb-2"> Ingredientes:</h3>
                           <div className="flex flex-wrap gap-1">
                             {recipe.ingredients.slice(0, 6).map((ing, i) => (
                               <span key={i} className="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm">
@@ -755,7 +762,15 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
                         </div>
                       </div>
 
-                      <p className="text-lg leading-relaxed">{message.step.description}</p>
+                      <div className="space-y-4">
+                        {formatCulinaryStep(message.step.description).map((line, index) => (
+                          <div key={index} className="border-l-4 border-orange-400 pl-4">
+                            <p className="text-lg leading-relaxed text-gray-800">
+                              {line}.
+                            </p>
+                          </div>
+                        ))}
+                      </div>
 
                       {message.step.imageUrl && (
                         <div className="w-full max-w-2xl mx-auto">

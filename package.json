@@ -9,6 +9,7 @@
     "preview": "vite preview --host :: --port 3001"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.3",
     "@radix-ui/react-checkbox": "^1.0.4",
