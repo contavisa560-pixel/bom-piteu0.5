@@ -207,12 +207,13 @@ exports.generateStep = async (req, res) => {
     const stepIndex = session.currentStep || 0;
     const recipeSteps = session.selectedRecipe?.steps || [];
 
-    console.log(`🔍 Gerando passo ${stepIndex + 1}/${recipeSteps.length}`);
+    console.log(` Gerando passo ${stepIndex + 1}/${recipeSteps.length}`);
 
     if ((stepIndex || 0) >= (recipeSteps.length || 0)) {
+      console.log(` Finalizando: passo ${stepIndex} > total ${recipeSteps.length}`);
       session.status = "COMPLETED";
       await session.save();
-      return res.json({ message: "Receita concluída 🎉" });
+      return res.json({ message: "Receita concluída " });
     }
 
     const currentStep = recipeSteps[stepIndex];

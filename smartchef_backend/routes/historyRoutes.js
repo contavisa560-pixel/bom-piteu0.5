@@ -52,9 +52,12 @@ router.get("/recipes", authenticateOptional, async (req, res) => {
 
   const history = await RecipeSession.find({
     userId,
-    status: "completed"
-  }).sort({ endTime: -1 });
-
+    status: "COMPLETED"  
+  })
+  .populate('userId', 'name email')  
+  .sort({ updatedAt: -1 }) 
+  .select('userId selectedRecipe sourceImageUrl status currentStep createdAt updatedAt');  // ← Campos úteis
+  
   res.json(history);
 });
 
