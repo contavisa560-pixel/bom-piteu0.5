@@ -10,7 +10,7 @@ const HistorySchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ["text", "image", "vision"],
+    enum: ["text", "image", "vision", "recipe"],
     required: true
   },
 

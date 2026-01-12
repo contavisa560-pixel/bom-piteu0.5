@@ -26,7 +26,7 @@ async function testTextOptions() {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            ingredients: "banana,pão,oleo"
+            ingredients: "batata , ovo"
         })
     });
 

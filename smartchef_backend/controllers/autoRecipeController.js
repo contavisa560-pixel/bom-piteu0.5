@@ -1,6 +1,22 @@
 const { uploadToCloudflare } = require("../services/storageService");
 const RecipeSession = require("../models/RecipeSession");
 const { callOpenAIText, callOpenAIImage } = require("../services/openaiClients");
+const History = require("../models/History");
+
+const translateStepToEnglish = async (text) => {
+  try {
+    const res = await fetch(`${process.env.BASE_URL || 'http://localhost:5000'}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, targetLanguage: 'en' })
+    });
+    const data = await res.json();
+    return data.translatedText || text;
+  } catch (err) {
+    console.log('Translation failed, using original:', text);
+    return text;
+  }
+};
 
 /**
  * 1️⃣ Recebe imagem (multer OU JSON base64) e gera 3 opções de receitas
@@ -97,13 +113,15 @@ exports.selectRecipe = async (req, res) => {
     console.log(" Escolheu:", chosenRecipe.title);
 
     //  IMAGEM DO PRATO FINAL 
-    const finalImagePrompt = ` Gera uma imagem do prato final:"${chosenRecipe.title}"
-    REALIDADE HUMANA:
-    Gera uma imagem gastronómica profissional ultra-realista de uma receita [ O nome da receita ], texturas extremamente detalhadas, iluminação perfeita e cinematográfica, profundidade de campo rasa (fundo desfocado), cores vibrantes e naturais, vapor realista subindo do alimento, superfícies brilhantes e suculentas, composição cinematográfica, resolução 8K, empratamento meticulosamente estilizado, qualidade de câmara DSLR profissional, foco ultra-nítido no prato, atmosfera quente, sombras suaves e reflexos realistas, fundo suavemente desfocado, estilo editorial de revista gastronómica.
+    const finalImagePrompt = `Generate an image of the final dish: "${chosenRecipe.title}"
 
-    NUNCA: arte digital, 3D render, AI art, cartoon, CGI, perfeição plástica
+HUMAN REALITY:
+Generate an ultra-realistic professional food photograph of the recipe [Recipe Name], extremely detailed textures, perfect cinematic lighting, shallow depth of field (blurred background), vibrant and natural colors, realistic steam rising from the food, glossy and juicy surfaces, cinematic composition, 8K resolution, meticulously styled plating, professional DSLR camera quality, ultra-sharp focus on the dish, warm atmosphere, soft shadows and realistic reflections, softly blurred background, editorial magazine-style food photography.
 
-    1024x1024, sem pessoas,sem logo, somente com texo minimalista no canto superior direito da imagem escrito: Bom Piteu! texto pequeno sofisticado, simples, moderno e suave. `;
+NEVER: digital art, 3D render, AI art, cartoon, CGI, plastic perfection
+
+1024x1024, no people, no logos, only a minimalistic text in the top right corner of the image saying: Bom Piteu! Small, sophisticated, simple, modern, and subtle text.`;
+
 
     const finalImageUrl = await callOpenAIImage(chosenRecipe.title);
     if (!finalImageUrl) {
@@ -190,91 +208,161 @@ FORMATO OBRIGATÓRIO SEMPRE:
 exports.generateStep = async (req, res) => {
   try {
     const { sessionId } = req.body;
-    const session = await RecipeSession.findById(sessionId).populate('userId');
-
-    console.log("🔍 Session status:", session?.status, "currentStep:", session?.currentStep);
+    const session = await RecipeSession.findById(sessionId).populate("userId");
 
     if (!session) {
       return res.status(404).json({ error: "Sessão não encontrada" });
     }
 
-    // ✅ CORREÇÃO: aceita SELECTED ou IN_PROGRESS
-    if (session.status !== "SELECTED" && session.status !== "IN_PROGRESS") {
-      console.log("❌ Status inválido:", session.status);
-      return res.status(400).json({ error: `Estado inválido: ${session.status}` });
-    }
-
+    const steps = session.selectedRecipe?.steps || [];
+    const totalSteps = steps.length;
     const stepIndex = session.currentStep || 0;
-    const recipeSteps = session.selectedRecipe?.steps || [];
 
-    console.log(` Gerando passo ${stepIndex + 1}/${recipeSteps.length}`);
-
-    if ((stepIndex || 0) >= (recipeSteps.length || 0)) {
-      console.log(` Finalizando: passo ${stepIndex} > total ${recipeSteps.length}`);
-      session.status = "COMPLETED";
-      await session.save();
-      return res.json({ message: "Receita concluída " });
-    }
-
-    const currentStep = recipeSteps[stepIndex];
-    const stepPrompt = `
-Tu és um chef profissional a orientar alguém sem experiência.
-
-Objetivo:
-Explicar este passo de forma clara, organizada e fácil de seguir, usando linguagem simples e profissional.
-
-Regras obrigatórias:
-- Linguagem natural e do dia a dia
-- Frases curtas e bem organizadas
-- Uma ação por frase
-- Seguir uma ordem lógica de execução
-- Incluir tempo aproximado quando fizer sentido
-- Indicar sinais claros de controlo (ex: dourado, cozido, macio)
-- Ajudar a evitar erros comuns (ex: não queimar)
-- Não usar palavras técnicas complicadas
-- Não usar listas, números ou emojis
-- Não mencionar o nome da receita
-- Não mencionar outros passos
-- Texto em um único parágrafo
-- Entre 4 e 7 frases no máximo
-
-Conteúdo do passo:
-${currentStep.description}
-`;
-
-
-    console.log("✅ Passo atual:", currentStep.description.slice(0, 50));
-
-    // ✅ IMAGEM  REAL
-    const imagePrompt = `Imagem realista cozinhando: ${session.selectedRecipe.title}
-Passo ${currentStep.stepNumber}: ${currentStep.description.slice(0, 100)}
-Cozinha caseira, sem pessoas, luz natural, simples, apetitoso`;
-
-    const imageUrl = await callOpenAIImage(
-      session.selectedRecipe.title,
-      currentStep.description
-    );
-
-    console.log("✅ Imagem passo:", imageUrl?.slice(0, 50));
-
-    // Avança passo
-    session.currentStep = stepIndex + 1;
-    session.status = "IN_PROGRESS";
-    await session.save();
-
-    res.json({
-      step: {
-        stepNumber: currentStep.stepNumber,
-        description: (await callOpenAIText(stepPrompt)).raw,
-        imageUrl: imageUrl
-      },
-      next: "Diz 'vamos' para próximo passo",
-      progress: `${session.currentStep}/${recipeSteps.length}`
+    console.log("🔍 STEP REQUEST", {
+      sessionId,
+      status: session.status,
+      stepIndex,
+      totalSteps,
     });
 
+    // 🔒 BLOQUEIO: sessão já concluída
+    if (session.status === "COMPLETED") {
+      console.log("⛔ Chamada duplicada ignorada");
+      return res.json({
+        message: "Receita já concluída!",
+        status: "COMPLETED",
+        finalImage: session.recipeFinalImage,
+      });
+    }
+
+    // 🔒 Estado inválido
+    if (!["SELECTED", "IN_PROGRESS"].includes(session.status)) {
+      return res.status(400).json({
+        error: `Estado inválido: ${session.status}`,
+      });
+    }
+
+    // ✅ SE NÃO HÁ MAIS PASSOS → FINALIZA
+    if (stepIndex >= totalSteps) {
+      await finalizeSession(session);
+      return res.json({
+        message: "Receita concluída!",
+        status: "COMPLETED",
+        finalImage: session.recipeFinalImage,
+      });
+    }
+
+    const currentStep = steps[stepIndex];
+    console.log("👨‍🍳 Passo:", currentStep.description.slice(0, 60));
+    console.log("🍳 Receita ativa:", session.selectedRecipe.title);
+    // TEXTO DO PASSO
+    const stepPrompt = `
+Tu és um chef profissional.
+
+Estás a orientar o utilizador passo a passo na receita:
+"${session.selectedRecipe.title}"
+
+Ingredientes da receita:
+${session.selectedRecipe.ingredients.join(", ")}
+
+Passo atual: ${stepIndex + 1} de ${totalSteps}
+
+Descrição base do passo:
+"${currentStep.description}"
+
+REGRAS OBRIGATÓRIAS:
+- NÃO sugerir novas receitas
+- NÃO fazer perguntas
+- NÃO listar opções
+- NÃO repetir passos anteriores
+- NÃO sair do contexto desta receita
+- NÃO mencionar outros pratos
+- Explica APENAS este passo
+- Assume que o utilizador nunca cozinhou antes
+- Usa linguagem clara, prática e direta
+
+Responde apenas com a explicação deste passo.
+`;
+
+    const stepText = (await callOpenAIText(stepPrompt)).raw;
+
+    // IMAGEM DO PASSO
+    let imageUrl = null;
+
+    try {
+      console.log("🔄 Traduzindo para Stability.AI...");
+
+      // Traduz título e passo
+      const recipeTitleEN = await fetch('http://localhost:5000/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: session.selectedRecipe.title })
+      }).then(r => r.json()).then(d => d.translatedText);
+
+      const stepDescriptionEN = await fetch('http://localhost:5000/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: currentStep.description })
+      }).then(r => r.json()).then(d => d.translatedText);
+
+      console.log(" Stability.AI prompt:", stepDescriptionEN.slice(0, 60));
+
+      imageUrl = await callOpenAIImage(recipeTitleEN, stepDescriptionEN);
+
+    } catch (err) {
+      console.log("FAL.AI falhou, tentando fallback...");
+    }
+
+    //  FALLBACK (igual ao comportamento antigo)
+    if (!imageUrl) {
+      imageUrl = getFallbackStepImage(session.selectedRecipe.title);
+      console.log(" Usando imagem fallback (Unsplash)");
+    }
+
+
+    // 👉 AVANÇA PASSO
+    session.currentStep = stepIndex + 1;
+
+    // 👉 SE ESTE FOI O ÚLTIMO PASSO
+    if (session.currentStep >= totalSteps) {
+      await finalizeSession(session);
+    } else {
+      session.status = "IN_PROGRESS";
+      await session.save();
+    }
+
+    return res.json({
+      step: {
+        stepNumber: currentStep.stepNumber,
+        description: stepText,
+        imageUrl,
+      },
+      progress: `${session.currentStep}/${totalSteps}`,
+      status: session.status,
+    });
   } catch (err) {
     console.error("generateStep ERROR:", err);
-    res.status(500).json({ error: "Erro ao gerar passo", details: err.message });
+    res.status(500).json({
+      error: "Erro ao gerar passo",
+      details: err.message,
+    });
   }
 };
 
+async function finalizeSession(session) {
+  session.status = "COMPLETED";
+  session.completedAt = new Date();
+  await session.save();
+
+  await History.create({
+    user: session.userId._id || session.userId,
+    type: "recipe",
+    prompt: `Receita "${session.selectedRecipe.title}" concluída.`,
+    response: session.selectedRecipe,
+  });
+
+  console.log(" Receita finalizada:", session.selectedRecipe.title);
+}
+function getFallbackStepImage(recipeTitle) {
+  return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=1024&q=80";
+}

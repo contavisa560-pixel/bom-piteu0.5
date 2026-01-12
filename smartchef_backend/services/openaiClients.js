@@ -214,79 +214,119 @@ module.exports = {
 //--------------------------------------- clienteopenai de teste gratuito ------------------------------------
 const axios = require("axios");
 const fal = require("@fal-ai/serverless-client");
+
 fal.config({
   credentials: process.env.FAL_AI_KEY,  // ← FAL_AI_KEY (não FAL_KEY)
 });
+let groqDelay = 0;
 /**
  * 🎯 GROQ + FAL.AI - GRATUITO REAL!
  */
-async function callOpenAIText(userPrompt, imageBase64 = null) {
-  console.log("🤖 GROQ:", userPrompt.slice(0, 50));
-
-  const messages = imageBase64
-    ? [
-      { role: "system", content: BASE_PROMPT },
-      {
-        role: "user",
-        content: [
-          { type: "text", text: userPrompt },
-          { type: "image_url", image_url: { url: imageBase64 } }
-        ]
-      }
-    ]
-    : [
-      { role: "system", content: BASE_PROMPT },
-      { role: "user", content: userPrompt }
-    ];
-
+async function callOpenAIText(userPrompt) {
+  console.log("🤖 GROQ:", userPrompt.slice(0, 60));
 
   try {
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: imageBase64 ? "llava-v1.5-7b-4096-preview" : "llama-3.3-70b-versatile",
-        messages,
-        temperature: 0.6,
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: BASE_PROMPT },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.6
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        timeout: 15000,
+        timeout: 15000
       }
     );
+
     return parseAIResponse(response.data.choices[0].message.content);
+
   } catch (err) {
-    console.error("GROQ ERROR:", err.message);
-    return mockTextFallback(imageBase64);
+    console.error("❌ GROQ ERROR:", err.response?.status, err.message);
+    return mockTextFallback();
   }
 }
 
+/**
+ * 🖼️ STABILITY.AI - ENDPOINT CORRIGIDO
+ */
 
 async function callOpenAIImage(recipeName, stepDescription = "") {
-  console.log("🖼️ FAL.AI:", recipeName);
+  console.log("🖼️ STABILITY.AI:", recipeName);
 
+  // Prompt detalhado
   const prompt = stepDescription
-    ? `Cooking step: ${stepDescription}. Realistic home kitchen, hands only, no faces`
-    : `Professional food photography of ${recipeName}, ultra realistic, restaurant style`;
+    ? `
+Ultra-realistic food photography of a COOKING STEP IN PROGRESS.
+
+This image represents ONLY the cooking action described below.
+DO NOT show the final dish.
+DO NOT show plating.
+DO NOT garnish.
+DO NOT complete the recipe.
+
+Cooking step:
+"${stepDescription}"
+
+Visual requirements:
+- Photorealistic (NOT illustration, NOT cartoon)
+- Real human hands performing the action
+- Ingredients mid-process (raw or partially cooked)
+- Kitchen utensils in use (pan, knife, spoon, bowl)
+- Home kitchen environment
+- Natural lighting
+- Shallow depth of field
+- DSLR camera quality
+- No text, no logos, no people faces
+`
+    : `Final dish: ${recipeName} Ultra-realistic professional photograph of [Recipe Name], freshly cooked, steaming hot, beautifully plated, vibrant and natural colors, extremely detailed textures of ingredients, juicy and glistening surfaces, crispy edges if applicable, soft melting textures for cheese or sauces, realistic steam rising from the dish, warm and appetizing atmosphere, shallow depth of field (background softly blurred), cinematic composition, high-resolution 8K quality, DSLR camera quality, ultra-sharp focus on the dish, soft natural lighting with subtle shadows and reflections, overhead and 45-degree camera angle combination, meticulously styled presentation with visible ingredients (herbs, spices, garnishes), realistic utensil props if present (plates, forks, spoons), realistic food textures (meat fibers, creamy sauces, vegetables glistening with oil or moisture), editorial food magazine style, appetizing and mouth-watering, freshly served from the oven or cooking pot, subtle condensation on glass or ceramic plates, cozy and warm kitchen ambiance`;
 
   try {
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
-      input: {
-        prompt: "Banana frita angolana",
-        image_size: "square",
+    const response = await axios.post(
+      "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+      {
+        text_prompts: [
+          { text: prompt }
+        ],
+        cfg_scale: 7,      // força de aderência ao prompt
+        height: 1024,      // altura da imagem
+        width: 1024,       // largura da imagem
+        samples: 1,        // número de imagens geradas
+        steps: 30,         // passos do modelo
       },
-    });
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.STABILITY_API_KEY}`,
+        },
+        timeout: 60000
+      }
+    );
 
-    console.log(result.images[0].url);
+    // ✅ Retornar a imagem em base64
+    if (response.data?.artifacts?.[0]?.base64) {
+      const imageBase64 = response.data.artifacts[0].base64;
+      console.log("✅ STABILITY.AI SUCESSO!");
+      return `data:image/png;base64,${imageBase64}`;
+    }
 
-    return result.images[0].url;
+    // fallback se não houver base64
+    console.warn("⚠️ STABILITY.AI retornou sem base64, usando placeholder");
+    return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=1024";
+
   } catch (err) {
-    console.error("FAL.AI ERROR:", err.message);
-    return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800";
+    console.error("STABILITY.AI ERROR:", err.response?.data || err.message);
+    return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=1024";
   }
 }
+
 
 // Fallback se APIs falharem
 function mockTextFallback(imageBase64 = null) {

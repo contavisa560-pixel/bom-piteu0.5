@@ -7,11 +7,13 @@ const cors = require("cors");
 const passport = require("passport");
 const autoRecipeRoutes = require("./routes/autoRecipe");
 const testAutoRecipeMock = require("./routes/testAutoRecipeMock");
-
+const translateRoutes = require('./routes/translate');
+const { authenticate } = require("./middleware/auth");
 // Importação de Estratégias Passport (Movidas para um config separado para não poluir aqui)
 require("./config/passport")(passport); 
 
 // Importação de Rotas
+
 const chatRoutes = require("./routes/chatRoutes");
 const recipeRoutes = require("./routes/recipeRoutes");
 const auth = require("./routes/auth");
@@ -27,12 +29,14 @@ const app = express();
 connectDB();
 
 // ===================== MIDDLEWARES =====================
+
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ limit: '10mb', extended: true })); 
 app.use(passport.initialize());
 
 // --- Rate Limits ---
+app.use('/api/translate', translateRoutes);
 app.use("/test-mock", testAutoRecipeMock);
 app.use("/api/", apiLimiter); 
 app.use("/api/auto-recipe", aiLimiter, autoRecipeRoutes);

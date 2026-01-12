@@ -24,7 +24,7 @@ const RecipeSessionSchema = new mongoose.Schema(
 
     // imagem enviada pelo utilizador
     sourceImage: {
-      type: String  // ← SEM required: true
+      type: String 
     },
     sourceImageUrl: {
       type: String
@@ -63,6 +63,12 @@ const RecipeSessionSchema = new mongoose.Schema(
       enum: ["OPTIONS", "SELECTED", "IN_PROGRESS", "COMPLETED"],
       default: "OPTIONS",
     },
+
+    completedAt: {
+      type: Date,
+      default: null
+    },
+
   },
   {
     timestamps: true,
