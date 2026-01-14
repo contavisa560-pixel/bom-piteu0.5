@@ -24,6 +24,4 @@ module.exports = function(passport) {
       return done(null, user);
     } catch (err) { return done(err, null); }
   }));
-
-  // Aqui adicionarias a estratégia do Facebook seguindo o mesmo padrão...
 };

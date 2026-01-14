@@ -27,12 +27,11 @@ const WelcomeScreen = ({ onLogin }) => {
       window.history.replaceState({}, document.title, "/"); // limpa a URL
     }
   }, []);
-
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_URL}/api//auth/login`, {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -49,7 +48,7 @@ const WelcomeScreen = ({ onLogin }) => {
         return;
       }
 
-      // ✅ SALVA TOKEN AQUI
+      // ✅ SALVA TOKEN
       localStorage.setItem("token", data.token);
       localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
 
@@ -63,14 +62,7 @@ const WelcomeScreen = ({ onLogin }) => {
         variant: "destructive",
       });
     }
-
-    if (res.ok) {
-      localStorage.setItem("token", data.token || data.token); // salva token
-      localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
-      onLogin(data.user);
-    }
   };
-
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -93,7 +85,7 @@ const WelcomeScreen = ({ onLogin }) => {
         return;
       }
 
-      // ✅ SALVA TOKEN AQUI
+      // ✅ SALVA TOKEN
       localStorage.setItem("token", data.token);
       localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
 
@@ -110,12 +102,6 @@ const WelcomeScreen = ({ onLogin }) => {
         description: "Não foi possível conectar.",
         variant: "destructive",
       });
-    }
-
-    if (res.ok) {
-      localStorage.setItem("token", data.token || data.token); // salva token
-      localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
-      onLogin(data.user);
     }
   };
 

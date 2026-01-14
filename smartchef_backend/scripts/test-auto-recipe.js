@@ -7,7 +7,7 @@ const FormData = require("form-data");
 
 const TEST_CONFIG = {
     SERVER_URL: "http://localhost:5000",
-    USER_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NWJkNGIwMmYzMTdlMTg4OGRlMjFiOSIsImlhdCI6MTc2NzYyNjQ1NSwiZXhwIjoxNzY4MjMxMjU1fQ.lJ4Mjr83kZ9QiqYa8NYPr6kHT9jSvvWS8cmHqGDSEJc",
+    USER_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NjdhOWQ3NDkxYzc1MGViMzliMGZjNiIsImlhdCI6MTc2ODQwMTM2OCwiZXhwIjoxNzY5MDA2MTY4fQ.PydsI5a65FSX9OAQqLVpINy9qCbVm1avM8u-FUqgu10",
     TEST_IMAGE_PATH: "C:/Users/Mauricio carruagem/bom-piteu0.5/public/Calde_de_Peixe_da_Ilha_.jpg"
 };
 

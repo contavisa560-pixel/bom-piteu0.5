@@ -1,17 +1,26 @@
 const { saveMessage } = require("../services/messageService");
+const ChatSession = require("../models/ChatSession");
 const Message = require("../models/Message");
-// Inicializa o OpenAI com a chave do .env
 const { openaiText } = require("../services/openaiClients");
+const { uploadToCloudflare } = require("../services/storageService");
+const { analyzeFoodImage } = require("../services/visionService");
+const historyService = require("../services/historyService");
 
+/**
+ * Controlador principal do chat de texto
+ */
 exports.handleChat = async (req, res) => {
   try {
-    const { message, userId } = req.body;
+    const { message, userId, sessionId } = req.body;
 
     if (!message || !userId) {
       return res.status(400).json({ error: "Mensagem e userId são obrigatórios." });
     }
 
-    // 1️⃣ Busca histórico do MongoDB
+    // Define sessionId padrão se não fornecido
+    const finalSessionId = sessionId || `chat_${userId}_${Date.now()}`;
+
+    // 1️⃣ Busca histórico do MongoDB (últimas 20 mensagens)
     const history = await Message.find({ userId })
       .sort({ createdAt: 1 })
       .limit(20)
@@ -21,7 +30,7 @@ exports.handleChat = async (req, res) => {
     const messages = [
       {
         role: "system",
-        content: "Você é um Chef IA especializado em receitas. Responda de forma clara e prática."
+        content: "Você é um Chef IA especializado em receitas angolanas e internacionais. Responda de forma clara, prática e amigável em português de Angola."
       },
       ...history,
       {
@@ -34,36 +43,77 @@ exports.handleChat = async (req, res) => {
     await saveMessage({
       userId,
       role: "user",
-      content: message
+      content: message,
+      sessionId: finalSessionId
     });
 
-    // 4️⃣ Chamada OpenAI
+    // 4️⃣ Atualiza ou cria sessão no ChatSession
+    await ChatSession.findOneAndUpdate(
+      { sessionId: finalSessionId, userId },
+      {
+        sessionId: finalSessionId,
+        userId,
+        title: "Conversa com Chef IA",
+        status: "active",
+        lastActivity: new Date(),
+        $push: {
+          messages: {
+            type: "user",
+            content: message,
+            timestamp: new Date()
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    // 5️⃣ Chamada OpenAI
     const response = await openaiText.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o-mini",
       messages,
       max_tokens: 500
     });
 
     const reply = response.choices[0].message.content;
 
-    // 5️⃣ Salva resposta da IA
+    // 6️⃣ Salva resposta da IA
     await saveMessage({
       userId,
       role: "assistant",
       content: reply,
-      model: "gpt-3.5-turbo"
+      model: "gpt-4o-mini",
+      sessionId: finalSessionId
     });
 
-    return res.json({ reply });
+    // 7️⃣ Atualiza sessão com resposta do bot
+    await ChatSession.findOneAndUpdate(
+      { sessionId: finalSessionId, userId },
+      {
+        $push: {
+          messages: {
+            type: "bot",
+            content: reply,
+            timestamp: new Date()
+          }
+        },
+        lastActivity: new Date()
+      }
+    );
+
+    return res.json({
+      reply,
+      sessionId: finalSessionId
+    });
+    
   } catch (error) {
     console.error("Erro no chat:", error);
     return res.status(500).json({ error: error.message });
   }
 };
 
-const { uploadToCloudflare } = require("../services/storageService");
-const { analyzeFoodImage } = require("../services/visionService");
-
+/**
+ * Controlador para chat com imagem
+ */
 exports.handleImageChat = async (req, res) => {
   try {
     const { userId, prompt } = req.body;
@@ -84,6 +134,39 @@ exports.handleImageChat = async (req, res) => {
       imageUrl,
       prompt || "Analisar ingredientes da imagem"
     );
+
+    // 3️⃣ Salva no histórico automaticamente
+    try {
+      const sessionId = `img_${Date.now()}_${userId}`;
+      await historyService.addMessage(sessionId, {
+        userId,
+        type: 'user',
+        content: prompt || 'Enviei uma imagem',
+        imageUrl: imageUrl,
+        timestamp: new Date(),
+        metadata: {
+          messageType: 'image_upload',
+          fileSize: req.file.size,
+          dimensions: { width: 0, height: 0 }
+        }
+      });
+
+      // Salva resposta da análise
+      await historyService.addMessage(sessionId, {
+        userId,
+        type: 'bot',
+        content: analysis.notes || "Imagem analisada com sucesso",
+        timestamp: new Date(),
+        metadata: {
+          messageType: 'image_analysis',
+          canAdvance: analysis.canAdvance,
+          state: analysis.state
+        }
+      });
+    } catch (historyError) {
+      console.error("Erro ao salvar no histórico:", historyError);
+      // Não falha a requisição principal
+    }
 
     return res.json({
       imageUrl,
