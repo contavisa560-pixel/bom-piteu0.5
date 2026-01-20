@@ -1,14 +1,15 @@
 
 require("dotenv").config();
 require("./cronJobsAdvanced"); 
-const { connectDB } = require("./db");
+const { connectDB, readUsers, writeUsers } = require("./db");
 const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
 const autoRecipeRoutes = require("./routes/autoRecipe");
-const testAutoRecipeMock = require("./routes/testAutoRecipeMock");
 const translateRoutes = require('./routes/translate');
 const { authenticate } = require("./middleware/auth");
+const preferencesRoutes = require("./routes/preferencesRoutes");
+
 // Importação de Estratégias Passport (Movidas para um config separado para não poluir aqui)
 require("./config/passport")(passport); 
 
@@ -17,14 +18,15 @@ require("./config/passport")(passport);
 const chatRoutes = require("./routes/chatRoutes");
 const recipeRoutes = require("./routes/recipeRoutes");
 const auth = require("./routes/auth");
+const settingsRoutes = require("./routes/settingsRoutes");
  // Criamos este para limpar o server
 const imageRoutes = require("./routes/imageRoutes");
 const visionRoutes = require("./routes/visionRoutes");
 const historyRoutes = require("./routes/historyRoutes");
 const admin = require("./routes/admin");
-
+const sessionRoutes = require("./routes/sessionRoutes");
 const { apiLimiter, authLimiter, aiLimiter } = require("./middleware/security/rateLimiter");
-
+const userRoutes = require("./routes/userRoutes");
 const app = express();
 connectDB();
 
@@ -36,8 +38,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(passport.initialize());
 
 // --- Rate Limits ---
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/users", userRoutes);
 app.use('/api/translate', translateRoutes);
-app.use("/test-mock", testAutoRecipeMock);
 app.use("/api/", apiLimiter); 
 app.use("/api/auto-recipe", aiLimiter, autoRecipeRoutes);
 app.use("/api/auth/login", authLimiter);
@@ -45,6 +48,9 @@ app.use("/api/auth/register", authLimiter);
 app.use("/api/chat", aiLimiter);
 app.use("/api/vision", aiLimiter);
 app.use("/api/image", aiLimiter);
+app.use("/api/preferences", preferencesRoutes);
+app.use("/api/preferences", require("./routes/preferencesRoutes"));
+app.use("/api/settings", settingsRoutes);
 
 // ===================== ROTAS DEFINITIVAS =====================
 app.use("/api/auth", auth);   // Email/Senha/Me/Avatar
@@ -64,10 +70,10 @@ app.use((err, req, res, next) => {
   console.error(`[ERROR]: ${err.message}`);
   res.status(500).json({ error: "Erro interno no servidor Bom Piteu." });
 });
-// No server.js, após as importações:
+
 console.log("Chat routes loaded from:", require.resolve("./routes/chat"));
 console.log("ChatRoutes loaded from:", require.resolve("./routes/chatRoutes"));
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Bom Piteu Backend rodando em http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(` Bom Piteu Backend rodando em http://localhost:${PORT}`));
 
 module.exports = app;

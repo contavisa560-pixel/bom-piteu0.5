@@ -7,9 +7,9 @@ const { uploadToCloudflare } = require("../services/storageService");
 const { authenticate } = require("../middleware/security/jwtAuth");
 
 const router = express.Router();
-const upload = multer({ 
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 } 
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 // LOGIN
@@ -26,12 +26,15 @@ router.post("/login", async (req, res) => {
     const isMatch = await authService.comparePassword(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Credenciais inválidas" });
 
+    const token = await authService.generateTokenWithSession(user._id, req);
+
     res.json({
       success: true,
-      token: authService.generateToken(user._id),
+      token,
       user: authService.formatUser(user)
     });
   } catch (err) {
+    console.error("Erro no login:", err);
     res.status(500).json({ error: "Erro interno no servidor" });
   }
 });
@@ -84,7 +87,7 @@ router.post("/update-avatar", authenticate, upload.single("image"), async (req, 
 });
 
 // 1. Inicia a autenticação (O que tu estás a tentar aceder)
-router.get("/google", passport.authenticate("google", { 
+router.get("/google", passport.authenticate("google", {
   scope: ["profile", "email"],
   prompt: "select_account" // Força a escolha de conta para evitar loops
 }));
@@ -92,7 +95,7 @@ router.get("/google", passport.authenticate("google", {
 // 2. Callback (Para onde o Google envia o utilizador)
 // No routes/auth.js (ou onde unificaste as rotas)
 // No routes/auth.js
-router.get("/google/callback", 
+router.get("/google/callback",
   passport.authenticate("google", { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed` }),
   async (req, res) => {
     try {
@@ -104,7 +107,7 @@ router.get("/google/callback",
       // 2. Gerar Token e Formatar Usuário manualmente para evitar erros de contexto (this)
       const token = authService.generateToken(req.user._id);
       const userData = authService.formatUser(req.user);
-      
+
       // 3. Criar a URL de redirecionamento exatamente como o seu App.js espera
       const userParam = encodeURIComponent(JSON.stringify(userData));
       const redirectUrl = `${process.env.CLIENT_URL}/?token=${token}&user=${userParam}`;

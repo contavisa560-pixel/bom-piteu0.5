@@ -74,7 +74,7 @@ Ação esperada: ${step.expectedAction}
 Visual esperado: ${step.expectedVisual}
     `.trim();
 
-    // 🔥 VISÃO DECIDE
+    // VISÃO DECIDE
     const visionResult = await analyzeFoodImage(imageUrl, stepContext);
 
     step.userImageUrl = imageUrl;

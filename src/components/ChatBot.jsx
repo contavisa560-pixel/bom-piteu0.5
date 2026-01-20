@@ -320,7 +320,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     const formData = new FormData();
     formData.append("image", file);
 
-    const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+    const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/options`, {
@@ -362,7 +362,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     const formData = new FormData();
     formData.append("document", file);
 
-    const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+    const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/document-options`, {
@@ -408,7 +408,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     setProcessingStep(true);
     setLoading(true);
 
-    const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+    const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
 
     try {
       // Adiciona mensagem de processamento
@@ -481,7 +481,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+      const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/step`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -586,7 +586,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
   };
 
   const fetchRecipeOptions = async (ingredients, category) => {
-    const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+    const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/text-options`, {
@@ -610,7 +610,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     }
   };
 
-  const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+  const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
   const handleSendMessage = async (messageOverride) => {
     const currentInput = messageOverride || inputMessage;
     if (!currentInput.trim() || loading) return;
@@ -783,7 +783,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     setRating(value);
     
     try {
-      const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+      const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
       
       await fetch(`${import.meta.env.VITE_API_URL}/api/ratings`, {
         method: "POST",
@@ -821,7 +821,7 @@ const ChatBot = ({ selectedCategory, onRecipeGenerated, onBack, user }) => {
     const isCurrentlyFavorite = favorites[sessionId];
     
     try {
-      const token = localStorage.getItem("bomPiteuUserToken") || localStorage.getItem("token");
+      const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
       
       if (isCurrentlyFavorite) {
         await fetch(`${import.meta.env.VITE_API_URL}/api/favorites/${sessionId}`, {

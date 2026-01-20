@@ -14,5 +14,5 @@ exports.validateRegister = (req, res, next) => {
     return res.status(400).json({ error: "A senha deve ter no mínimo 6 caracteres." });
   }
 
-  next(); // Tudo ok, pode seguir para a rota
+  next(); 
 };

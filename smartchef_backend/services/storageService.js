@@ -1,6 +1,5 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const path = require("path");
-const mime = require("mime-types"); // npm install mime-types
 
 // Configuração do cliente para Cloudflare R2
 const s3Client = new S3Client({
@@ -14,20 +13,23 @@ const s3Client = new S3Client({
 
 /**
  * Faz upload de um buffer para o Cloudflare R2
+ * @param {Buffer} fileBuffer - O conteúdo do ficheiro
+ * @param {String} fileName - Nome original do ficheiro
+ * @param {String} folder - Pasta dentro do bucket (ex: 'avatars', 'recipes')
  */
 exports.uploadToCloudflare = async (fileBuffer, fileName, folder = "uploads") => {
   const fileKey = `${folder}/${Date.now()}-${path.basename(fileName)}`;
-  const contentType = mime.lookup(fileName) || "application/octet-stream";
 
   const params = {
     Bucket: process.env.R2_BUCKET_NAME,
     Key: fileKey,
     Body: fileBuffer,
-    ContentType: contentType,
+    ContentType: "image/jpeg", 
   };
 
   try {
     await s3Client.send(new PutObjectCommand(params));
+    // Retorna a URL pública que será guardada no MongoDB
     return `${process.env.R2_PUBLIC_URL}/${fileKey}`;
   } catch (err) {
     console.error("Erro no upload Cloudflare R2:", err);

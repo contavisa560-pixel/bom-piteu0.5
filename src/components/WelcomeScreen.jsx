@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChefHat } from "lucide-react";
@@ -6,14 +5,15 @@ import { toast } from "@/components/ui/use-toast";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const WelcomeScreen = ({ onLogin }) => {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  
+  // ✅ CORRIGIDO: Porta 5000 + proxy
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -22,15 +22,17 @@ const WelcomeScreen = ({ onLogin }) => {
 
     if (token && userParam) {
       const user = JSON.parse(decodeURIComponent(userParam));
-      onLogin(user); // função que você já passa por props
-      localStorage.setItem("token", token); // opcional
-      window.history.replaceState({}, document.title, "/"); // limpa a URL
+      onLogin(user);
+      localStorage.setItem("bomPiteuToken", token); // nome correto
+      window.history.replaceState({}, document.title, "/");
     }
-  }, []);
+  }, [onLogin]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
+      // ✅ CORRIGIDO: URL SEM // dupla
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,11 +50,11 @@ const WelcomeScreen = ({ onLogin }) => {
         return;
       }
 
-      // ✅ SALVA TOKEN
-      localStorage.setItem("token", data.token);
+      // ✅ SÓ AQUI (dentro do try, após sucesso)
+      localStorage.setItem("bomPiteuToken", data.token);
       localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
-
-      toast({ title: "Login efetuado", description: "Bem-vindo" });
+      
+      toast({ title: "Login efetuado", description: "Bem-vindo!" });
       onLogin(data.user);
 
     } catch (err) {
@@ -68,6 +70,7 @@ const WelcomeScreen = ({ onLogin }) => {
     e.preventDefault();
 
     try {
+      // ✅ CORRIGIDO: URL SEM // dupla
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,13 +88,13 @@ const WelcomeScreen = ({ onLogin }) => {
         return;
       }
 
-      // ✅ SALVA TOKEN
-      localStorage.setItem("token", data.token);
+      // ✅ SÓ AQUI (dentro do try, após sucesso)
+      localStorage.setItem("bomPiteuToken", data.token);
       localStorage.setItem("bomPiteuUser", JSON.stringify(data.user));
 
       toast({
         title: "Conta criada",
-        description: "Sessão iniciada automaticamente.",
+        description: "Sessão iniciada automaticamente!",
       });
 
       onLogin(data.user);
