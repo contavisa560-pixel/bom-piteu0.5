@@ -10,29 +10,29 @@
 
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
- 
+
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
- 
+
   --primary: 24.6 95% 53.1%;
   --primary-foreground: 60 9.1% 97.8%;
- 
+
   --secondary: 60 4.8% 95.9%;
   --secondary-foreground: 24 9.8% 10%;
- 
+
   --muted: 60 4.8% 95.9%;
   --muted-foreground: 25 5.3% 44.7%;
- 
+
   --accent: 60 4.8% 95.9%;
   --accent-foreground: 24 9.8% 10%;
- 
+
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
 
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
   --ring: 24.6 95% 53.1%;
- 
+
   --radius: 0.5rem;
 }
 
@@ -98,126 +98,276 @@ input:focus-visible,
   .bg-primary {
     background-color: hsl(var(--primary));
   }
+
   .text-primary-foreground {
     color: hsl(var(--primary-foreground));
   }
+
   .bg-secondary {
     background-color: hsl(var(--secondary));
   }
+
   .bg-destructive {
     background-color: hsl(var(--destructive));
   }
+
   .text-destructive-foreground {
     color: hsl(var(--destructive-foreground));
   }
+
   .border-input {
     border-color: hsl(var(--input));
   }
+
   .bg-background {
     background-color: hsl(var(--background));
   }
+
   .hover\:bg-accent:hover {
     background-color: hsl(var(--accent));
   }
+
   .hover\:text-accent-foreground:hover {
     color: hsl(var(--accent-foreground));
-  }.recipe-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
+  }
+
+  .recipe-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .recipe-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid #eee;
+  }
+
+  .recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .recipe-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recipe-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .recipe-content p {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .recipe-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  .recipe-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .recipe-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid #eee;
+  }
+
+  .recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .recipe-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recipe-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .recipe-content p {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .recipe-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) skewX(-12deg);
+    }
+
+    100% {
+      transform: translateX(100%) skewX(-12deg);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s infinite linear;
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+/* ANIMAÇÕES PARA CHATBOT */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.recipe-card {
-  display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #ffffff, #f9f9f9);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid #eee;
+@keyframes fadeInUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.recipe-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+@keyframes fadeInDown {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.recipe-icon {
-  font-size: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@keyframes slideInLeft {
+  from { 
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.recipe-content h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+@keyframes slideInRight {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.recipe-content p {
-  margin: 4px 0 8px;
-  font-size: 14px;
-  color: #555;
+@keyframes slideDown {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.recipe-meta {
-  display: flex;
-  gap: 14px;
-  font-size: 13px;
-  color: #777;
-}
-.recipe-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
+@keyframes gradientX {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.recipe-card {
-  display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #ffffff, #f9f9f9);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid #eee;
+/* CLASSES DE ANIMAÇÃO */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.recipe-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+.animate-fadeInUp {
+  animation: fadeInUp 0.7s ease-out;
 }
 
-.recipe-icon {
-  font-size: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.animate-fadeInDown {
+  animation: fadeInDown 0.7s ease-out;
 }
 
-.recipe-content h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out;
 }
 
-.recipe-content p {
-  margin: 4px 0 8px;
-  font-size: 14px;
-  color: #555;
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-out;
 }
 
-.recipe-meta {
-  display: flex;
-  gap: 14px;
-  font-size: 13px;
-  color: #777;
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
 }
 
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradientX 3s ease infinite;
+}
+
+/* UTILITÁRIOS */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
 }

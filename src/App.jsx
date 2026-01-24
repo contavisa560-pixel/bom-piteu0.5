@@ -27,6 +27,15 @@ import DataDeletion from "@/pages/legal/DataDeletion";
 import About from "./pages/legal/About";
 import Partnerships from "./pages/legal/Partnerships";
 import LegalCentral from "./pages/legal/LegalCentral";
+import * as settingsApi from '@/services/settingsApi';
+import { useSettings } from '@/hooks/useSettings';
+
+// Torna funções disponíveis globalmente no navegador
+window.getSettings = settingsApi.getSettings;
+window.saveSettings = settingsApi.saveSettings;
+window.updateSettingField = settingsApi.updateSettingField;
+window.syncSettings = settingsApi.syncSettings;
+
 
 function App() {
   const location = useLocation();
