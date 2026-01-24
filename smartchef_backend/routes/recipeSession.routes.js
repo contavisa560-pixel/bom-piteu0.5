@@ -37,13 +37,13 @@ router.post("/start", async (req, res) => {
       recipeId,
       totalSteps: sessionSteps.length,
       steps: sessionSteps,
-      sessionId: "teste-" + uuidv4() 
+      sessionId: "teste-" + uuidv4() //  UUID personalizado
     });
 
     const currentStep = session.steps[0];
 
     res.status(201).json({
-      sessionId: session.sessionId, 
+      sessionId: session.sessionId, //  aqui estava session._id, agora é session.sessionId
       currentStep: session.currentStep,
       totalSteps: session.totalSteps,
       step: currentStep

@@ -1,10 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const OpenAI = require("openai");
 const limitService = require("../services/limitService");
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { openaiImage } = require("../services/openaiClients");
 
 router.post("/analyze", async (req, res) => {
   try {
@@ -15,7 +13,7 @@ router.post("/analyze", async (req, res) => {
     const canUse = await limitService.checkLimits(userId, "vision");
     if (!canUse.allowed) return res.status(403).json({ error: "limit_reached", message: canUse.message });
 
-    const response = await openai.images.analyze({
+    const response = await openaiVision.images.analyze({
       model: "gpt-vision-1",
       image: imageUrl
     });

@@ -1,8 +1,4 @@
-const OpenAI = require("openai");
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const { openaiVision } = require("./openaiClients");
 
 /**
  * Analisa imagem de comida usando OpenAI Vision
@@ -10,7 +6,7 @@ const openai = new OpenAI({
  * @param {string} stepContext
  */
 async function analyzeFoodImage(imageUrl, stepContext) {
-  const response = await openai.chat.completions.create({
+  const response = await openaiVision.chat.completions.create({
     model: "gpt-4o",
     temperature: 0.2,
     messages: [
@@ -44,7 +40,13 @@ ${stepContext}
     ],
   });
 
-  return JSON.parse(response.choices[0].message.content);
+  let raw = response.choices[0].message.content;
+
+  // Remove ```json e ```
+  raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+
+  return JSON.parse(raw);
+
 }
 
 module.exports = { analyzeFoodImage };

@@ -11,9 +11,13 @@ class RecipeService {
 
     const steps = recipeData.steps.map((step, index) => ({
       stepNumber: index + 1,
-      description: step,
+      objective: step.objective,
+      expectedAction: step.expectedAction,
+      expectedVisual: step.expectedVisual,
+      warnings: step.warnings || [],
       completed: false
     }));
+
 
     return await RecipeSession.create({
       userId,
@@ -30,7 +34,7 @@ class RecipeService {
     if (!session) throw new Error("Sessão não encontrada");
 
     session.currentStepIndex = stepIndex;
-    
+
     // Marcar passos anteriores como completados logicamente
     session.steps.forEach((step, idx) => {
       if (idx <= stepIndex) step.completed = true;

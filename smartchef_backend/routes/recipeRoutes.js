@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 const recipeService = require("../services/recipeService");
 
+// 1. Tenta importar o middleware (ajusta o caminho se o teu ficheiro for 'authenticate.js')
 const authMiddleware = require("../middleware/auth");
-
+// 2. Esta linha resolve o problema: se authMiddleware for uma função, usa-a. 
+// Se for um objeto com uma propriedade .authenticate, usa essa.
 const authenticate = typeof authMiddleware === 'function' 
   ? authMiddleware 
   : (authMiddleware.authenticate || authMiddleware.protect);
