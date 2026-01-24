@@ -1,8 +1,14 @@
 const limitService = require("../services/limitService");
 
+
 function checkLimitsMiddleware(type) {
   return async (req, res, next) => {
-    const userId = req.body.userId || req.query.userId;
+    const userId = req.user?.id || req.user?._id;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId_missing" });
+    }
+
 
     if (!userId) return res.status(400).json({ error: "userId_missing" });
 

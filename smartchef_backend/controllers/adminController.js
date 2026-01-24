@@ -22,6 +22,7 @@ exports.getGlobalMetrics = async (req, res) => {
     const metrics = usageData[0] || { totalText: 0, totalImages: 0, totalAnalysis: 0 };
 
     // 3. Estimativa de custo (Valores exemplo da OpenAI/Cloudflare)
+    // Ex: 0.01$ por cada 1k tokens ou imagem gerada
     const estimatedCost = (metrics.totalText * 0.002) + (metrics.totalImages * 0.04);
 
     res.json({

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot PATCH /api/users/694016a9e74400f23615d25f/experience</pre>
+</body>
+</html>

@@ -14,5 +14,28 @@ const authenticate = async (req, res, next) => {
     res.status(401).json({ error: "Token inválido" });
   }
 };
+const authenticateOptional = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-module.exports = { authenticate };
+  if (!authHeader) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    req.user = user || null;
+    next();
+  } catch (err) {
+    req.user = null;
+    next();
+  }
+};
+
+module.exports = {
+  authenticate,
+  authenticateOptional
+};
