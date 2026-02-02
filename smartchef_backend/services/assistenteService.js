@@ -2,7 +2,9 @@
 const ai = require("../utils/openaiWrapper");
 
 async function gerarReceitaAdaptada(profile, numberOfPeople = 1) {
-    // Garante que as listas existam antes de dar join
+
+
+    
     const alergias = profile.allergies?.length ? profile.allergies.join(", ") : "Nenhuma";
     const intolerancias = profile.intolerances?.length ? profile.intolerances.join(", ") : "Nenhuma";
     const observacoes = profile.healthObservations?.length ? profile.healthObservations.join(", ") : "Nenhuma";

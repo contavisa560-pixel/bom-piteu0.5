@@ -59,7 +59,7 @@ router.post("/:id/enviar-assistente", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Listar com filtros (Tags, Categoria, etc)
+// Listar com filtros 
 router.get("/", async (req, res) => {
   try {
     const { tags, type } = req.query;

@@ -7,6 +7,7 @@ const NoteSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+
 const ObservacaoSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   imageUrl: { type: String, required: true },

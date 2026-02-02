@@ -1,4 +1,3 @@
-// services/ocrService.js
 const fs = require("fs");
 const ai = require("../utils/openaiWrapper"); // ajuste o caminho conforme sua pasta
 
@@ -7,7 +6,7 @@ async function extrairReceita(imagePath) {
         const imageData = fs.readFileSync(imagePath, { encoding: 'base64' });
 
         const response = await ai.chat.completions.create({
-            model: "gpt-4o", // O modelo de visão para processar a foto
+            model: "gpt-4o", 
             messages: [
                 {
                     role: "user",

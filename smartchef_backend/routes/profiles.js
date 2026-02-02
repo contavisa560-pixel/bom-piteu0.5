@@ -61,7 +61,6 @@ router.post("/:profileId/generate-ai", async (req, res) => {
 
         const numPeople = req.body.numberOfPeople || 1;
 
-        // Chamada ao seu wrapper da OpenAI
         const response = await ai.chat.completions.create({
             messages: [
                 { 

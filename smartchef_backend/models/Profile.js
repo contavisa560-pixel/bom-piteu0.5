@@ -17,7 +17,6 @@ const RecipeSchema = new mongoose.Schema({
     readyToCook: { type: String, enum: ["now", "later", "false"], default: "false" },
     createdAt: { type: Date, default: Date.now }
 });
-
 // Esquema Principal do Perfil
 const ProfileSchema = new mongoose.Schema({
     name: { type: String, required: true },
