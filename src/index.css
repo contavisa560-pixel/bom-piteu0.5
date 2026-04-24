@@ -1,0 +1,731 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  --primary: 24.6 95% 53.1%;
+  --primary-foreground: 60 9.1% 97.8%;
+
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --ring: 24.6 95% 53.1%;
+
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1280px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #f97316, #dc2626);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@layer base {
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+
+  .text-primary-foreground {
+    color: hsl(var(--primary-foreground));
+  }
+
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+  }
+
+  .bg-destructive {
+    background-color: hsl(var(--destructive));
+  }
+
+  .text-destructive-foreground {
+    color: hsl(var(--destructive-foreground));
+  }
+
+  .border-input {
+    border-color: hsl(var(--input));
+  }
+
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+
+  .hover\:bg-accent:hover {
+    background-color: hsl(var(--accent));
+  }
+
+  .hover\:text-accent-foreground:hover {
+    color: hsl(var(--accent-foreground));
+  }
+
+  .recipe-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .recipe-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid #eee;
+  }
+
+  .recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .recipe-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recipe-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .recipe-content p {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .recipe-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  .recipe-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .recipe-card {
+    display: flex;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid #eee;
+  }
+
+  .recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .recipe-icon {
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .recipe-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .recipe-content p {
+    margin: 4px 0 8px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .recipe-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) skewX(-12deg);
+    }
+
+    100% {
+      transform: translateX(100%) skewX(-12deg);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s infinite linear;
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* ANIMAÇÕES PARA CHATBOT */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gradientX {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* CLASSES DE ANIMAÇÃO */
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.7s ease-out;
+  }
+
+  .animate-fadeInDown {
+    animation: fadeInDown 0.7s ease-out;
+  }
+
+  .animate-slideInLeft {
+    animation: slideInLeft 0.5s ease-out;
+  }
+
+  .animate-slideInRight {
+    animation: slideInRight 0.5s ease-out;
+  }
+
+  .animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradientX 3s ease infinite;
+  }
+
+  /* UTILITÁRIOS */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+  }
+
+
+
+  /* Adicione estas animações se quiser efeitos extras */
+  @keyframes slideRight {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-slideRight {
+    animation: slideRight 2s ease-in-out infinite;
+  }
+
+  /* MODO COMPACTO - Reduz espaçamentos */
+  .compact-mode .p-6 {
+    padding: 1rem !important;
+  }
+
+  .compact-mode .p-4 {
+    padding: 0.75rem !important;
+  }
+
+  .compact-mode .gap-6 {
+    gap: 1rem !important;
+  }
+
+  .compact-mode .gap-4 {
+    gap: 0.75rem !important;
+  }
+
+  .compact-mode .mb-8 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .compact-mode .mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .compact-mode .py-4 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .compact-mode .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .compact-mode .text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+  .compact-mode .text-lg {
+    font-size: 1rem !important;
+  }
+
+  .compact-mode .h-11 {
+    height: 2.5rem !important;
+  }
+
+  .compact-mode .h-9 {
+    height: 2.25rem !important;
+  }
+
+  .compact-mode .grid-cols-1,
+  .compact-mode .grid-cols-2,
+  .compact-mode .grid-cols-3,
+  .compact-mode .grid-cols-4 {
+    gap: 0.75rem !important;
+  }
+
+  .compact-mode .space-y-6> :not([hidden])~ :not([hidden]) {
+    margin-top: 1rem !important;
+  }
+
+  .compact-mode .space-y-4> :not([hidden])~ :not([hidden]) {
+    margin-top: 0.75rem !important;
+  }
+
+  .compact-mode .space-y-3> :not([hidden])~ :not([hidden]) {
+    margin-top: 0.5rem !important;
+  }
+
+  .compact-mode .rounded-xl {
+    border-radius: 0.5rem !important;
+  }
+
+  .compact-mode .rounded-lg {
+    border-radius: 0.375rem !important;
+  }
+
+  /* Cards específicos */
+  .compact-mode .compact-card .card-header {
+    padding-top: 1rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .compact-mode .compact-card .card-content {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .compact-mode .compact-card .card-footer {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  /* SEM ANIMAÇÕES - Remove todas as transições */
+  .no-animations *,
+  .no-animations *::before,
+  .no-animations *::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .no-animations [class*="motion-div"] {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  /* ===================================== */
+  /* TEMA DARK PROFISSIONAL */
+  /* ===================================== */
+
+  /* Variáveis para tema dark */
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 24.6 95% 53.1%;
+  }
+
+  /* Ajustes específicos para elementos no dark mode */
+  .dark body {
+    background-color: #0f172a;
+    /* slate-900 */
+    color: #e2e8f0;
+    /* slate-200 */
+  }
+
+  .dark .bg-white {
+    background-color: #1e293b !important;
+    /* slate-800 */
+  }
+
+  .dark .bg-gray-50 {
+    background-color: #0f172a !important;
+    /* slate-900 */
+  }
+
+  .dark .bg-gray-100 {
+    background-color: #1e293b !important;
+    /* slate-800 */
+  }
+
+  .dark .text-gray-900 {
+    color: #f8fafc !important;
+    /* slate-50 */
+  }
+
+  .dark .text-gray-800 {
+    color: #f1f5f9 !important;
+    /* slate-100 */
+  }
+
+  .dark .text-gray-700 {
+    color: #cbd5e1 !important;
+    /* slate-300 */
+  }
+
+  .dark .text-gray-600 {
+    color: #94a3b8 !important;
+    /* slate-400 */
+  }
+
+  .dark .text-gray-500 {
+    color: #64748b !important;
+    /* slate-500 */
+  }
+
+  .dark .border-gray-200 {
+    border-color: #334155 !important;
+    /* slate-700 */
+  }
+
+  .dark .border-gray-300 {
+    border-color: #475569 !important;
+    /* slate-600 */
+  }
+
+  /* Cards e containers */
+  .dark .card,
+  .dark .rounded-lg,
+  .dark .rounded-xl,
+  .dark .rounded-2xl {
+    background-color: #1e293b;
+    border-color: #334155;
+  }
+
+  /* Inputs e selects */
+  .dark input,
+  .dark select,
+  .dark textarea {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #64748b !important;
+  }
+
+  /* Dropdowns e menus */
+  .dark [data-radix-popper-content-wrapper] {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  .dark .dropdown-content {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+  }
+
+  /* Tabs */
+  .dark .tab-trigger[data-state="active"] {
+    background-color: #2d3a4f !important;
+  }
+
+  /* Progress bars */
+  .dark .bg-gray-200 {
+    background-color: #334155 !important;
+  }
+
+  /* Alertas */
+  .dark .bg-blue-50 {
+    background-color: #1e3a8a33 !important;
+    /* blue-900 com opacidade */
+  }
+
+  .dark .bg-green-50 {
+    background-color: #16653433 !important;
+    /* green-900 com opacidade */
+  }
+
+  .dark .bg-red-50 {
+    background-color: #991b1b33 !important;
+    /* red-900 com opacidade */
+  }
+
+  .dark .bg-yellow-50 {
+    background-color: #854d0e33 !important;
+    /* yellow-900 com opacidade */
+  }
+
+  .dark .bg-purple-50 {
+    background-color: #581c8733 !important;
+    /* purple-900 com opacidade */
+  }
+
+  /* Gradientes no dark mode */
+  .dark .bg-gradient-to-r {
+    opacity: 0.9;
+  }
+
+  .dark .from-orange-500,
+  .dark .to-red-500 {
+    filter: brightness(0.9);
+  }
+
+  /* Scrollbar no dark mode */
+  .dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #f97316;
+    opacity: 0.7;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #fb923c;
+  }
+
+  /* Fundo principal da aplicação no dark mode */
+  .dark body {
+    background-color: #111827 !important;
+    /* gray-900 mais escuro */
+  }
+
+  .dark .bg-gradient-to-br {
+    background: #111827 !important;
+    /* remove o gradiente no dark mode */
+  }
+
+  /* Se quiseres manter um gradiente sutil no dark mode */
+  .dark .bg-gradient-to-br {
+    background: linear-gradient(135deg, #111827, #1f2937) !important;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+}

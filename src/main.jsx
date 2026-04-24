@@ -1,0 +1,37 @@
+// ── Suprimir logs em produção ──────────────────────────────────────────
+if (import.meta.env.PROD) {
+  console.log    = () => {};
+  console.info   = () => {};
+  console.warn   = () => {};
+  console.debug  = () => {};
+  console.error  = () => {};
+}
+// ────────────────────────────────────────────────────────────────────────
+
+import "./index.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+
+import "./i18n";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./i18n";
+
+import { ThemeProvider } from "@/context/ThemeContext";
+import App from "./App";
+import { ensureDemoUser } from "@/services/authFix";
+
+// Garantir utilizador demo
+ensureDemoUser();
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+ 
+    <I18nextProvider i18n={i18n}>
+      <BrowserRouter>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </I18nextProvider>
+  
+);

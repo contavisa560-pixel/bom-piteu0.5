@@ -1,0 +1,266 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, ChefHat, X, Flame, Sparkles, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { getPersonalizedSuggestions } from '@/utils/recipeRecommendation';
+import { useRecipeHistory } from '@/hooks/useRecipeHistory';
+import { recipeImages } from '@/components/InternationalRecipes';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useQuery } from '@tanstack/react-query';
+
+const DiffBadge = ({ level }) => {
+  const { t } = useTranslation();
+  const map = {
+    'Fácil':   'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    'Médio':   'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+    'Difícil': 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  };
+  const keyMap = { 'Fácil': 'easy', 'Médio': 'medium', 'Difícil': 'hard' };
+  return (
+    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${map[level] || map['Fácil']}`}>
+      {t(`difficulty.${keyMap[level] || 'easy'}`)}
+    </span>
+  );
+};
+
+const RecipeModal = ({ recipe, onClose, onCook }) => {
+  const { t } = useTranslation();
+  if (!recipe) return null;
+
+  const categoryColors = {
+    'Pequeno-almoço': 'from-amber-400 to-orange-500',
+    'Almoço':         'from-blue-400 to-blue-600',
+    'Jantar':         'from-indigo-500 to-purple-600',
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+          className="bg-white dark:bg-gray-900 w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="relative h-52 overflow-hidden">
+            <img
+              src={recipe.image}
+              alt={recipe.name}
+              className="w-full h-full object-cover"
+              onError={e => { e.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80'; }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-9 h-9 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className={`inline-block bg-gradient-to-r ${categoryColors[recipe.category] || 'from-gray-500 to-gray-700'} text-white text-[10px] font-bold px-2.5 py-1 rounded-full mb-1`}>
+                {recipe.category}
+              </div>
+              <h2 className="text-xl font-bold text-white leading-tight">{recipe.name}</h2>
+              {recipe.pais && <p className="text-white/70 text-xs mt-0.5">📍 {recipe.pais}</p>}
+            </div>
+          </div>
+
+          <div className="p-5">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-sm">
+                <Clock className="h-4 w-4" />
+                <span>{recipe.time}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-sm">
+                <Flame className="h-4 w-4 text-orange-400" />
+                <span>{recipe.difficulty}</span>
+              </div>
+              {recipe.tags?.slice(0, 2).map(tag => (
+                <span key={tag} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-5">
+              {recipe.description}
+            </p>
+
+            {recipe._isPersonalized && (
+              <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-3 py-2.5 mb-5">
+                <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
+                <p className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                  Sugestão personalizada para o teu perfil
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => { onCook(recipe); onClose(); }}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3.5 rounded-2xl transition-all duration-200 active:scale-95 shadow-md hover:shadow-lg text-sm"
+            >
+              <ChefHat className="h-5 w-5" />
+              Quero cozinhar isto
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+const DailySuggestions = ({ onStartChat, user, preferences }) => {
+  const { t } = useTranslation();
+  const [selectedRecipe, setSelected] = useState(null);
+  const [imgErrors, setImgErrors] = useState({});
+
+  const userId = user?._id || user?.id;
+  const { history, trackRecipe } = useRecipeHistory(userId);
+
+  // Usar React Query para buscar receitas internacionais
+  const { data: dbRecipes, isLoading } = useQuery({
+    queryKey: ['international-recipes-public'],
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/international-recipes/public`)
+      .then(r => r.json())
+      .then(json => json.data || []),
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+  });
+
+  // Calcular as sugestões personalizadas sempre que os dados base mudarem
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() => {
+    if (!dbRecipes) return;
+    
+    const suggestions = getPersonalizedSuggestions(user, preferences, history, dbRecipes);
+    const withImages = suggestions.map(recipe => ({
+      ...recipe,
+      image: recipe.imagem_url
+        || recipeImages[recipe.name]
+        || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80',
+    }));
+    setRecipes(withImages);
+  }, [dbRecipes, user, preferences, history]);
+
+  const handleCook = (recipe) => {
+    trackRecipe(recipe);
+    onStartChat({
+      title:       recipe.name,
+      source:      'receita_internacional_direta',
+      nomeReceita: recipe.name,
+      pais:        recipe.pais || 'Internacional',
+      query:       null,
+    });
+  };
+
+  const categoryColors = {
+    'Pequeno-almoço': 'from-amber-400 to-orange-500',
+    'Almoço':         'from-blue-400 to-blue-600',
+    'Jantar':         'from-indigo-500 to-purple-600',
+  };
+
+  // Mostrar skeleton enquanto carrega
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[1,2,3].map(i => (
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border">
+            <Skeleton className="h-44 w-full" />
+            <div className="p-4">
+              <Skeleton className="h-5 w-3/4 mb-2" />
+              <Skeleton className="h-3 w-full mb-3" />
+              <div className="flex justify-between">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (recipes.length === 0) return null;
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {recipes.map((recipe, i) => (
+          <motion.div
+            key={`${recipe.name}-${i}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ y: -4 }}
+            onClick={() => setSelected(recipe)}
+            className="group cursor-pointer bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300"
+          >
+            <div className="relative h-44 overflow-hidden bg-gray-100 dark:bg-gray-700">
+              {!imgErrors[recipe.name] ? (
+                <img
+                  src={recipe.image}
+                  alt={recipe.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={() => setImgErrors(p => ({ ...p, [recipe.name]: true }))}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-5xl">
+                  {recipe.emoji}
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className={`absolute top-3 left-3 bg-gradient-to-r ${categoryColors[recipe.category] || 'from-gray-500 to-gray-700'} text-white text-[10px] font-bold px-2.5 py-1 rounded-full`}>
+                {recipe.category}
+              </div>
+              <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {recipe.time}
+              </div>
+              {recipe.pais && (
+                <div className="absolute bottom-3 left-3 text-white text-[10px] font-semibold bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                  📍 {recipe.pais}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base leading-snug mb-1 line-clamp-1 group-hover:text-orange-500 transition-colors">
+                {recipe.name}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+                {recipe.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <DiffBadge level={recipe.difficulty} />
+                <div className="flex items-center gap-1 text-orange-500 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                  Ver receita <ArrowRight className="h-3 w-3" />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {selectedRecipe && (
+          <RecipeModal
+            recipe={selectedRecipe}
+            onClose={() => setSelected(null)}
+            onCook={handleCook}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default DailySuggestions;
