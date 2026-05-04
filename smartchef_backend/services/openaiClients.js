@@ -215,10 +215,9 @@ module.exports = {
 const axios = require("axios");
 
 /**
- * 🎯 GROQ + STABILITY.AI - Versão Corrigida para Passos Específicos
+ * 🎯 GROQ + STABILITY.AI - Imagens de Passo Profissionais
  */
 
-// Prompt base atualizado para GROQ
 const BASE_PROMPT = `Você é um CHEF PROFISSIONAL especializado em cozinha Angolana e internacional.
 
 ANÁLISE DE INGREDIENTES:
@@ -259,14 +258,26 @@ async function callOpenAIText(userPrompt, imageBase64 = null, systemMessage = nu
     const messages = [];
     messages.push({ role: "system", content: systemMessage || BASE_PROMPT });
     if (imageBase64) {
-      messages.push({ role: "user", content: [{ type: "text", text: userPrompt }, { type: "image_url", image_url: { url: imageBase64 } }] });
+      messages.push({
+        role: "user",
+        content: [
+          { type: "text", text: userPrompt },
+          { type: "image_url", image_url: { url: imageBase64 } }
+        ]
+      });
     } else {
       messages.push({ role: "user", content: userPrompt });
     }
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       { model: "llama-3.3-70b-versatile", messages, temperature: 0.7 },
-      { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" }, timeout: 30000 }
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 30000
+      }
     );
     console.log("✅ GROQ sucesso");
     const aiResponse = response.data.choices[0].message.content;
@@ -281,14 +292,14 @@ async function callOpenAIText(userPrompt, imageBase64 = null, systemMessage = nu
 async function extractStepIngredients(stepDescription, allIngredients, recipeTitle) {
   try {
     const prompt = `You are a culinary expert. Identify ONLY the ingredients actively used in THIS cooking step.
- 
+
 RECIPE: "${recipeTitle}"
 ALL INGREDIENTS: ${allIngredients.join(', ')}
 THIS STEP: "${stepDescription}"
- 
-Return ONLY a JSON array (max 3 ingredients, in English):
+
+Return ONLY a JSON array (max 4 ingredients, in English):
 ["ingredient1", "ingredient2", "ingredient3"]
- 
+
 RULES: Only ingredients touched in THIS step. Translate to English. No explanation.`;
 
     const response = await axios.post(
@@ -302,7 +313,13 @@ RULES: Only ingredients touched in THIS step. Translate to English. No explanati
         temperature: 0.1,
         max_tokens: 80
       },
-      { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" }, timeout: 8000 }
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 8000
+      }
     );
 
     const raw = response.data.choices[0].message.content.trim();
@@ -311,7 +328,7 @@ RULES: Only ingredients touched in THIS step. Translate to English. No explanati
       const parsed = JSON.parse(match[0]);
       if (Array.isArray(parsed) && parsed.length > 0) {
         console.log("✅ Ingredientes do passo:", parsed);
-        return parsed.slice(0, 3);
+        return parsed.slice(0, 4);
       }
     }
     throw new Error("Formato inválido");
@@ -329,135 +346,281 @@ function extractIngredientsByKeyword(stepDescription, allIngredients) {
       .split(' ')[0];
     return clean.length > 2 && stepLower.includes(clean);
   });
-  return found.length > 0 ? found.slice(0, 3) : allIngredients.slice(0, 2);
+  return found.length > 0 ? found.slice(0, 4) : allIngredients.slice(0, 2);
 }
 
-// ── CONSTRÓI CENA VISUAL ESPECÍFICA DO PASSO ──────────────────────────────────
-function buildStepVisual(stepDescription, stepIngredients, recipeTitle) {
+// ── NEGATIVO UNIVERSAL — aplicado em TODOS os prompts de passo ─────────────────
+const UNIVERSAL_NEGATIVE = [
+  // Humanos
+  'human hands fingers arms person people chef cook woman man',
+  'body parts skin flesh nails rings gloves kitchen worker',
+  'human silhouette portrait face eyes mouth',
+  // Erros visuais
+  'illustration cartoon drawing anime sketch 3d render cgi digital art',
+  'watermark text logo label signature overlay',
+  'blurry out of focus dark underexposed overexposed noisy grainy',
+  'plastic fake food artificial colors',
+  // Contexto errado
+  'empty pan no food unrelated objects furniture',
+  'multiple dishes collage split screen',
+  'raw uncooked ingredients when step requires cooking'
+].join(', ');
+
+// ── CONSTRÓI PROMPT VISUAL PROFISSIONAL DO PASSO ──────────────────────────────
+// A chave da mudança: descreve o RESULTADO VISUAL do passo, não a acção humana.
+// Ex: "golden onions in pan" em vez de "hands stirring onions"
+function buildStepVisual(stepDescription, stepIngredients, recipeTitle, stepNumber, totalSteps) {
   const desc = stepDescription.toLowerCase();
-  const ings = stepIngredients.length > 0 ? stepIngredients.join(' and ') : 'fresh ingredients';
+  const ings = stepIngredients.length > 0 ? stepIngredients.join(', ') : 'ingredients';
+  const ingsFull = stepIngredients.length > 0
+    ? stepIngredients.join(' and ')
+    : 'fresh ingredients';
 
-  if (/lav|wash|clean|rinse|limpar/.test(desc))
-    return { action: `hands washing ${ings} under cold running water in kitchen sink`, scene: `water flowing over produce, wet vegetables glistening, natural daylight` };
+  // ── CORTE / PICAGEM ────────────────────────────────────────────────────────
+  if (/lav|wash|clean|rinse|limpar|enxaguar/.test(desc)) {
+    return {
+      subject: `${ingsFull} freshly washed`,
+      state: `glistening with water droplets, wet surface, clean and vibrant colours`,
+      vessel: `on clean white cutting board or colander, water drops visible`,
+      angle: `close-up overhead shot`,
+      lighting: `bright natural daylight, high key`
+    };
+  }
 
-  if (/picar|cortar|chop|cut|slice|dice|mince|fatiar|descascar|peel/.test(desc))
-    return { action: `chef hands using sharp kitchen knife to chop ${ings} on wooden cutting board, knife mid-cut`, scene: `knife blade cutting through ingredient, pieces separating, close-up` };
+  if (/picar|cortar|chop|cut|slice|dice|mince|fatiar|descascar|peel|juliana/.test(desc)) {
+    return {
+      subject: `${ingsFull} neatly cut and prepared`,
+      state: `thin uniform cucumber slices neatly arranged inside a tall clear glass, slightly overlapping, fresh moisture visible on surface, crisp texture`,
+      vessel: `dark wooden cutting board surface`,
+      angle: `45-degree angle shot showing all pieces clearly`,
+      lighting: `warm natural side lighting casting gentle shadows`
+    };
+  }
 
-  if (/refogar|fritar|fry|sauté|sautee|dourar|golden|brown|saltear/.test(desc))
-    return { action: `${ings} sizzling vigorously in hot oil inside frying pan on gas stove`, scene: `oil bubbles around ingredients, steam rising, edges turning golden brown` };
+  // ── REFOGAR / FRITAR ───────────────────────────────────────────────────────
+  if (/refogar|fritar|fry|sauté|sautee|dourar|golden|brown|saltear|caramelizar/.test(desc)) {
+    return {
+      subject: `${ingsFull} sautéing in pan`,
+      state: `golden-brown caramelised surface, edges crisping, light steam rising, oil glistening around ingredients`,
+      vessel: `black cast iron skillet or stainless steel frying pan on stove, burner glow visible underneath`,
+      angle: `overhead shot or 30-degree angle showing full pan interior`,
+      lighting: `warm kitchen lighting with subtle steam haze`
+    };
+  }
 
-  if (/ferver|boil|simmer|cozinhar|cook|cozer|stew|guisar/.test(desc))
-    return { action: `pot on lit gas stove with ${ings} simmering in bubbling liquid`, scene: `steam rising from pot, liquid gently bubbling, stove burner glowing` };
+  // ── FERVER / COZINHAR / GUISAR ─────────────────────────────────────────────
+  if (/ferver|boil|simmer|cozinhar|cook|cozer|stew|guisar|rebuliçar/.test(desc)) {
+    return {
+      subject: `${ingsFull} simmering in pot`,
+      state: `liquid gently bubbling around ingredients, rich colourful broth, ingredients partially submerged and cooked through`,
+      vessel: `large ceramic or stainless steel pot on stove, steam rising naturally`,
+      angle: `overhead shot looking down into pot showing full contents`,
+      lighting: `warm ambient kitchen light, steam softening edges`
+    };
+  }
 
-  if (/misturar|mexer|stir|mix|blend|whisk|bater|incorporar|combinar/.test(desc))
-    return { action: `hands actively stirring ${ings} in large ceramic bowl using wooden spoon`, scene: `ingredients swirling together, spoon in motion, mixing action` };
+  // ── MISTURAR / INCORPORAR ──────────────────────────────────────────────────
+  if (/misturar|mexer|stir|mix|blend|whisk|bater|incorporar|combinar|amassar/.test(desc)) {
+    return {
+      subject: `${ingsFull} mixed together`,
+      state: `fully incorporated mixture with visible texture and colour contrast, smooth or chunky as appropriate, wooden spoon or whisk resting in bowl`,
+      vessel: `large ceramic mixing bowl on kitchen counter`,
+      angle: `45-degree angle showing depth of mixture`,
+      lighting: `bright overhead light showing texture clearly`
+    };
+  }
 
-  if (/temperar|season|salt|salgar|spice|herb|azeite|adicionar|add|juntar|colocar|pour|verter/.test(desc))
-    return { action: `hand carefully adding ${ings} to pan, pouring or sprinkling in motion`, scene: `seasoning falling, close-up of hand and pan, steam visible` };
+  // ── TEMPERAR / ADICIONAR ───────────────────────────────────────────────────
+  if (/temperar|season|salt|salgar|spice|herb|adicionar|juntar|colocar|verter|por/.test(desc)) {
+    return {
+      subject: `${ingsFull} being seasoned`,
+      state: `spices or herbs visibly coating the surface, seasoning granules or herb flakes clearly visible against food surface, rich colours`,
+      vessel: `pan or bowl with food below, seasoning scattered across surface`,
+      angle: `close-up overhead macro shot`,
+      lighting: `bright directional light showing seasoning texture`
+    };
+  }
 
-  if (/marinar|marinate|rest|descansar|macerar/.test(desc))
-    return { action: `${ings} marinating in glass bowl with fresh herbs, spices and marinade liquid`, scene: `ingredients soaking in marinade, herbs and garlic visible` };
+  // ── MARINAR ────────────────────────────────────────────────────────────────
+  if (/marinar|marinate|rest|descansar|macerar|repousar/.test(desc)) {
+    return {
+      subject: `${ingsFull} marinating`,
+      state: `submerged in dark aromatic marinade, herbs and spices floating, surface glistening with liquid absorption`,
+      vessel: `glass or ceramic bowl with marinade liquid covering ingredients`,
+      angle: `45-degree angle shot showing marinade depth`,
+      lighting: `natural daylight showing translucent marinade colour`
+    };
+  }
 
-  if (/forno|oven|bake|assar|roast/.test(desc))
-    return { action: `${ings || recipeTitle} roasting inside hot oven on metal rack, browning nicely`, scene: `oven interior with glowing heating elements, food surface browning` };
+  // ── FORNO / ASSAR ──────────────────────────────────────────────────────────
+  if (/forno|oven|bake|assar|roast|gratinar|tostar/.test(desc)) {
+    return {
+      subject: `${ingsFull || recipeTitle} roasting in oven`,
+      state: `golden-brown caramelised surface with crispy edges, slight char marks, juices bubbling around edges, perfectly roasted`,
+      vessel: `metal roasting tray or ceramic baking dish inside hot oven, rack visible`,
+      angle: `front-facing shot through oven interior or close-up on dish`,
+      lighting: `warm oven glow with golden tones`
+    };
+  }
 
-  if (/grelhar|grill|barbecue|churrasco|brasa/.test(desc))
-    return { action: `${ings} grilling on hot grill grate with char marks and smoke`, scene: `grill marks forming, smoke rising, flames visible below` };
+  // ── GRELHAR ────────────────────────────────────────────────────────────────
+  if (/grelhar|grill|barbecue|churrasco|brasa|grelhado/.test(desc)) {
+    return {
+      subject: `${ingsFull || recipeTitle} on grill`,
+      state: `distinct char grill marks on surface, caramelised exterior, light smoke rising, juicy interior visible at edges`,
+      vessel: `cast iron grill pan or outdoor grill grates, heat visible`,
+      angle: `30-degree angle showing grill marks and full surface`,
+      lighting: `dramatic warm backlighting with smoke haze`
+    };
+  }
 
-  if (/servir|serve|empratar|plate|garnish|decorar|apresentar/.test(desc))
-    return { action: `plating ${recipeTitle} from pan onto white ceramic plate, final presentation`, scene: `serving spoon placing food, steam rising, garnish being added` };
+  // ── SERVIR / EMPRATAR ─────────────────────────────────────────────────────
+  if (/servir|serve|empratar|plate|garnish|decorar|apresentar|final/.test(desc) || stepNumber === totalSteps) {
+    return {
+      subject: `${recipeTitle} plated beautifully`,
+      state: `complete dish fully plated with garnish, colours vibrant, textures visible, sauce or juices pooling elegantly`,
+      vessel: `elegant white ceramic plate on dark wood or marble surface`,
+      angle: `45-degree angle food photography shot`,
+      lighting: `soft natural side lighting, professional food photography`
+    };
+  }
 
-  if (/preparar|prepare|organizar|mise en place|separar/.test(desc))
-    return { action: `mise en place: ${ings} arranged in small bowls on kitchen counter ready for cooking`, scene: `organised ingredients, cutting board nearby, overhead view` };
+  // ── PREPARAR / MISE EN PLACE ───────────────────────────────────────────────
+  if (/preparar|prepare|organizar|mise en place|separar|dispor|reunir/.test(desc)) {
+    return {
+      subject: `${ingsFull} mise en place`,
+      state: `all ingredients measured and arranged in individual small bowls, colours contrasting beautifully, organised and ready`,
+      vessel: `clean kitchen counter or marble surface with small prep bowls`,
+      angle: `overhead flat-lay shot`,
+      lighting: `bright even lighting showing all ingredients clearly`
+    };
+  }
 
-  return { action: `cooking step for ${recipeTitle}: actively working with ${ings} in kitchen`, scene: `hands performing cooking action, natural kitchen lighting, close-up` };
+  // ── AZEITE / MOLHO / LÍQUIDOS ─────────────────────────────────────────────
+  if (/azeite|óleo|oil|molho|sauce|caldo|stock|broth|creme|cream/.test(desc)) {
+    return {
+      subject: `sauce or liquid with ${ingsFull}`,
+      state: `rich glossy sauce or liquid, visible depth and colour, coating or surrounding other ingredients`,
+      vessel: `pan or saucepan showing sauce consistency and colour`,
+      angle: `overhead or 30-degree angle shot`,
+      lighting: `warm lighting highlighting liquid gloss`
+    };
+  }
+
+  // ── FALLBACK PROFISSIONAL ──────────────────────────────────────────────────
+  return {
+    subject: `${ingsFull} in cooking process for ${recipeTitle}`,
+    state: `ingredients at correct stage of cooking, showing realistic colour and texture transformation`,
+    vessel: `appropriate cooking vessel, clean and professional`,
+    angle: `overhead or 30-degree angle showing full cooking stage`,
+    lighting: `warm natural kitchen lighting, professional food photography`
+  };
+}
+
+// ── CONSTRÓI PROMPT COMPLETO PARA STABILITY AI ────────────────────────────────
+function buildStabilityPrompt(visual, recipeTitle, stepNumber, totalSteps) {
+  const { subject, state, vessel, angle, lighting } = visual;
+
+  return [
+    `professional food photography, editorial cookbook style`,
+    subject,
+    state,
+    `${vessel}, realistic kitchen environment`,
+    `${angle}, subject centered`,
+    `${lighting}`,
+    `shallow depth of field, blurred background`,
+    `natural imperfections, realistic cooking mess minimal`,
+    `high detail textures, moisture, steam, oil sheen`,
+    `sharp focus on food only`,
+    `no people no hands no body parts`,
+    `cookbook editorial quality`,
+    `ultra-realistic food textures`,
+    `vibrant natural colours`,
+    `clean uncluttered composition`,
+    `main subject centered and dominant in frame`,
+    `Michelin star visual quality`,
+    `shot on Canon EOS R5, 50mm lens, f1.8, ultra realistic, food magazine quality, natural light`
+  ].join(', ');
 }
 
 // ── STABILITY AI ──────────────────────────────────────────────────────────────
-async function callOpenAIImage(prompt, recipeTitle = "", stepDescription = "", isFinalDish = false) {
-  console.log("🖼️ STABILITY.AI:", isFinalDish ? "PRATO FINAL" : "PASSO");
+async function callOpenAIImage(prompt, recipeTitle = "", stepDescription = "", isFinalDish = false, stepNumber = 0, totalSteps = 0) {
+  console.log("🖼️ STABILITY.AI:", isFinalDish ? "PRATO FINAL" : `PASSO ${stepNumber}/${totalSteps}`);
 
   try {
     let stabilityPrompt;
     let negativePrompt;
 
     if (isFinalDish) {
+      // ── IMAGEM FINAL DO PRATO ──────────────────────────────────────────────
       stabilityPrompt = [
         `Professional food photography of "${recipeTitle}"`,
-        `Beautifully plated complete dish on elegant white ceramic plate`,
-        `Canon EOS DSLR 50mm f/1.8 lens shallow depth of field bokeh`,
-        `Soft natural window light warm golden tones`,
-        `Restaurant quality presentation with garnish`,
-        `Light steam rising glistening sauces visible food textures`,
-        `Clean marble or dark wood surface background`,
-        `Michelin star editorial food magazine quality`,
-        `Vibrant natural colors crispy juicy textures`,
-        `Appetizing mouth-watering ultra-realistic photograph`
+        `beautifully plated complete finished dish`,
+        `elegant presentation on white ceramic plate`,
+        `rich vibrant colours showing all components`,
+        `garnish and sauce visible`,
+        `light steam rising naturally`,
+        `dark wood or marble surface background`,
+        `45-degree angle shot`,
+        `soft natural window side lighting with bokeh background`,
+        `no people no hands no body parts anywhere in frame`,
+        `cookbook cover quality`,
+        `ultra-realistic food textures`,
+        `Michelin star editorial food magazine photography`,
+        `Canon EOS R5 50mm f1.8 lens shallow depth of field`
       ].join(', ');
 
       negativePrompt = [
-        'illustration cartoon drawing painting anime comic sketch',
-        '3d render cgi unreal engine digital art concept art',
-        'plastic food fake food artificial colors oversaturated',
-        'text watermark logo signature label',
-        'blurry dark underexposed overexposed',
-        'people hands faces fingers',
-        'empty plate no food'
+        UNIVERSAL_NEGATIVE,
+        'unfinished incomplete raw ingredients',
+        'multiple unrelated dishes',
+        'messy cluttered presentation'
       ].join(', ');
 
     } else {
-      // Extrai ingredientes do marcador especial no stepDescription
-      // Formato: "descrição do passo [INGREDIENTS: onion, garlic, oil]"
+      // ── IMAGEM DO PASSO ────────────────────────────────────────────────────
+      // Extrai ingredientes do marcador especial
       let stepIngredients = [];
       const ingMatch = stepDescription.match(/\[INGREDIENTS:(.*?)\]/);
       if (ingMatch) {
         stepIngredients = ingMatch[1].split(',').map(s => s.trim()).filter(Boolean);
       }
-
       const cleanDesc = stepDescription.replace(/\[INGREDIENTS:.*?\]/, '').trim();
-      const { action, scene } = buildStepVisual(cleanDesc, stepIngredients, recipeTitle);
 
-      stabilityPrompt = [
-        `Instructional cooking photography documentary style`,
-        action,
-        scene,
-        `Tight close-up shot hands and ingredients fill the frame`,
-        `Warm natural kitchen lighting wooden counter or stove background`,
-        `Sharp focus on the action being performed`,
-        `Realistic food textures natural colors`,
-        `Educational cooking tutorial photography`,
-        `DSLR camera 35mm lens f2.8 aperture`
-      ].join(', ');
+      const visual = buildStepVisual(cleanDesc, stepIngredients, recipeTitle, stepNumber, totalSteps);
+      stabilityPrompt = buildStabilityPrompt(visual, recipeTitle, stepNumber, totalSteps);
 
       negativePrompt = [
-        'illustration cartoon drawing anime digital art 3d render cgi',
-        'finished plated dish final meal restaurant presentation',
-        'empty kitchen no action happening',
-        'text watermark logo labels',
-        'full body faces portraits',
-        'blurry overexposed dark noisy',
-        'generic stock photo staged studio'
+        UNIVERSAL_NEGATIVE,
+        'wrong cooking stage',
+        'burnt overcooked',
+        'unrelated cooking utensils dominating frame'
       ].join(', ');
     }
 
-    console.log("📝 Prompt:", stabilityPrompt.substring(0, 120));
+    console.log(" Positive:", stabilityPrompt.substring(0, 150) + "...");
+    console.log(" Negative:", negativePrompt.substring(0, 100) + "...");
 
     const response = await axios.post(
       "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
       {
         text_prompts: [
           { text: stabilityPrompt, weight: 1 },
-          { text: negativePrompt, weight: -1.5 }
+          { text: negativePrompt, weight: -2 }
         ],
-        cfg_scale: 8,
+        cfg_scale: 10,
         height: 1024,
         width: 1024,
         samples: 1,
-        steps: 35,
+        steps: 50,        
         style_preset: "photographic"
       },
       {
-        headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${process.env.STABILITY_API_KEY}` },
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.STABILITY_API_KEY}`
+        },
         timeout: 60000
       }
     );
@@ -505,13 +668,28 @@ function extractOptionsFromJSON(jsonText) {
   return jsonText.split('\n').filter(l => l.trim())
     .filter(l => /^\d+\./.test(l) || /^[•\-]/.test(l))
     .slice(0, 3)
-    .map(line => ({ title: line.replace(/^\d+\.\s*|^[•\-]\s*/, '').trim(), description: "Receita tradicional", ingredients: [], difficulty: "Média", time: "45 min", category: "Angolana" }));
+    .map(line => ({
+      title: line.replace(/^\d+\.\s*|^[•\-]\s*/, '').trim(),
+      description: "Receita tradicional",
+      ingredients: [],
+      difficulty: "Média",
+      time: "45 min",
+      category: "Angolana"
+    }));
 }
 
 function mockTextFallback(imageBase64 = null) {
   const options = imageBase64
-    ? [{ title: "Moamba de Galinha", description: "Frango com óleo de palma", difficulty: "Média", time: "60 min" }, { title: "Calulu de Peixe", description: "Peixe com legumes", difficulty: "Fácil", time: "45 min" }, { title: "Mufete de Feijão", description: "Feijão com óleo vermelho", difficulty: "Difícil", time: "90 min" }]
-    : [{ title: "Arroz de Galinha", description: "Arroz com frango", difficulty: "Média", time: "50 min" }, { title: "Cabrito Assado", description: "Cabrito no forno", difficulty: "Difícil", time: "120 min" }, { title: "Peixe Grelhado", description: "Peixe com limão", difficulty: "Fácil", time: "30 min" }];
+    ? [
+      { title: "Moamba de Galinha", description: "Frango com óleo de palma", difficulty: "Média", time: "60 min" },
+      { title: "Calulu de Peixe", description: "Peixe com legumes", difficulty: "Fácil", time: "45 min" },
+      { title: "Mufete de Feijão", description: "Feijão com óleo vermelho", difficulty: "Difícil", time: "90 min" }
+    ]
+    : [
+      { title: "Arroz de Galinha", description: "Arroz com frango", difficulty: "Média", time: "50 min" },
+      { title: "Cabrito Assado", description: "Cabrito no forno", difficulty: "Difícil", time: "120 min" },
+      { title: "Peixe Grelhado", description: "Peixe com limão", difficulty: "Fácil", time: "30 min" }
+    ];
   return { raw: JSON.stringify({ ingredientsIdentified: [], options }), options };
 }
 

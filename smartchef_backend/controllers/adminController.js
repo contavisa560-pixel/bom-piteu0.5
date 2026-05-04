@@ -7,29 +7,44 @@ const Alerta = require("../models/Alerta");
 const IpLookupService = require('../services/ipLookupService');
 const AdminNotificationService = require('../services/adminNotificationService');
 const { clearCache } = require('../services/systemSettingsService');
+
 // ==================== MÉTRICAS ====================
 exports.getGlobalMetrics = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const premiumUsers = await User.countDocuments({ isPremium: true });
     const bannedUsers = await User.countDocuments({ isBanned: true });
-    const adminUsers = await User.countDocuments({ role: "admin" });
+    const adminUsers = await User.countDocuments({
+      role: { $in: ["admin", "superadmin", "moderator"] }
+    });
 
+    // Utilizadores activos hoje — quem teve actividade no usageCycle iniciado hoje
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const activeToday = await User.countDocuments({ lastReset: { $gte: today } });
+    const activeToday = await User.countDocuments({
+      $or: [
+        { "usageCycle.startDate": { $gte: today } },
+        { lastReset: { $gte: today } }
+      ]
+    });
 
     const usageData = await User.aggregate([{
       $group: {
         _id: null,
-        totalText: { $sum: "$usage.dailyTextRequests" },
-        totalImages: { $sum: "$usage.dailyImageGenerations" },
-        totalAnalysis: { $sum: "$usage.dailyImageAnalysis" }
+        totalText: { $sum: { $add: [{ $ifNull: ["$usageCycle.used", 0] }, { $ifNull: ["$usage.dailyTextRequests", 0] }] } },
+        totalImages: { $sum: { $add: [{ $ifNull: ["$usageCycle.imagesUsed", 0] }, { $ifNull: ["$usage.dailyImageGenerations", 0] }] } },
+        totalAnalysis: { $sum: { $add: [{ $ifNull: ["$usageCycle.visionUsed", 0] }, { $ifNull: ["$usage.dailyImageAnalysis", 0] }] } }
       }
     }]);
 
     const usage = usageData[0] || { totalText: 0, totalImages: 0, totalAnalysis: 0 };
-    const estimatedCost = ((usage.totalText * 0.002) + (usage.totalImages * 0.04)).toFixed(2);
+
+    // Custo estimado: texto ~$0.002/req, imagem ~$0.04/req, visão ~$0.01/req
+    const estimatedCost = (
+      (usage.totalText * 0.002) +
+      (usage.totalImages * 0.04) +
+      (usage.totalAnalysis * 0.01)
+    ).toFixed(2);
 
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -253,19 +268,19 @@ exports.getUsageTimeline = async (req, res) => {
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
 
-    const timeline = await User.aggregate([
+    // Usa o AuditLog para timeline real de actividade
+    // e o usageCycle para os totais actuais por utilizador
+    const timeline = await AuditLog.aggregate([
       {
-        $match: {
-          lastReset: { $gte: startDate }
-        }
+        $match: { createdAt: { $gte: startDate } }
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$lastReset" } },
-          totalText: { $sum: "$usage.dailyTextRequests" },
-          totalImages: { $sum: "$usage.dailyImageGenerations" },
-          totalAnalysis: { $sum: "$usage.dailyImageAnalysis" },
-          activeUsers: { $addToSet: "$_id" }
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          totalText: { $sum: 1 },           // cada log = 1 operação
+          totalImages: { $sum: 0 },
+          totalAnalysis: { $sum: 0 },
+          activeUsers: { $addToSet: "$userId" }
         }
       },
       {
@@ -280,6 +295,39 @@ exports.getUsageTimeline = async (req, res) => {
       { $sort: { date: 1 } }
     ]);
 
+    // Se não houver logs suficientes, complementa com dados do usageCycle
+    // agrupando utilizadores por data de início do ciclo
+    if (timeline.length === 0) {
+      const cycleTimeline = await User.aggregate([
+        {
+          $match: {
+            "usageCycle.startDate": { $gte: startDate, $ne: null }
+          }
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$usageCycle.startDate" } },
+            totalText: { $sum: "$usageCycle.used" },
+            totalImages: { $sum: "$usageCycle.imagesUsed" },
+            totalAnalysis: { $sum: "$usageCycle.visionUsed" },
+            activeUsers: { $addToSet: "$_id" }
+          }
+        },
+        {
+          $project: {
+            date: "$_id",
+            totalText: 1,
+            totalImages: 1,
+            totalAnalysis: 1,
+            activeUsersCount: { $size: "$activeUsers" }
+          }
+        },
+        { $sort: { date: 1 } }
+      ]);
+
+      return res.json({ success: true, data: cycleTimeline });
+    }
+
     res.json({ success: true, data: timeline });
   } catch (err) {
     res.status(500).json({ error: "Erro ao gerar timeline: " + err.message });
@@ -290,18 +338,22 @@ exports.getUsageTimeline = async (req, res) => {
 exports.getTopUsers = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
+
+    // Ordena pelo usageCycle — fonte de verdade actual
     const topText = await User.find({})
-      .sort({ "usage.dailyTextRequests": -1 })
+      .sort({ "usageCycle.used": -1 })
       .limit(limit)
-      .select("name email usage.dailyTextRequests");
+      .select("name email usageCycle.used usage.dailyTextRequests");
+
     const topImages = await User.find({})
-      .sort({ "usage.dailyImageGenerations": -1 })
+      .sort({ "usageCycle.imagesUsed": -1 })
       .limit(limit)
-      .select("name email usage.dailyImageGenerations");
+      .select("name email usageCycle.imagesUsed usage.dailyImageGenerations");
+
     const topAnalysis = await User.find({})
-      .sort({ "usage.dailyImageAnalysis": -1 })
+      .sort({ "usageCycle.visionUsed": -1 })
       .limit(limit)
-      .select("name email usage.dailyImageAnalysis");
+      .select("name email usageCycle.visionUsed usage.dailyImageAnalysis");
 
     res.json({
       success: true,

@@ -1,52 +1,85 @@
+
 const crypto = require("crypto");
 const ImageCache = require("../models/ImageCache");
 
-function normalizePrompt(prompt, imageType) {
-  const normalized = prompt
+// Normaliza o prompt para maximizar hits de cache
+function normalizePrompt(raw) {
+  return raw
     .toLowerCase()
     .trim()
     .replace(/\s+/g, " ")
-    .replace(/[^\w\s\u00C0-\u024F]/g, "");
-
-  return `${imageType}::${normalized}`;
+    // Remove artigos e palavras de ligação que não afectam o significado visual
+    .replace(/\b(de|da|do|com|e|em|o|a|os|as|um|uma|the|of|with|and)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function generateHash(prompt, imageType) {
-  const key = normalizePrompt(prompt, imageType);
-  return crypto.createHash("md5").update(key).digest("hex");
+function generateHash(normalizedPrompt) {
+  return crypto.createHash("md5").update(normalizedPrompt).digest("hex");
+}
+
+// Extrai palavras-chave para busca por similaridade
+function extractKeywords(prompt) {
+  const stopWords = new Set([
+    "de", "da", "do", "com", "e", "em", "o", "a", "os", "as",
+    "um", "uma", "the", "of", "with", "and", "step", "passo",
+    "ingredients", "ingredientes", "recipe", "receita"
+  ]);
+  return normalizePrompt(prompt)
+    .split(" ")
+    .filter(w => w.length > 3 && !stopWords.has(w));
 }
 
 async function getCachedImage(prompt, imageType = "recipe") {
   try {
-    const hash = generateHash(prompt, imageType);
-    const cached = await ImageCache.findOne({ hash });
+    const normalized = normalizePrompt(prompt);
+    const hash = generateHash(`${imageType}::${normalized}`);
 
-    if (!cached) {
-      console.log(`📭 Cache MISS: ${imageType} — "${prompt.substring(0, 50)}..."`);
-      return null;
+    // Camada 1: hash exacto
+    const exact = await ImageCache.findOne({ hash });
+    if (exact) {
+      ImageCache.findByIdAndUpdate(exact._id, {
+        $inc: { hitCount: 1 },
+        lastUsedAt: new Date(),
+        expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      }).exec().catch(() => {});
+      console.log(`✅ Cache HIT exacto: ${imageType} — "${prompt.substring(0, 50)}"`);
+      return exact.imageUrl;
     }
 
-    // ✅ ALTERAÇÃO 2 — agora loga se falhar
-    ImageCache.findByIdAndUpdate(cached._id, {
-      $inc: { hitCount: 1 },
-      lastUsedAt: new Date(),
-      expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-    }).exec().catch(err => console.error("⚠️ Cache hit update falhou:", err.message));
+    // Camada 2: busca por palavras-chave (mesma categoria)
+    const keywords = extractKeywords(prompt);
+    if (keywords.length >= 2) {
+      // Procura entradas que contenham pelo menos 2 palavras-chave no prompt
+      const keywordRegex = keywords.slice(0, 3).map(k => new RegExp(k, "i"));
+      const similar = await ImageCache.findOne({
+        imageType,
+        $and: keywordRegex.map(r => ({ prompt: r })),
+        hitCount: { $gte: 1 } // só reutiliza se já foi validado antes
+      }).sort({ hitCount: -1 });
 
-    console.log(
-      `✅ Cache HIT: ${imageType} — "${prompt.substring(0, 50)}..." (usado ${cached.hitCount + 1}x)`
-    );
+      if (similar) {
+        ImageCache.findByIdAndUpdate(similar._id, {
+          $inc: { hitCount: 1 },
+          lastUsedAt: new Date(),
+        }).exec().catch(() => {});
+        console.log(`✅ Cache HIT similar: ${imageType} — "${prompt.substring(0, 50)}"`);
+        return similar.imageUrl;
+      }
+    }
 
-    return cached.imageUrl;
+    console.log(`📭 Cache MISS: ${imageType} — "${prompt.substring(0, 50)}"`);
+    return null;
   } catch (error) {
-    console.error("⚠️ Erro ao consultar cache (continuando sem cache):", error.message);
+    console.error("⚠️ Erro cache lookup:", error.message);
     return null;
   }
 }
 
 async function setCachedImage(prompt, imageType = "recipe", imageUrl) {
   try {
-    const hash = generateHash(prompt, imageType);
+    const normalized = normalizePrompt(prompt);
+    const hash = generateHash(`${imageType}::${normalized}`);
 
     await ImageCache.findOneAndUpdate(
       { hash },
@@ -60,10 +93,9 @@ async function setCachedImage(prompt, imageType = "recipe", imageUrl) {
       },
       { upsert: true, new: true }
     );
-
-    console.log(`💾 Cache SALVO: ${imageType} — "${prompt.substring(0, 50)}..."`);
+    console.log(`💾 Cache GUARDADO: ${imageType} — "${prompt.substring(0, 50)}"`);
   } catch (error) {
-    console.error("⚠️ Erro ao salvar no cache (imagem gerada normalmente):", error.message);
+    console.error("⚠️ Erro ao guardar cache:", error.message);
   }
 }
 
@@ -71,60 +103,13 @@ async function getOrGenerateImage(prompt, imageType, generateFn) {
   const cached = await getCachedImage(prompt, imageType);
   if (cached) return cached;
 
-  console.log(`🎨 Gerando nova imagem: ${imageType} — "${prompt.substring(0, 60)}..."`);
+  console.log(`🎨 Gerando nova imagem: ${imageType} — "${prompt.substring(0, 60)}"`);
   const imageUrl = await generateFn();
 
+  // Guarda em background sem bloquear a resposta
   setCachedImage(prompt, imageType, imageUrl).catch(() => {});
 
   return imageUrl;
 }
 
-// ✅ ALTERAÇÃO 1 — getCacheStats completo
-async function getCacheStats() {
-  const COST_PER_IMAGE_USD = 0.04;
-
-  const [total, byTypeRaw, topHits, recentSaved, globalAgg] = await Promise.all([
-    ImageCache.countDocuments(),
-    ImageCache.aggregate([
-      {
-        $group: {
-          _id: "$imageType",
-          count: { $sum: 1 },
-          totalHits: { $sum: "$hitCount" },
-          avgHits: { $avg: "$hitCount" },
-        },
-      },
-      { $sort: { count: -1 } },
-    ]),
-    ImageCache.find()
-      .sort({ hitCount: -1 })
-      .limit(10)
-      .select("prompt imageType hitCount lastUsedAt imageUrl"),
-    ImageCache.find()
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .select("prompt imageType hitCount createdAt imageUrl"),
-    ImageCache.aggregate([
-      { $group: { _id: null, totalReusos: { $sum: "$hitCount" } } },
-    ]),
-  ]);
-
-  const totalReusos = globalAgg[0]?.totalReusos ?? 0;
-  const estimatedSavingsUSD = (totalReusos * COST_PER_IMAGE_USD).toFixed(2);
-
-  return {
-    total,
-    totalReusos,
-    estimatedSavingsUSD,
-    byType: byTypeRaw,
-    topHits,
-    recentSaved,
-  };
-}
-
-module.exports = {
-  getOrGenerateImage,
-  getCachedImage,
-  setCachedImage,
-  getCacheStats,
-};
+module.exports = { getOrGenerateImage, getCachedImage, setCachedImage };

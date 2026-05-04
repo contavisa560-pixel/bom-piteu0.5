@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
  * - Dietas (Vegana, Keto, etc)
  * - Alergias e Intolerâncias
  * - Objetivos nutricionais
- * - Restrições alimentares
+ * - Restriçõe salimentares
  * 
  * RELAÇÃO: 1-para-1 com User
  */

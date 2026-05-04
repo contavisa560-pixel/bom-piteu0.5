@@ -477,11 +477,18 @@ router.put("/:id/settings", authenticate, async (req, res) => {
       twoFactorBackupCodes: user.settings?.security?.twoFactorBackupCodes,
     };
 
+    const currentSettings = user.settings?.toObject?.() || user.settings || {};
+
     const mergedSettings = {
-      ...user.settings?.toObject?.() || user.settings || {},
+      ...currentSettings,
       ...newSettings,
-      security: securityToMerge
+      security: securityToMerge,
     };
+
+    // Forçar explicitamente campos booleanos do newSettings
+    if (newSettings.restrictionsInSuggestions !== undefined) {
+      mergedSettings.restrictionsInSuggestions = newSettings.restrictionsInSuggestions;
+    }
 
     // Remover campos undefined
     delete mergedSettings.security.twoFactorSecret;
@@ -498,7 +505,10 @@ router.put("/:id/settings", authenticate, async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Configurações salvas com sucesso!",
-      settings: updatedUser.settings,
+      settings: {
+        ...updatedUser.settings?.toObject?.() || updatedUser.settings,
+        restrictionsInSuggestions: updatedUser.settings?.restrictionsInSuggestions ?? true,
+      },
       user: { id: updatedUser._id, email: updatedUser.email, name: updatedUser.name }
     });
 
@@ -611,13 +621,21 @@ router.get("/:id/usage-cycle", authenticate, async (req, res) => {
   }
 });
 
+
 // ==================== POST - Guardar Ciclo de Uso ====================
 router.post("/:id/usage-cycle", authenticate, async (req, res) => {
   try {
-    const { used, imagesUsed, startDate } = req.body;
+    const { used, imagesUsed, startDate, limitReachedAt } = req.body;
 
     await User.findByIdAndUpdate(req.params.id, {
-      $set: { usageCycle: { used, imagesUsed, startDate } }
+      $set: {
+        usageCycle: {
+          used: used || 0,
+          imagesUsed: imagesUsed || 0,
+          startDate: startDate || new Date(),
+          limitReachedAt: limitReachedAt || null   // ← CAMPO QUE FALTAVA
+        }
+      }
     });
 
     res.json({ success: true });
@@ -655,6 +673,115 @@ router.post("/:id/cancel-subscription", authenticate, async (req, res) => {
   } catch (error) {
     console.error("Erro ao cancelar subscrição:", error);
     res.status(500).json({ error: "Erro ao cancelar subscrição" });
+  }
+});
+
+// ==================== POST - Activar Subscrição (após pagamento) ====================
+router.post("/:id/activate-subscription", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { plan = 'premium', durationDays = 30 } = req.body;
+
+    // Verificar autorização
+    if (req.user._id.toString() !== id && req.user.id !== id) {
+      return res.status(403).json({ error: "Não autorizado" });
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + durationDays);
+
+    // Limites por plano
+    const PLAN_LIMITS = {
+      premium: { textLimit: 80, imageLimit: 50 },
+      familiar: { textLimit: 200, imageLimit: 100 },
+    };
+    const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.premium;
+
+    //  Activa premium + nova data de expiração + novos limites
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          isPremium: true,
+          plan: plan,
+          premiumExpiresAt: expiresAt,
+          'limits.textLimit': limits.textLimit,
+          'limits.imageLimit': limits.imageLimit,
+          //  RESET COMPLETO do ciclo de uso — utilizador recomeça do zero
+          usageCycle: {
+            used: 0,
+            imagesUsed: 0,
+            startDate: now,
+            limitReachedAt: null  // ← desbloqueia o utilizador
+          }
+        }
+      },
+      { new: true, select: '-password' }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "Utilizador não encontrado" });
+    }
+
+    console.log(`✅ Subscrição ${plan} activada para ${updatedUser.email} até ${expiresAt.toLocaleDateString('pt-PT')}`);
+
+    res.json({
+      success: true,
+      user: updatedUser,
+      message: `Subscrição ${plan} activada até ${expiresAt.toLocaleDateString('pt-PT')}`
+    });
+
+  } catch (err) {
+    console.error("Erro ao activar subscrição:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+// ==================== POST - Actualizar Streak ====================
+router.post("/:id/streak", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: "Utilizador não encontrado" });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const last = user.lastAccessDate ? new Date(user.lastAccessDate) : null;
+    if (last) last.setHours(0, 0, 0, 0);
+
+    let newStreak = user.streakCount || 0;
+    let message = "";
+
+    if (!last) {
+      // Primeira visita
+      newStreak = 1;
+      message = "inicio";
+    } else {
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        // Já entrou hoje — não altera
+        return res.json({ streak: newStreak, message: "hoje" });
+      } else if (diffDays === 1) {
+        // Ontem — incrementa
+        newStreak = (user.streakCount || 0) + 1;
+        message = "incremento";
+      } else {
+        // Quebrou — reinicia
+        newStreak = 1;
+        message = "reset";
+      }
+    }
+
+    await User.findByIdAndUpdate(id, {
+      streakCount: newStreak,
+      lastAccessDate: today
+    });
+
+    res.json({ streak: newStreak, message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

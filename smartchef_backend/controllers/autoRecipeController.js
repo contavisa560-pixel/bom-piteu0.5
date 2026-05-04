@@ -543,7 +543,7 @@ exports.selectRecipe = async (req, res) => {
 
     let finalImageUrl = null;
     try {
-      const cachePrompt = `${chosenRecipe.title}::${chosenRecipe.description || "prato tradicional"}`;
+      const cachePrompt = chosenRecipe.title.toLowerCase().trim();
 
       finalImageUrl = await getOrGenerateImage(
         cachePrompt,
@@ -716,9 +716,8 @@ ${langInstruction}
       );
 
       console.log(`🥘 Passo ${stepIndex + 1} — ingredientes específicos:`, stepIngredients);
-
-      const stepContextForImage = `${stepDescriptionEN} [INGREDIENTS: ${stepIngredients.join(", ")}]`;
-      const cachePrompt = `${recipeTitleEN}::step${stepIndex + 1}::${stepContextForImage}`;
+      const stepContextForImage = `${stepDescriptionEN} [INGREDIENTS:${stepIngredients.join(",")}]`;
+      const cachePrompt = `${recipeTitleEN}::step${stepIndex + 1}`;
 
       stepImageUrl = await getOrGenerateImage(
         cachePrompt,
@@ -729,7 +728,9 @@ ${langInstruction}
             "",
             recipeTitleEN,
             stepContextForImage,
-            false
+            false,
+            stepIndex + 1,
+            totalSteps
           );
           if (!tempStepImageUrl) throw new Error("OpenAI não retornou URL");
           return await require("../services/storageService").ensurePermanentImageUrl(
@@ -1473,8 +1474,22 @@ function detectarIntencao(mensagem, session = null) {
  */
 exports.chatLivre = async (req, res) => {
   try {
-    const { mensagem, sessionId, language } = req.body; // ← language
+    const { mensagem, sessionId, language, contexto, historico } = req.body;
     const langInstruction = getLanguageInstruction(language);
+
+    // Mapa de contexto por categoria 
+    const contextMap = {
+      'cocktails': 'O utilizador veio da secção de Cocktails. Foca em cocktails, bebidas especiais e mocktails. Pergunta que tipo de cocktail quer, para que ocasião e se tem alguma restrição.',
+      'vegetariano': 'O utilizador é vegetariano ou vegano. Todas as sugestões devem ser plant-based, sem carne nem peixe. Pergunta que tipo de receitas prefere e os seus objetivos nutricionais.',
+      'receitas_rapidas': 'O utilizador quer receitas muito rápidas (menos de 20 minutos). Sugere pratos simples e práticos. Pergunta quantas pessoas são e o que tem disponível em casa.',
+      'saude': 'O utilizador está focado em saúde e nutrição. Sugere receitas equilibradas, com poucos processados. Pergunta os seus objetivos de saúde.',
+      'economico': 'O utilizador tem orçamento reduzido. Sugere receitas baratas com ingredientes comuns. Pergunta quantas pessoas são e o que costuma ter em casa.',
+      'tecnicas': 'O utilizador quer aprender técnicas culinárias profissionais. Explica técnicas de forma clara e progressiva. Pergunta o seu nível actual na cozinha.',
+      'mood': 'O utilizador quer uma receita baseada no seu estado de espírito. Pergunta como se sente hoje e o que procura (conforto, energia, celebração, etc).',
+      'topRated': 'O utilizador quer descobrir receitas populares e bem avaliadas. Sugere pratos clássicos e bem executados. Pergunta as suas preferências de cozinha.',
+      'sazonal': 'O utilizador quer usar ingredientes da época. Pergunta onde vive para saber a estação do ano e que ingredientes tem disponíveis.',
+    };
+    const contextoExtra = contexto ? (contextMap[contexto] || '') : '';
 
     console.log("💬 CHAT LIVRE:", {
       mensagem: mensagem?.substring(0, 100),
@@ -1561,47 +1576,59 @@ CONTEXTO: Usuário tem receita "${session.selectedRecipe?.title}" selecionada ma
 `;
     }
 
-    const prompt = `${promptContext}
+    // ── Constrói mensagens com histórico real para o GROQ (NOVO) ──────────────
+    const mensagensParaGroq = [];
 
-VOCÊ É O BOMPITEU! - ASSISTENTE CULINÁRIO ANGOLANO INTELIGENTE
+    // System message com contexto da categoria + preferências do utilizador
+    const systemContent = [
+      `Você é o BOMPITEU, assistente culinário angolano inteligente e amigável.`,
+      contextoExtra,
+      userPrefs.hasPreferences ? `RESTRIÇÕES DO UTILIZADOR: ${userPrefs.restrictionsText}` : '',
+      `REGRAS: Seja natural e conversacional. Nunca uses emojis. Máximo 4 frases por resposta.`,
+      `Se o utilizador mencionar ingrediente proibido (alergia), avisa gentilmente e sugere alternativa.`,
+      `Só entra em modo de receita quando o utilizador pedir explicitamente.`,
+      langInstruction,
+    ].filter(Boolean).join(' ');
 
-PERSONALIDADE:
-- Amigável e prestativo
-- Especialista em culinária angolana e internacional
-- Dá respostas práticas e diretas
-- Encoraja o usuário a cozinhar
-- Respeita totalmente as restrições alimentares do usuário
-- Não usa emojis
-- Se o usuário mencionar ingrediente proibido (leite, marisco, etc), DEVE:
-  1. ALERTAR sobre a alergia específica
-  2. EXPLICAR porquê não pode sugerir
-  3. OFERECER alternativa segura
-  4. Ser gentil e educativo
+    mensagensParaGroq.push({ role: 'system', content: systemContent });
 
-MENSAGEM DO USUÁRIO:
-"${mensagem}"
+    // Adiciona histórico real da conversa (se existir)
+    if (Array.isArray(historico) && historico.length > 0) {
+      historico.forEach(msg => {
+        if (msg.role && msg.content && typeof msg.content === 'string') {
+          mensagensParaGroq.push({ role: msg.role, content: msg.content });
+        }
+      });
+    }
 
-INSTRUÇÕES:
-1. Se for saudação (olá, oi, bom dia, hello, hi, good morning): Seja caloroso e pergunte como pode ajudar
-2. Se for pergunta culinária: Responda de forma clara e prática, considerando restrições
-3. Se for despedida: Despeça-se amigavelmente
-4. Se for agradecimento: Agradeça e incentive a cozinhar
-5. SEMPRE sugira sutilmente iniciar uma receita quando apropriado
-6. Seja BREVE (máximo 4-5 linhas)
+    // Mensagem actual do utilizador
+    mensagensParaGroq.push({ role: 'user', content: mensagem });
 
-${langInstruction}
-
-RESPONDA APENAS COM O TEXTO DA RESPOSTA, SEM JSON E SEM MARCADORES.`;
-
-    const aiResponse = await callOpenAIText(
-      prompt,
-      null,
-      `Você é o BOMPITEU, um assistente culinário angolano amigável e profissional que respeita as restrições alimentares dos usuários. ${langInstruction}`
+    // Chama o GROQ directamente com o array de mensagens
+    const axios = require('axios');
+    const groqResponse = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.3-70b-versatile",
+        messages: mensagensParaGroq,
+        temperature: 0.75,
+        max_tokens: 300,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 25000
+      }
     );
 
-    let contextoExtra = null;
+    const respostaNatural = groqResponse.data.choices[0].message.content;
+    // ─────────────────────────────────────────────────────────────────────────
+
+    let contextoExtra2 = null;
     if (session && session.status === "SELECTED") {
-      contextoExtra = {
+      contextoExtra2 = {
         temReceitaPendente: true,
         receita: session.selectedRecipe?.title,
         mensagem: "Você tem uma receita pronta para começar! Quer iniciar os passos?"
@@ -1611,10 +1638,10 @@ RESPONDA APENAS COM O TEXTO DA RESPOSTA, SEM JSON E SEM MARCADORES.`;
     res.json({
       tipo: "chat_livre",
       intencao: intencao,
-      resposta: aiResponse.raw,
+      resposta: respostaNatural,           // ← usa a nova variável
       temPreferencias: userPrefs.hasPreferences,
       preferenciasResumo: userPrefs.restrictionsText || null,
-      contextoReceita: contextoExtra,
+      contextoReceita: contextoExtra2,
       sessionId: session?._id || null
     });
 

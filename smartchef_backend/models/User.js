@@ -94,9 +94,18 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now
     },
+    streakCount: {
+      type: Number,
+      default: 0
+    },
+    lastAccessDate: {
+      type: Date,
+      default: null
+    },
     usageCycle: {
       used: { type: Number, default: 0 },
       imagesUsed: { type: Number, default: 0 },
+      visionUsed: { type: Number, default: 0 },
       startDate: { type: Date, default: null },
       limitReachedAt: { type: Date, default: null }
     },
@@ -233,6 +242,11 @@ const userSchema = new mongoose.Schema(
       },
 
       newsletter: {
+        type: Boolean,
+        default: true
+      },
+
+      restrictionsInSuggestions: {
         type: Boolean,
         default: true
       },

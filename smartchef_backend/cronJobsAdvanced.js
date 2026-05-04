@@ -15,7 +15,7 @@ const dailyUserMaintenance = async () => {
   try {
     const agora = new Date();
 
-    // Reset de limites diários
+    //  Reset de limites diários de uso (mantém como está)
     await User.updateMany(
       {},
       {
@@ -28,35 +28,39 @@ const dailyUserMaintenance = async () => {
       }
     );
 
-    // Verificação de Expiração Premium e Downgrade Automático
-    const expired = await User.updateMany(
-      {
-        isPremium: true,
-        premiumExpiresAt: { $lt: agora, $ne: null }
-      },
-      {
-        $set: {
-          isPremium: false,
-          premiumExpiresAt: null,
-          // Retorna aos limites básicos de FREE
-          "limits.textLimit": 7,
-          "limits.imageLimit": 2
-        }
-      }
-    );
+    //  PRIMEIRO busca quem vai expirar ANTES do updateMany
+    const usersToExpire = await User.find({
+      isPremium: true,
+      premiumExpiresAt: { $lt: agora, $ne: null }
+    });
 
-    if (expired.modifiedCount > 0) {
-      // Para cada utilizador expirado, cria notificação
-      const expiredUsers = await User.find({
-        isPremium: true,
-        premiumExpiresAt: { $lt: agora, $ne: null }
-      });
-      for (const user of expiredUsers) {
-        await AdminNotificationService.notifyPremiumExpired(user);
+    // 3. Só depois faz o downgrade
+    if (usersToExpire.length > 0) {
+      await User.updateMany(
+        { _id: { $in: usersToExpire.map(u => u._id) } },
+        {
+          $set: {
+            isPremium: false,
+            premiumExpiresAt: null,
+            plan: 'free',
+            "limits.textLimit": 7,
+            "limits.imageLimit": 3,
+          }
+        }
+      );
+
+      //  Notifica cada utilizador 
+      for (const u of usersToExpire) {
+        try {
+          // await AdminNotificationService.notifyPremiumExpired(u);
+          console.log(`⬇️ Downgrade automático: ${u.email}`);
+        } catch (notifErr) {
+          console.error(`Erro ao notificar ${u.email}:`, notifErr.message);
+        }
       }
     }
 
-    console.log(` Manutenção de usuários concluída. Downgrades: ${expired.modifiedCount}`);
+    console.log(` Manutenção concluída. Downgrades: ${usersToExpire.length}`);
   } catch (err) {
     console.error(" Erro na manutenção diária:", err.message);
   }

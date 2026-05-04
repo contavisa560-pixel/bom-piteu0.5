@@ -18,12 +18,12 @@ const UserSettingsSchema = new mongoose.Schema(
       enum: ["light", "dark", "system"],
       default: "light"
     },
-    
+
     compactMode: {
       type: Boolean,
       default: false
     },
-    
+
     animations: {
       type: Boolean,
       default: true
@@ -35,12 +35,12 @@ const UserSettingsSchema = new mongoose.Schema(
       enum: ["pt", "en", "es", "fr"],
       default: "pt"
     },
-    
+
     region: {
       type: String,
       default: "pt-AO" // Angola
     },
-    
+
     dateFormat: {
       type: String,
       enum: ["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd"],
@@ -145,9 +145,14 @@ const UserSettingsSchema = new mongoose.Schema(
       max: 60,
       default: 10
     },
+    // ==================== SUGESTÕES DIÁRIAS ====================
+    restrictionsInSuggestions: {
+      type: Boolean,
+      default: true
+    },
   },
-  { 
-    timestamps: true 
+  {
+    timestamps: true
   }
 );
 
@@ -159,9 +164,9 @@ UserSettingsSchema.index({ userId: 1 });
 /**
  * atualiza dispositivo
  */
-UserSettingsSchema.methods.registerDevice = function(deviceInfo) {
+UserSettingsSchema.methods.registerDevice = function (deviceInfo) {
   const existing = this.devices.find(d => d.id === deviceInfo.id);
-  
+
   if (existing) {
     existing.lastAccess = new Date();
     existing.ip = deviceInfo.ip;
@@ -174,14 +179,14 @@ UserSettingsSchema.methods.registerDevice = function(deviceInfo) {
       current: deviceInfo.current || false
     });
   }
-  
+
   return this.save();
 };
 
 /**
  * Remove dispositivo por ID
  */
-UserSettingsSchema.methods.removeDevice = function(deviceId) {
+UserSettingsSchema.methods.removeDevice = function (deviceId) {
   this.devices = this.devices.filter(d => d.id !== deviceId);
   return this.save();
 };
@@ -189,7 +194,7 @@ UserSettingsSchema.methods.removeDevice = function(deviceId) {
 /**
  * Marca dispositivo atual
  */
-UserSettingsSchema.methods.setCurrentDevice = function(deviceId) {
+UserSettingsSchema.methods.setCurrentDevice = function (deviceId) {
   this.devices.forEach(d => {
     d.current = (d.id === deviceId);
   });
@@ -199,7 +204,7 @@ UserSettingsSchema.methods.setCurrentDevice = function(deviceId) {
 /**
  * Retorna configurações para o frontend
  */
-UserSettingsSchema.methods.toClientFormat = function() {
+UserSettingsSchema.methods.toClientFormat = function () {
   return {
     theme: this.theme,
     language: this.language,
@@ -207,7 +212,12 @@ UserSettingsSchema.methods.toClientFormat = function() {
     animations: this.animations,
     dateFormat: this.dateFormat,
     notifications: this.notifications,
-    privacy: this.privacy
+    privacy: this.privacy,
+    restrictionsInSuggestions: this.restrictionsInSuggestions,
+    alertLogin: this.security?.alertLogin,
+    alertSecurity: this.security?.alertPasswordChange,
+    notifyRecipes: this.notifications?.email?.recipes,
+    newsletter: this.notifications?.email?.promotions,
   };
 };
 
