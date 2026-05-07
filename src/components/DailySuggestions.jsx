@@ -153,33 +153,32 @@ function dailySeed(userId) {
 // Receitas clicadas recentemente têm mais peso (recency decay com 7 dias).
 function buildUserTasteProfile(history, pool) {
   const tagWeights = {};
-  if (!history || history.length === 0) return tagWeights;
+  
+  //  CORREÇÃO: Garantir que history é um array
+  const historyArray = Array.isArray(history) ? history : [];
+  
+  if (!historyArray || historyArray.length === 0) return tagWeights;
 
-  history.forEach(h => {
+  historyArray.forEach(h => {
     const recipe = pool.find(r => (r.nome_receita || r.name) === h.nome_receita);
     if (!recipe) return;
 
     // Peso decresce exponencialmente com o tempo (7 dias = meio-vida)
     const hoursAgo  = (Date.now() - new Date(h.clickedAt).getTime()) / 3_600_000;
-    const recency   = Math.exp(-hoursAgo / (7 * 24)); // 0..1
-
-    // Peso extra por conversão (cozinhou) vs simples clique
+    const recency   = Math.exp(-hoursAgo / (7 * 24));
     const intentMultiplier = h.cooked ? 2.0 : 1.0;
     const weight = recency * intentMultiplier;
 
-    // Acumular peso nas tags do perfil alimentar
     const tags = (recipe.perfil_alimentar || '').split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
     tags.forEach(tag => {
       tagWeights[tag] = (tagWeights[tag] || 0) + weight;
     });
 
-    // País também é uma "tag" implícita, com peso ligeiramente superior
     if (recipe.pais) {
       const countryKey = `country:${recipe.pais}`;
       tagWeights[countryKey] = (tagWeights[countryKey] || 0) + weight * 1.5;
     }
 
-    // Categoria (almoço, jantar, etc.)
     if (recipe.categoria) {
       const catKey = `cat:${recipe.categoria.toLowerCase()}`;
       tagWeights[catKey] = (tagWeights[catKey] || 0) + weight * 0.8;
@@ -188,7 +187,6 @@ function buildUserTasteProfile(history, pool) {
 
   return tagWeights;
 }
-
 // ─── MELHORIA 2: Score de similaridade de conteúdo ───────────────────────────
 // Compara a receita com o perfil de gosto do utilizador.
 // Cap em 60 para não dominar os outros sinais.
@@ -326,6 +324,7 @@ function scoreRecipe(recipe, { user, preferences, history, seed, rotationOffset,
   // ── Sinal 3: Padrão de preferências do histórico (países e categorias) ───
   const countryClicks  = {};
   const categoryClicks = {};
+  const historyArray = Array.isArray(history) ? history : [];
   history.forEach(h => {
     if (h.pais)      countryClicks[h.pais]      = (countryClicks[h.pais]      || 0) + 1;
     if (h.categoria) categoryClicks[h.categoria] = (categoryClicks[h.categoria] || 0) + 1;
@@ -393,7 +392,8 @@ function pickRecipes(pool, { user, preferences, history, seed, rotationOffset, c
   const safe    = applyRestrictions
     ? pool.filter(r => isRecipeSafe(r, userAllergies, userDiets))
     : pool;
-  const working = safe.length >= count ? safe : pool;
+    const working = safe.length >= count ? safe : pool;
+    const safeHistory = Array.isArray(history) ? history : [];
 
   // Construir perfil de gosto do utilizador (content-based)
   const tasteProfile = buildUserTasteProfile(history, pool);
@@ -566,7 +566,13 @@ const RecipeModal = ({ recipe, onClose, onCook, userId }) => {
 // ─── Componente principal ─────────────────────────────────────────────────────
 const DailySuggestions = ({ onStartChat, user, preferences, settings }) => {
   const userId = user?._id || user?.id;
-  const { history, trackRecipe } = useRecipeHistory(userId);
+  const { history: rawHistory, trackRecipe } = useRecipeHistory(userId);
+    const history = React.useMemo(() => {
+    if (!rawHistory) return [];
+    if (Array.isArray(rawHistory)) return rawHistory;
+    
+    return Object.values(rawHistory);
+  }, [rawHistory]);
 
   // Pool da viagem gastronómica (vem do backend)
   const { data: dbRecipes, isLoading } = useQuery({
