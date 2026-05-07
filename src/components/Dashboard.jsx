@@ -11,7 +11,7 @@ import PetiscosSection from './Petiscossection';
 import CocktailsSection from './Cocktailssection';
 import DocesSection from './DocesSection';
 import Footer from '@/components/Footer';
-import SmartSuggestionCarousel from './SmartSuggestionCarousel';
+import SmartSuggestionCarousel from './Smartsuggestioncarousel';
 import { useSettings } from '@/hooks/useSettings';
 const Dashboard = ({ onStartChat, onNavigate, user }) => {
   const { t } = useTranslation();
