@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSettings, saveSettings, DEFAULT_SETTINGS, applyTheme, applyLanguage, getCurrentUserId } from '@/services/settingsApi';
 
 export function useSettings() {
@@ -6,7 +6,7 @@ export function useSettings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
-
+const settingsRef = useRef(settings);
   // Carrega settings
   const loadSettings = useCallback(async () => {
     setLoading(true);
@@ -14,6 +14,7 @@ export function useSettings() {
     try {
       const data = await getSettings();
       setSettings(data);
+      settingsRef.current = data;
       setHasChanges(false);
       if (data.theme) applyTheme(data.theme);
       if (data.language) applyLanguage(data.language);
@@ -31,7 +32,7 @@ export function useSettings() {
     setLoading(true);
     setError(null);
     try {
-      const toSave = overrideSettings || settings;
+      const toSave = overrideSettings || settingsRef.current;
       const result = await saveSettings(toSave);
       setSettings(result);
       setHasChanges(false);
@@ -48,11 +49,15 @@ export function useSettings() {
 
   // Atualiza campo simples
   const updateField = useCallback((field, value) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
-    setHasChanges(true);
-    if (field === 'theme') applyTheme(value);
-    if (field === 'language') applyLanguage(value);
-  }, []);
+  setSettings(prev => {
+    const next = { ...prev, [field]: value };
+    settingsRef.current = next;  // ← sempre actualizado
+    return next;
+  });
+  setHasChanges(true);
+  if (field === 'theme') applyTheme(value);
+  if (field === 'language') applyLanguage(value);
+}, []);
 
   // Atualiza campos aninhados (notifications, security, privacy)
   const updateNested = useCallback((path, value) => {

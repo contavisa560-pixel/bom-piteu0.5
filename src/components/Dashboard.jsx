@@ -11,7 +11,8 @@ import PetiscosSection from './Petiscossection';
 import CocktailsSection from './Cocktailssection';
 import DocesSection from './DocesSection';
 import Footer from '@/components/Footer';
-
+import SmartSuggestionCarousel from './SmartSuggestionCarousel';
+import { useSettings } from '@/hooks/useSettings';
 const Dashboard = ({ onStartChat, onNavigate, user }) => {
   const { t } = useTranslation();
   const [streak, setStreak] = useState(0);
@@ -20,6 +21,7 @@ const Dashboard = ({ onStartChat, onNavigate, user }) => {
 
  
 const [preferences, setPreferences] = useState(null);
+const { settings, sync: syncSettings } = useSettings();
 
 // Buscar preferências do backend sempre que o dashboard carrega
 useEffect(() => {
@@ -40,59 +42,58 @@ useEffect(() => {
 
   // Recarregar quando o utilizador volta ao dashboard
   // (ex: voltou do perfil onde mudou as preferências)
-  window.addEventListener('focus', fetchPrefs);
-  return () => window.removeEventListener('focus', fetchPrefs);
+  const onFocus = () => { fetchPrefs(); syncSettings(); };
+window.addEventListener('focus', onFocus);
+return () => window.removeEventListener('focus', onFocus);
 
 }, [user?.id]);
 
   // Checa streak e login
   useEffect(() => {
-   // Normaliza sempre para o mesmo valor independente do campo
-const uid = (user?._id || user?.id || '').toString();
-const STREAK_KEY = `bomPiteuStreak_${uid}`;
-const LAST_DAY_KEY = `bomPiteuLastDay_${uid}`;
-    // Trabalhar sempre com datas normalizadas (só a data, sem horas)
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
-    const todayStr = todayDate.toISOString().split('T')[0]; // "2025-03-12"
+  if (!user) return;
+  const uid = (user._id || user.id || '').toString();
+  if (!uid) return;
 
-    const lastDayStr = localStorage.getItem(LAST_DAY_KEY);
-    const savedStreak = parseInt(localStorage.getItem(STREAK_KEY) || '0', 10);
+  const token = localStorage.getItem('bomPiteuToken');
+  if (!token) return;
 
-    let newStreak = savedStreak;
+  const updateStreak = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${uid}/streak`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      const data = await res.json();
+      setStreak(data.streak || 0);
 
-    if (!lastDayStr) {
-      // Primeira visita alguma vez
-      newStreak = 1;
-    } else if (lastDayStr === todayStr) {
-      // Já visitou hoje — não faz nada, mantém o valor guardado
-      newStreak = savedStreak || 1;
-    } else {
-     const lastDate = new Date(lastDayStr + 'T00:00:00');
-const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) {
-        // Visitou ontem → incrementa
-        newStreak = savedStreak + 1;
-        toast({ title: t('dashboard.streak.incrementTitle', { day: newStreak }), description: t('dashboard.streak.incrementDesc') });
-      } else {
-        // Saltou um ou mais dias → reinicia
-        newStreak = 1;
-        toast({ title: t('dashboard.streak.resetTitle'), description: t('dashboard.streak.resetDesc') });
+      if (data.message === 'incremento') {
+        toast({
+          title: t('dashboard.streak.incrementTitle', { day: data.streak }),
+          description: t('dashboard.streak.incrementDesc'),
+        });
+      } else if (data.message === 'reset') {
+        toast({
+          title: t('dashboard.streak.resetTitle'),
+          description: t('dashboard.streak.resetDesc'),
+        });
       }
+    } catch (err) {
+      console.error('Erro ao actualizar streak:', err);
     }
+  };
 
-    // Guarda sempre a data de hoje e o streak actualizado
-    localStorage.setItem(LAST_DAY_KEY, todayStr);
-    localStorage.setItem(STREAK_KEY, newStreak.toString());
-    setStreak(newStreak);
+  updateStreak();
 
-    // Onboarding
-    if (user?.id) {
-      const onboardingCompleted = localStorage.getItem(`bomPiteuOnboardingCompleted_${user.id}`);
-      if (!onboardingCompleted) setShowOnboarding(true);
-    }
-}, [user?._id || user?.id, t]);
+  // Onboarding
+  const onboardingKey = `bomPiteuOnboardingCompleted_${uid}`;
+  if (!localStorage.getItem(onboardingKey)) {
+    setShowOnboarding(true);
+  }
+}, [user?._id, user?.id, t]);
+  
   const handleFeatureClick = (id) => {
     if (id === 'gastronomicJourney') {
       onNavigate('internationalRecipes');
@@ -142,10 +143,29 @@ const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
     return <div className="text-center text-gray-500 mt-10">{t('dashboard.loadingUser')}</div>;
   }
 
-  const hasFilledProfile =
-    (user.foodProfile && user.foodProfile.length > 0) ||
-    !!localStorage.getItem(`bomPiteu_preferences_${user?.id}`);
+    const hasFilledProfile = (() => {
+  // 1. Preferências vindas do backend (já carregadas no estado)
+  if (preferences) {
+    const p = preferences;
+    const temDados =
+      (Array.isArray(p.diets)         && p.diets.length > 0)         ||
+      (Array.isArray(p.allergies)      && p.allergies.length > 0)     ||
+      (Array.isArray(p.goals)          && p.goals.length > 0)         ||
+      (Array.isArray(p.intolerances)   && p.intolerances.length > 0)  ||
+      (Array.isArray(p.cuisines)       && p.cuisines.length > 0)      ||
+      (typeof p.cookingLevel === 'string' && p.cookingLevel.length > 0);
+    if (temDados) return true;
+  }
 
+  // 2. foodProfile no objecto do utilizador (vem do /api/auth/me)
+  if (Array.isArray(user?.foodProfile) && user.foodProfile.length > 0) return true;
+
+  // 3. Fallback: localStorage com qualquer variante de ID
+  const uid = (user?._id || user?.id || '').toString();
+  if (uid && localStorage.getItem(`bomPiteu_preferences_${uid}`)) return true;
+
+  return false;
+})();
   return (
     <div className="space-y-8 relative">
       {/* --- ONBOARDING --- */}
@@ -248,7 +268,12 @@ const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
           </div>
         </motion.div>
       )}
-
+{/* SUGESTÕES DINÂMICAS */}
+<SmartSuggestionCarousel
+  onStartChat={onStartChat}
+  onNavigate={onNavigate}
+  user={user}
+/>
       {/* CARDS RÁPIDOS */}
       <div id="quick-access-cards" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
         <Card className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
@@ -295,14 +320,12 @@ const diffDays = Math.round((todayDate - lastDate) / (1000 * 60 * 60 * 24));
       <div id="daily-suggestions-section">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{t('dashboard.suggestions.title')}</h2>
-          <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" /> {t('dashboard.suggestions.refreshNote')}
-          </span>
         </div>
-        <DailySuggestions
+      <DailySuggestions
   onStartChat={onStartChat}
   user={user}
   preferences={preferences}
+  settings={settings}
 />
   
       </div>

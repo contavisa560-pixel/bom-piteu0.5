@@ -61,7 +61,7 @@ export const useUsageLimit = (user) => {
         },
         body: JSON.stringify(cycle)
       });
-    } catch {}
+    } catch { }
   }, [user]);
 
   // Verifica se o ciclo deve ser resetado (7 dias após atingir limite)
@@ -94,6 +94,8 @@ export const useUsageLimit = (user) => {
       cycle = await resolveReset(cycle);
     }
 
+    const visionLimit = isPremium ? 50 : 5;
+
     setUsageStats({
       used: cycle.used || 0,
       limit,
@@ -101,6 +103,9 @@ export const useUsageLimit = (user) => {
       imagesUsed: cycle.imagesUsed || 0,
       imagesLimit,
       imagesRemaining: Math.max(0, imagesLimit - (cycle.imagesUsed || 0)),
+      visionUsed: cycle.visionUsed || 0,
+      visionLimit,
+      visionRemaining: Math.max(0, visionLimit - (cycle.visionUsed || 0)),
       isPremium,
       resetDate: calcResetDate(cycle),
     });
@@ -126,13 +131,18 @@ export const useUsageLimit = (user) => {
 
     await saveCycleToBackend(cycle);
 
+    const visionLimit = isPremium ? 50 : 5;
+
     setUsageStats({
-      used: cycle.used,
+      used: cycle.used || 0,
       limit,
-      remaining: Math.max(0, limit - cycle.used),
-      imagesUsed: cycle.imagesUsed,
+      remaining: Math.max(0, limit - (cycle.used || 0)),
+      imagesUsed: cycle.imagesUsed || 0,
       imagesLimit,
-      imagesRemaining: Math.max(0, imagesLimit - cycle.imagesUsed),
+      imagesRemaining: Math.max(0, imagesLimit - (cycle.imagesUsed || 0)),
+      visionUsed: cycle.visionUsed || 0,       // ← NOVO
+      visionLimit,                                    // ← NOVO
+      visionRemaining: Math.max(0, visionLimit - (cycle.visionUsed || 0)), // ← NOVO
       isPremium,
       resetDate: calcResetDate(cycle),
     });
@@ -148,7 +158,12 @@ export const useUsageLimit = (user) => {
 
     // Se ainda está bloqueado (menos de 7 dias), recusa
     if (cycle?.limitReachedAt) {
-      setShowLimitModal(true);
+      setUsageStats(prev => ({
+        ...prev,
+        resetDate: calcResetDate(cycle),
+      }));
+      // Pequeno delay para garantir que o React processa o setState antes do modal abrir
+      setTimeout(() => setShowLimitModal(true), 0);
       return false;
     }
 
@@ -156,17 +171,17 @@ export const useUsageLimit = (user) => {
 
     if (used >= limit) {
       // Atingiu o limite agora — regista o momento exato
-    if (!cycle.limitReachedAt) {
-  cycle.limitReachedAt = now.toISOString();
-  await saveCycleToBackend(cycle);
-}
-// Actualiza o estado com a data de reset antes de abrir o modal
-setUsageStats(prev => ({
-  ...prev,
-  resetDate: calcResetDate(cycle),
-}));
-setShowLimitModal(true);
-return false;
+      if (!cycle.limitReachedAt) {
+        cycle.limitReachedAt = now.toISOString();
+        await saveCycleToBackend(cycle);
+      }
+      // Actualiza o estado com a data de reset antes de abrir o modal
+      setUsageStats(prev => ({
+        ...prev,
+        resetDate: calcResetDate(cycle),
+      }));
+      setShowLimitModal(true);
+      return false;
     }
 
     await increment('message');
@@ -181,24 +196,29 @@ return false;
     cycle = await resolveReset(cycle || { used: 0, imagesUsed: 0, startDate: now.toISOString(), limitReachedAt: null });
 
     if (cycle?.limitReachedAt) {
-      setShowLimitModal(true);
+      setUsageStats(prev => ({
+        ...prev,
+        resetDate: calcResetDate(cycle),
+      }));
+      // Pequeno delay para garantir que o React processa o setState antes do modal abrir
+      setTimeout(() => setShowLimitModal(true), 0);
       return false;
     }
 
     const imagesUsed = cycle?.imagesUsed || 0;
 
     if (imagesUsed >= imagesLimit) {
-    if (!cycle.limitReachedAt) {
-  cycle.limitReachedAt = now.toISOString();
-  await saveCycleToBackend(cycle);
-}
-// Actualiza o estado com a data de reset antes de abrir o modal
-setUsageStats(prev => ({
-  ...prev,
-  resetDate: calcResetDate(cycle),
-}));
-setShowLimitModal(true);
-return false;
+      if (!cycle.limitReachedAt) {
+        cycle.limitReachedAt = now.toISOString();
+        await saveCycleToBackend(cycle);
+      }
+      // Actualiza o estado com a data de reset antes de abrir o modal
+      setUsageStats(prev => ({
+        ...prev,
+        resetDate: calcResetDate(cycle),
+      }));
+      setShowLimitModal(true);
+      return false;
     }
 
     await increment('image');

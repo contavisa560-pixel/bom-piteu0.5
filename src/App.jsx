@@ -233,7 +233,20 @@ function App() {
       case "recipe": return <RecipeDisplay recipe={currentRecipe} onBack={() => handleNavigate("dashboard")} user={user} onToggleFavorite={handleToggleFavorite} />;
       case "profile":
       case "userProfile": return <UserProfile user={user} onNavigate={handleNavigate} initialTab={navParams.initialTab} />;
-      case "subscription": return <Subscription user={user} onSubscribe={(plan) => { updateUser({ isPremium: plan !== "free" }); handleNavigate("dashboard"); }} onNavigate={handleNavigate} />;
+// App.jsx — actualizar o handler
+case "subscription": return <Subscription 
+  user={user} 
+  onSubscribe={(plan, updatedUser) => {
+    // Se vier utilizador actualizado do backend, usa esse
+    if (updatedUser) {
+      updateUser(updatedUser);
+    } else {
+      updateUser({ isPremium: plan !== "free" });
+    }
+    handleNavigate("dashboard");
+  }} 
+  onNavigate={handleNavigate} 
+/>;
       case "marketplace": return <Marketplace onNavigate={handleNavigate} />;
       case "imageRecognition": return <ImageRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;
       case "voiceRecognition": return <VoiceRecognition onNavigate={handleNavigate} onStartChat={(category) => { setSelectedCategory(category); handleNavigate("chat"); }} user={user} />;

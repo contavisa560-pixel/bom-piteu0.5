@@ -1409,74 +1409,65 @@
 
 
     const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
+const handleChatLivre = async (mensagem) => {
+  console.log("🗣️ Chat livre:", mensagem);
 
-    const handleChatLivre = async (mensagem) => {
-      console.log("🗣️ Chat livre:", mensagem);
+  const userMsg = {
+    id: Date.now(),
+    type: "user",
+    content: mensagem,
+    timestamp: new Date()
+  };
+  setMessages(prev => [...prev, userMsg]);
 
-      const userMsg = {
-        id: Date.now(),
-        type: "user",
-        content: mensagem,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, userMsg]);
+  setInputMessage("");
+  setIsTyping(true);
 
-      setInputMessage("");
-      setIsTyping(true);
+    const canProceed = await checkAndIncrementBot();
+  if (!canProceed) {
+    setIsTyping(false);
+    return;
+  }
+  try {
+    const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
 
-      try {
-        const token = localStorage.getItem("bomPiteuToken") || localStorage.getItem("token");
+    // ── Constrói histórico das últimas 8 mensagens  ──────────────────
+    const historico = messages
+      .filter(m => m.type === 'user' || m.type === 'bot')
+      .filter(m => typeof m.content === 'string' && m.content.trim().length > 0)
+      .slice(-8)
+      .map(m => ({
+        role: m.type === 'user' ? 'user' : 'assistant',
+        content: m.content
+      }));
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/chat`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            mensagem: mensagem,
-            sessionId: sessionId,
-            language: i18n.language
-          }),
-        });
-
-        const data = await res.json();
-        console.log("✅ Resposta chat livre:", data);
-
-        const canProceed = await checkAndIncrementBot();
-        if (!canProceed) return;
-
-        const botMsg = {
-          id: Date.now() + 1,
-          type: "bot",
-          content: data.resposta || t('chatBot.howCanIHelp'),
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMsg]);
-
-      } catch (err) {
-        console.error("❌ Erro em chat livre:", err);
-
-        let resposta = t('chatBot.hiIAmChef');
-        if (mensagem.toLowerCase().includes('tudo bem')) {
-          resposta = t('chatBot.imFineAndYou');
-        }
-
-        const canProceed = await checkAndIncrementBot();
-        if (!canProceed) return;
-
-        const botMsg = {
-          id: Date.now() + 1,
-          type: "bot",
-          content: resposta,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMsg]);
-
-      } finally {
-        setIsTyping(false);
-      }
-    };
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auto-recipe/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        mensagem: mensagem,
+        sessionId: sessionId,
+        language: i18n.language,
+        contexto: selectedCategory?.chatContext || null,  
+        historico: historico,                              
+      }),
+    });
+     if (res.ok) {
+      const data = await res.json();
+      addMessage("bot", data.resposta || data.mensagem || t('chatBot.technicalError'));
+    } else {
+      addMessage("bot", t('chatBot.technicalError'));
+    }
+  } catch (err) {
+    console.error("Erro no chat livre:", err);
+    addMessage("bot", t('chatBot.technicalError'));
+  } finally {
+    setIsTyping(false);
+  }
+};
 
     const handlePerguntaPasso = async (pergunta) => {
       console.log("❓ Pergunta sobre passo:", pergunta);
@@ -1604,6 +1595,11 @@
             if (res.status === 401) {
               throw new Error('Token inválido ou expirado');
             }
+            if (res.status === 403) {
+  const canProceed = await checkAndIncrementBot();
+  if (!canProceed) return;
+  return;
+}
 
             if (!res.ok) {
               throw new Error(`HTTP error! status: ${res.status}`);

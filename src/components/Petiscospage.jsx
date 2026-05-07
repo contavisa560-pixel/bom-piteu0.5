@@ -139,6 +139,12 @@ const PetiscosPage = ({ onStartChat, onNavigate }) => {
   const ALL_COUNTRIES = useMemo(
     () => ['Todos', ...Array.from(new Set(PETISCOS_DB.map(p => p.pais))).sort()],
     [PETISCOS_DB]
+  )
+    const ALL_DRINKS = useMemo(
+    () => ['Todos', ...Array.from(new Set(
+      PETISCOS_DB.map(p => p.bebida_sugerida).filter(Boolean)
+    )).sort()],
+    [PETISCOS_DB]
   );
 
   const categoryTranslations = {
@@ -158,6 +164,7 @@ const PetiscosPage = ({ onStartChat, onNavigate }) => {
   const [catFilter, setCat] = useState('Todos');
   const [countryFilter, setCountry] = useState('Todos');
   const [diffFilter, setDiff] = useState('Todos');
+  const [drinkFilter, setDrink] = useState('Todos');
   const [selected, setSelected] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -171,9 +178,10 @@ const PetiscosPage = ({ onStartChat, onNavigate }) => {
       const matchCat = catFilter === 'Todos' || p.categoria === catFilter;
       const matchCountry = countryFilter === 'Todos' || p.pais === countryFilter;
       const matchDiff = diffFilter === 'Todos' || p.dificuldade === diffFilter;
-      return matchSearch && matchCat && matchCountry && matchDiff;
+      const matchDrink = drinkFilter === 'Todos' || p.bebida_sugerida === drinkFilter;
+      return matchSearch && matchCat && matchCountry && matchDiff && matchDrink;
     });
-  }, [search, catFilter, countryFilter, diffFilter, PETISCOS_DB]);
+  }, [search, catFilter, countryFilter, diffFilter , drinkFilter, PETISCOS_DB]);
 
   const handleCook = (p) => {
     onStartChat({
@@ -294,6 +302,27 @@ const PetiscosPage = ({ onStartChat, onNavigate }) => {
                       }`}
                     >
                       {diff === 'Todos' ? t('petiscos.filters.all') : t(`difficulty.${diff === 'Fácil' ? 'easy' : diff === 'Médio' ? 'medium' : 'hard'}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+                      {/* Bebida */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Bebida
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_DRINKS.map(drink => (
+                    <button
+                      key={drink}
+                      onClick={() => setDrink(drink)}
+                      className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors ${
+                        drinkFilter === drink
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                      }`}
+                    >
+                      {drink === 'Todos' ? 'Todos' : drink}
                     </button>
                   ))}
                 </div>

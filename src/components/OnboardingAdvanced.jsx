@@ -9,7 +9,6 @@ const steps = [
   { id: 3, titleKey: "onboardingAdvanced.step3.title", descriptionKey: "onboardingAdvanced.step3.description", highlightSelector: "#cameraButton" },
   { id: 4, titleKey: "onboardingAdvanced.step4.title", descriptionKey: "onboardingAdvanced.step4.description", highlightSelector: "#voiceButton" },
   { id: 5, titleKey: "onboardingAdvanced.step5.title", descriptionKey: "onboardingAdvanced.step5.description", highlightSelector: "#daily-suggestions-section" },
-  { id: 6, titleKey: "onboardingAdvanced.step6.title", descriptionKey: "onboardingAdvanced.step6.description", highlightSelector: "#quick-access-cards" },
 ];
 
 const MARGIN = 12;

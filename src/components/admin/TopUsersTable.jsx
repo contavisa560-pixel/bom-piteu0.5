@@ -47,8 +47,9 @@ function UserRow({ user, value, rank, color }) {
 }
 
 const SEGMENTS = [
-  { key: "topText",   label: "Texto",   valueKey: "usage.dailyTextRequests",    color: "#a78bfa" },
-  { key: "topImages", label: "Imagens", valueKey: "usage.dailyImageGenerations", color: "#fbbf24" },
+  { key: "topText",     label: "Texto",   valueKey: "usageCycle.used",        color: "#a78bfa" },
+  { key: "topImages",   label: "Imagens", valueKey: "usageCycle.imagesUsed",  color: "#fbbf24" },
+  { key: "topAnalysis", label: "Visão",   valueKey: "usageCycle.visionUsed",  color: "#22d3ee" },
 ];
 
 function getNestedValue(obj, path) {

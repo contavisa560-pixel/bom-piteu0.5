@@ -497,7 +497,7 @@ router.put("/:id/settings", authenticate, async (req, res) => {
     const updatedUser = await User.findOneAndUpdate(
       { _id: id },
       { $set: { settings: mergedSettings } },
-      { new: true, runValidators: true, select: "settings email name _id" }
+      { new: true, runValidators: false, select: "settings email name _id" }
     );
 
     console.log('✅ [SETTINGS SAVED] twoFactorAuth preservado:', updatedUser.settings?.security?.twoFactorAuth);
@@ -506,9 +506,9 @@ router.put("/:id/settings", authenticate, async (req, res) => {
       success: true,
       message: "Configurações salvas com sucesso!",
       settings: {
-        ...updatedUser.settings?.toObject?.() || updatedUser.settings,
-        restrictionsInSuggestions: updatedUser.settings?.restrictionsInSuggestions ?? true,
-      },
+  ...(updatedUser.settings?.toObject?.() || updatedUser.settings),
+  restrictionsInSuggestions: updatedUser.settings?.restrictionsInSuggestions,
+},
       user: { id: updatedUser._id, email: updatedUser.email, name: updatedUser.name }
     });
 

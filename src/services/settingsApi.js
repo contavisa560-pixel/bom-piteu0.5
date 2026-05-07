@@ -49,6 +49,7 @@ export const DEFAULT_SETTINGS = {
     alertSecurity: true,
     notifyRecipes: true,
     newsletter: true,
+    restrictionsInSuggestions: true,
     notifications: {
         email: { enabled: true, recipes: true, tips: true, promotions: false },
         push: { enabled: true, recipeReady: true, dailyTips: false },
@@ -73,7 +74,14 @@ export async function getSettings() {
     try {
         const res = await fetch(`${API_URL}/api/users/${userId}/settings`, { method: 'GET', headers });
         const data = await handleResponse(res);
-        const merged = { ...DEFAULT_SETTINGS, ...(data.settings || data) };
+        const returned = data.settings || data;
+        const merged = {
+            ...DEFAULT_SETTINGS,
+            ...returned,
+            restrictionsInSuggestions: returned.restrictionsInSuggestions !== undefined
+                ? returned.restrictionsInSuggestions
+                : DEFAULT_SETTINGS.restrictionsInSuggestions,
+        };
         localStorage.setItem(key, JSON.stringify(merged));
         return merged;
     } catch (err) {
@@ -102,7 +110,15 @@ export async function saveSettings(settings) {
             body: JSON.stringify(settings)
         });
         const data = await handleResponse(res);
-        const merged = { ...DEFAULT_SETTINGS, ...(data.settings || settings) };
+        const returned = data.settings || data;
+        const merged = {
+            ...DEFAULT_SETTINGS,
+            ...returned,
+            // Campos booleanos: se o servidor devolveu explicitamente, usar esse valor
+            restrictionsInSuggestions: returned.restrictionsInSuggestions !== undefined
+                ? returned.restrictionsInSuggestions
+                : DEFAULT_SETTINGS.restrictionsInSuggestions,
+        };
         localStorage.setItem(key, JSON.stringify(merged));
         return merged;
     } catch (err) {
@@ -155,7 +171,12 @@ export async function syncSettings() {
     try {
         const backend = await getSettings();
         const local = JSON.parse(localStorage.getItem(key) || '{}');
-        const merged = { ...local, ...backend };
+        const merged = {
+            ...local, ...backend,
+            restrictionsInSuggestions: backend.restrictionsInSuggestions !== undefined
+                ? backend.restrictionsInSuggestions
+                : local.restrictionsInSuggestions
+        };
         localStorage.setItem(key, JSON.stringify(merged));
         if (merged.theme) applyTheme(merged.theme);
         if (merged.language) applyLanguage(merged.language);

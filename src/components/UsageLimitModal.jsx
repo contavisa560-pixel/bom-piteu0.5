@@ -78,20 +78,26 @@ const UsageLimitModal = ({ isOpen, onClose, onUpgrade, usageStats, user }) => {
                 </div>
 
                 {/* Contadores mensagens + imagens */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                    <p className="text-xs text-gray-400 mb-1">{t('usageLimitModal.messages')}</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {used}<span className="text-sm font-normal text-gray-400">/{limit}</span>
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                    <p className="text-xs text-gray-400 mb-1">{t('usageLimitModal.images')}</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {imagesUsed}<span className="text-sm font-normal text-gray-400">/{imagesLimit}</span>
-                    </p>
-                  </div>
-                </div>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+  <div className="bg-gray-50 rounded-xl px-3 py-3 text-center">
+    <p className="text-xs text-gray-400 mb-1">{t('usageLimitModal.messages')}</p>
+    <p className="text-lg font-bold text-gray-800">
+      {used}<span className="text-sm font-normal text-gray-400">/{limit}</span>
+    </p>
+  </div>
+  <div className="bg-gray-50 rounded-xl px-3 py-3 text-center">
+    <p className="text-xs text-gray-400 mb-1">{t('usageLimitModal.images')}</p>
+    <p className="text-lg font-bold text-gray-800">
+      {imagesUsed}<span className="text-sm font-normal text-gray-400">/{imagesLimit}</span>
+    </p>
+  </div>
+  <div className="bg-gray-50 rounded-xl px-3 py-3 text-center">
+    <p className="text-xs text-gray-400 mb-1">Leituras</p>
+    <p className="text-lg font-bold text-gray-800">
+      {usageStats?.visionUsed || 0}<span className="text-sm font-normal text-gray-400">/{usageStats?.visionLimit || (isPremium ? 50 : 5)}</span>
+    </p>
+  </div>
+</div>
 
                 {/* Data de renovação — 7 dias após atingir o limite */}
                 <div className="flex items-center gap-2.5 bg-gray-50 rounded-xl px-4 py-3 mb-6">

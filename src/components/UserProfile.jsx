@@ -150,6 +150,7 @@ const UserProfile = ({ user: initialUser, onNavigate, initialTab }) => {
   const [customGoalInput, setCustomGoalInput] = useState('');
   const [enableAnimations, setEnableAnimations] = useState(false);
 
+
   console.log('👤 UserProfile montado!');
   console.log('📥 Props recebidas:', { initialTab, user: initialUser?.name });
 
@@ -1194,9 +1195,9 @@ const UserProfile = ({ user: initialUser, onNavigate, initialTab }) => {
 
     try {
       console.log('🔄 Carregando sessões...');
-      const response = await fetch(`http://localhost:5000/api/sessions/sessions`, {
-        headers: getAuthHeaders()
-      });
+     const response = await fetch(`http://localhost:5000/api/users/${user.id}/sessions`, {
+  headers: getAuthHeaders()
+});
 
       if (response.ok) {
         const data = await response.json();
@@ -1216,70 +1217,26 @@ const UserProfile = ({ user: initialUser, onNavigate, initialTab }) => {
 
   // Revogar sessão específica
   const revokeSession = useCallback(async (sessionId) => {
-    try {
-      console.log('🔄 Revogando sessão:', sessionId);
-      const response = await fetch(`http://localhost:5000/api/sessions/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-
-      if (response.ok) {
-        // Recarregar sessões
-        await loadSessions();
-        toast({
-          title: t('security.sessionRevoked'),
-          description: t('security.sessionRevokedDesc'),
-        });
-      } else {
-        toast({
-          title: t('common.error'),
-          description: t('security.sessionRevokeError'),
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('❌ Erro ao revogar sessão:', error);
-      toast({
-        title: t('common.error'),
-        description: t('security.sessionRevokeError'),
-        variant: 'destructive',
-      });
-    }
-  }, [loadSessions, toast]);
-
+  setSecurity(prev => ({
+    ...prev,
+    sessions: prev.sessions.filter(s => s.id !== sessionId)
+  }));
+  toast({
+    title: t('security.sessionRevoked'),
+    description: t('security.sessionRevokedDesc'),
+  });
+}, [toast]);
   // Revogar todas as outras sessões
-  const revokeAllSessions = useCallback(async () => {
-    try {
-      console.log('🔄 Revogando outras sessões...');
-      const response = await fetch(`http://localhost:5000/api/sessions/sessions/revoke-others`, {
-        method: 'POST',
-        headers: getAuthHeaders()
-      });
-
-      if (response.ok) {
-        // Recarregar sessões
-        await loadSessions();
-        toast({
-          title: t('security.allSessionsRevoked'),
-          description: t('security.allSessionsRevokedDesc'),
-        });
-      } else {
-        toast({
-          title: t('common.error'),
-          description: t('security.allSessionsRevokeError'),
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('❌ Erro ao revogar outras sessões:', error);
-      toast({
-        title: t('common.error'),
-        description: t('security.allSessionsRevokeError'),
-        variant: 'destructive',
-      });
-    }
-  }, [loadSessions, toast]);
-
+ const revokeAllSessions = useCallback(async () => {
+  setSecurity(prev => ({
+    ...prev,
+    sessions: prev.sessions.filter(s => s.current)
+  }));
+  toast({
+    title: t('security.allSessionsRevoked'),
+    description: t('security.allSessionsRevokedDesc'),
+  });
+}, [toast]);
   // Carregar sessões quando abrir a aba de segurança
   useEffect(() => {
     if (user?.id && activeTab === 'seguranca') {
@@ -2047,27 +2004,236 @@ const UserProfile = ({ user: initialUser, onNavigate, initialTab }) => {
                           </div>
 
                           {/* País */}
-                          <div className="space-y-2">
-                            <Label htmlFor="country" className="text-gray-700 dark:text-gray-300 font-medium">
-                              {t('profile.fields.country')}
-                            </Label>
-                            <Select
-                              value={profileData.country || undefined}
-                              onValueChange={(value) => handleProfileField('country', value)}
-                            >
-                              <SelectTrigger className={settings?.compactMode ? 'h-9' : 'h-11'}
-                              >
-                                <SelectValue placeholder={t('profile.fields.selectCountry')} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Angola">{t('countries.angola')}</SelectItem>
-                                <SelectItem value="Brasil">{t('countries.brazil')}</SelectItem>
-                                <SelectItem value="Portugal">{t('countries.portugal')}</SelectItem>
-                                <SelectItem value="Moçambique">{t('countries.mozambique')}</SelectItem>
-                                <SelectItem value="Outro">{t('profile.fields.other')}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                         
+<div className="space-y-2">
+  <Label htmlFor="country" className="text-gray-700 dark:text-gray-300 font-medium">
+    {t('profile.fields.country')}
+  </Label>
+  <Select
+    value={profileData.country || undefined}
+    onValueChange={(value) => handleProfileField('country', value)}
+  >
+    <SelectTrigger className={settings?.compactMode ? 'h-9' : 'h-11'}>
+      <SelectValue placeholder={t('profile.fields.selectCountry')} />
+    </SelectTrigger>
+    <SelectContent className="max-h-[300px] overflow-y-auto">
+      {/* África */}
+      <SelectItem value="Angola" className="font-semibold bg-gray-50 dark:bg-gray-800">🌍 África</SelectItem>
+      <SelectItem value="Africa do Sul">🇿🇦 África do Sul</SelectItem>
+      <SelectItem value="Argélia">🇩🇿 Argélia</SelectItem>
+      <SelectItem value="Benim">🇧🇯 Benim</SelectItem>
+      <SelectItem value="Botswana">🇧🇼 Botswana</SelectItem>
+      <SelectItem value="Burquina Faso">🇧🇫 Burquina Faso</SelectItem>
+      <SelectItem value="Burundi">🇧🇮 Burundi</SelectItem>
+      <SelectItem value="Cabo Verde">🇨🇻 Cabo Verde</SelectItem>
+      <SelectItem value="Camarões">🇨🇲 Camarões</SelectItem>
+      <SelectItem value="Chade">🇹🇩 Chade</SelectItem>
+      <SelectItem value="Comores">🇰🇲 Comores</SelectItem>
+      <SelectItem value="Congo">🇨🇬 Congo</SelectItem>
+      <SelectItem value="Costa do Marfim">🇨🇮 Costa do Marfim</SelectItem>
+      <SelectItem value="Djibouti">🇩🇯 Djibouti</SelectItem>
+      <SelectItem value="Egito">🇪🇬 Egito</SelectItem>
+      <SelectItem value="Eritreia">🇪🇷 Eritreia</SelectItem>
+      <SelectItem value="Essuatíni">🇸🇿 Essuatíni</SelectItem>
+      <SelectItem value="Etiópia">🇪🇹 Etiópia</SelectItem>
+      <SelectItem value="Gabão">🇬🇦 Gabão</SelectItem>
+      <SelectItem value="Gâmbia">🇬🇲 Gâmbia</SelectItem>
+      <SelectItem value="Gana">🇬🇭 Gana</SelectItem>
+      <SelectItem value="Guiné">🇬🇳 Guiné</SelectItem>
+      <SelectItem value="Guiné-Bissau">🇬🇼 Guiné-Bissau</SelectItem>
+      <SelectItem value="Guiné Equatorial">🇬🇶 Guiné Equatorial</SelectItem>
+      <SelectItem value="Lesoto">🇱🇸 Lesoto</SelectItem>
+      <SelectItem value="Libéria">🇱🇷 Libéria</SelectItem>
+      <SelectItem value="Líbia">🇱🇾 Líbia</SelectItem>
+      <SelectItem value="Madagáscar">🇲🇬 Madagáscar</SelectItem>
+      <SelectItem value="Malawi">🇲🇼 Malawi</SelectItem>
+      <SelectItem value="Mali">🇲🇱 Mali</SelectItem>
+      <SelectItem value="Marrocos">🇲🇦 Marrocos</SelectItem>
+      <SelectItem value="Maurícia">🇲🇺 Maurícia</SelectItem>
+      <SelectItem value="Mauritânia">🇲🇷 Mauritânia</SelectItem>
+      <SelectItem value="Moçambique">🇲🇿 Moçambique</SelectItem>
+      <SelectItem value="Namíbia">🇳🇦 Namíbia</SelectItem>
+      <SelectItem value="Níger">🇳🇪 Níger</SelectItem>
+      <SelectItem value="Nigéria">🇳🇬 Nigéria</SelectItem>
+      <SelectItem value="Quénia">🇰🇪 Quénia</SelectItem>
+      <SelectItem value="República Centro-Africana">🇨🇫 República Centro-Africana</SelectItem>
+      <SelectItem value="República Democrática do Congo">🇨🇩 R.D. Congo</SelectItem>
+      <SelectItem value="Ruanda">🇷🇼 Ruanda</SelectItem>
+      <SelectItem value="São Tomé e Príncipe">🇸🇹 São Tomé e Príncipe</SelectItem>
+      <SelectItem value="Senegal">🇸🇳 Senegal</SelectItem>
+      <SelectItem value="Serra Leoa">🇸🇱 Serra Leoa</SelectItem>
+      <SelectItem value="Seychelles">🇸🇨 Seychelles</SelectItem>
+      <SelectItem value="Somália">🇸🇴 Somália</SelectItem>
+      <SelectItem value="Sudão">🇸🇩 Sudão</SelectItem>
+      <SelectItem value="Sudão do Sul">🇸🇸 Sudão do Sul</SelectItem>
+      <SelectItem value="Tanzânia">🇹🇿 Tanzânia</SelectItem>
+      <SelectItem value="Togo">🇹🇬 Togo</SelectItem>
+      <SelectItem value="Tunísia">🇹🇳 Tunísia</SelectItem>
+      <SelectItem value="Uganda">🇺🇬 Uganda</SelectItem>
+      <SelectItem value="Zâmbia">🇿🇲 Zâmbia</SelectItem>
+      <SelectItem value="Zimbabwe">🇿🇼 Zimbabwe</SelectItem>
+
+      {/* América do Norte */}
+      <SelectItem value="America do Norte" className="font-semibold bg-gray-50 dark:bg-gray-800 mt-2">🌎 América do Norte</SelectItem>
+      <SelectItem value="Canadá">🇨🇦 Canadá</SelectItem>
+      <SelectItem value="Estados Unidos">🇺🇸 Estados Unidos</SelectItem>
+      <SelectItem value="México">🇲🇽 México</SelectItem>
+
+      {/* América Central e Caribe */}
+      <SelectItem value="Antígua e Barbuda">🇦🇬 Antígua e Barbuda</SelectItem>
+      <SelectItem value="Bahamas">🇧🇸 Bahamas</SelectItem>
+      <SelectItem value="Barbados">🇧🇧 Barbados</SelectItem>
+      <SelectItem value="Belize">🇧🇿 Belize</SelectItem>
+      <SelectItem value="Costa Rica">🇨🇷 Costa Rica</SelectItem>
+      <SelectItem value="Cuba">🇨🇺 Cuba</SelectItem>
+      <SelectItem value="Dominica">🇩🇲 Dominica</SelectItem>
+      <SelectItem value="El Salvador">🇸🇻 El Salvador</SelectItem>
+      <SelectItem value="Granada">🇬🇩 Granada</SelectItem>
+      <SelectItem value="Guatemala">🇬🇹 Guatemala</SelectItem>
+      <SelectItem value="Haiti">🇭🇹 Haiti</SelectItem>
+      <SelectItem value="Honduras">🇭🇳 Honduras</SelectItem>
+      <SelectItem value="Jamaica">🇯🇲 Jamaica</SelectItem>
+      <SelectItem value="Nicarágua">🇳🇮 Nicarágua</SelectItem>
+      <SelectItem value="Panamá">🇵🇦 Panamá</SelectItem>
+      <SelectItem value="República Dominicana">🇩🇴 República Dominicana</SelectItem>
+      <SelectItem value="São Cristóvão e Neves">🇰🇳 São Cristóvão e Neves</SelectItem>
+      <SelectItem value="São Vicente e Granadinas">🇻🇨 São Vicente e Granadinas</SelectItem>
+      <SelectItem value="Santa Lúcia">🇱🇨 Santa Lúcia</SelectItem>
+      <SelectItem value="Trindade e Tobago">🇹🇹 Trindade e Tobago</SelectItem>
+
+      {/* América do Sul */}
+      <SelectItem value="America do Sul" className="font-semibold bg-gray-50 dark:bg-gray-800 mt-2">🌎 América do Sul</SelectItem>
+      <SelectItem value="Argentina">🇦🇷 Argentina</SelectItem>
+      <SelectItem value="Bolívia">🇧🇴 Bolívia</SelectItem>
+      <SelectItem value="Brasil">🇧🇷 Brasil</SelectItem>
+      <SelectItem value="Chile">🇨🇱 Chile</SelectItem>
+      <SelectItem value="Colômbia">🇨🇴 Colômbia</SelectItem>
+      <SelectItem value="Equador">🇪🇨 Equador</SelectItem>
+      <SelectItem value="Guiana">🇬🇾 Guiana</SelectItem>
+      <SelectItem value="Paraguai">🇵🇾 Paraguai</SelectItem>
+      <SelectItem value="Peru">🇵🇪 Peru</SelectItem>
+      <SelectItem value="Suriname">🇸🇷 Suriname</SelectItem>
+      <SelectItem value="Uruguai">🇺🇾 Uruguai</SelectItem>
+      <SelectItem value="Venezuela">🇻🇪 Venezuela</SelectItem>
+
+      {/* Ásia */}
+      <SelectItem value="Asia" className="font-semibold bg-gray-50 dark:bg-gray-800 mt-2">🌏 Ásia</SelectItem>
+      <SelectItem value="Afeganistão">🇦🇫 Afeganistão</SelectItem>
+      <SelectItem value="Arábia Saudita">🇸🇦 Arábia Saudita</SelectItem>
+      <SelectItem value="Arménia">🇦🇲 Arménia</SelectItem>
+      <SelectItem value="Azerbaijão">🇦🇿 Azerbaijão</SelectItem>
+      <SelectItem value="Bangladesh">🇧🇩 Bangladesh</SelectItem>
+      <SelectItem value="Barém">🇧🇭 Barém</SelectItem>
+      <SelectItem value="Brunei">🇧🇳 Brunei</SelectItem>
+      <SelectItem value="Butão">🇧🇹 Butão</SelectItem>
+      <SelectItem value="Camboja">🇰🇭 Camboja</SelectItem>
+      <SelectItem value="Catar">🇶🇦 Catar</SelectItem>
+      <SelectItem value="Cazaquistão">🇰🇿 Cazaquistão</SelectItem>
+      <SelectItem value="China">🇨🇳 China</SelectItem>
+      <SelectItem value="Coreia do Norte">🇰🇵 Coreia do Norte</SelectItem>
+      <SelectItem value="Coreia do Sul">🇰🇷 Coreia do Sul</SelectItem>
+      <SelectItem value="Emirados Árabes Unidos">🇦🇪 EAU</SelectItem>
+      <SelectItem value="Filipinas">🇵🇭 Filipinas</SelectItem>
+      <SelectItem value="Geórgia">🇬🇪 Geórgia</SelectItem>
+      <SelectItem value="Iémen">🇾🇪 Iémen</SelectItem>
+      <SelectItem value="Índia">🇮🇳 Índia</SelectItem>
+      <SelectItem value="Indonésia">🇮🇩 Indonésia</SelectItem>
+      <SelectItem value="Irão">🇮🇷 Irão</SelectItem>
+      <SelectItem value="Iraque">🇮🇶 Iraque</SelectItem>
+      <SelectItem value="Israel">🇮🇱 Israel</SelectItem>
+      <SelectItem value="Japão">🇯🇵 Japão</SelectItem>
+      <SelectItem value="Jordânia">🇯🇴 Jordânia</SelectItem>
+      <SelectItem value="Kuwait">🇰🇼 Kuwait</SelectItem>
+      <SelectItem value="Laos">🇱🇦 Laos</SelectItem>
+      <SelectItem value="Líbano">🇱🇧 Líbano</SelectItem>
+      <SelectItem value="Malásia">🇲🇾 Malásia</SelectItem>
+      <SelectItem value="Maldivas">🇲🇻 Maldivas</SelectItem>
+      <SelectItem value="Mianmar">🇲🇲 Mianmar</SelectItem>
+      <SelectItem value="Mongólia">🇲🇳 Mongólia</SelectItem>
+      <SelectItem value="Nepal">🇳🇵 Nepal</SelectItem>
+      <SelectItem value="Omã">🇴🇲 Omã</SelectItem>
+      <SelectItem value="Paquistão">🇵🇰 Paquistão</SelectItem>
+      <SelectItem value="Quirguistão">🇰🇬 Quirguistão</SelectItem>
+      <SelectItem value="Rússia">🇷🇺 Rússia</SelectItem>
+      <SelectItem value="Singapura">🇸🇬 Singapura</SelectItem>
+      <SelectItem value="Síria">🇸🇾 Síria</SelectItem>
+      <SelectItem value="Sri Lanka">🇱🇰 Sri Lanka</SelectItem>
+      <SelectItem value="Tailândia">🇹🇭 Tailândia</SelectItem>
+      <SelectItem value="Taiwan">🇹🇼 Taiwan</SelectItem>
+      <SelectItem value="Tajiquistão">🇹🇯 Tajiquistão</SelectItem>
+      <SelectItem value="Timor-Leste">🇹🇱 Timor-Leste</SelectItem>
+      <SelectItem value="Turquemenistão">🇹🇲 Turquemenistão</SelectItem>
+      <SelectItem value="Turquia">🇹🇷 Turquia</SelectItem>
+      <SelectItem value="Usbequistão">🇺🇿 Usbequistão</SelectItem>
+      <SelectItem value="Vietname">🇻🇳 Vietname</SelectItem>
+
+      {/* Europa */}
+      <SelectItem value="Europa" className="font-semibold bg-gray-50 dark:bg-gray-800 mt-2">🌍 Europa</SelectItem>
+      <SelectItem value="Albânia">🇦🇱 Albânia</SelectItem>
+      <SelectItem value="Alemanha">🇩🇪 Alemanha</SelectItem>
+      <SelectItem value="Andorra">🇦🇩 Andorra</SelectItem>
+      <SelectItem value="Áustria">🇦🇹 Áustria</SelectItem>
+      <SelectItem value="Bélgica">🇧🇪 Bélgica</SelectItem>
+      <SelectItem value="Bielorrússia">🇧🇾 Bielorrússia</SelectItem>
+      <SelectItem value="Bósnia e Herzegovina">🇧🇦 Bósnia e Herzegovina</SelectItem>
+      <SelectItem value="Bulgária">🇧🇬 Bulgária</SelectItem>
+      <SelectItem value="Chipre">🇨🇾 Chipre</SelectItem>
+      <SelectItem value="Croácia">🇭🇷 Croácia</SelectItem>
+      <SelectItem value="Dinamarca">🇩🇰 Dinamarca</SelectItem>
+      <SelectItem value="Eslováquia">🇸🇰 Eslováquia</SelectItem>
+      <SelectItem value="Eslovénia">🇸🇮 Eslovénia</SelectItem>
+      <SelectItem value="Espanha">🇪🇸 Espanha</SelectItem>
+      <SelectItem value="Estónia">🇪🇪 Estónia</SelectItem>
+      <SelectItem value="Finlândia">🇫🇮 Finlândia</SelectItem>
+      <SelectItem value="França">🇫🇷 França</SelectItem>
+      <SelectItem value="Grécia">🇬🇷 Grécia</SelectItem>
+      <SelectItem value="Hungria">🇭🇺 Hungria</SelectItem>
+      <SelectItem value="Irlanda">🇮🇪 Irlanda</SelectItem>
+      <SelectItem value="Islândia">🇮🇸 Islândia</SelectItem>
+      <SelectItem value="Itália">🇮🇹 Itália</SelectItem>
+      <SelectItem value="Kosovo">🇽🇰 Kosovo</SelectItem>
+      <SelectItem value="Letónia">🇱🇻 Letónia</SelectItem>
+      <SelectItem value="Liechtenstein">🇱🇮 Liechtenstein</SelectItem>
+      <SelectItem value="Lituânia">🇱🇹 Lituânia</SelectItem>
+      <SelectItem value="Luxemburgo">🇱🇺 Luxemburgo</SelectItem>
+      <SelectItem value="Macedónia do Norte">🇲🇰 Macedónia do Norte</SelectItem>
+      <SelectItem value="Malta">🇲🇹 Malta</SelectItem>
+      <SelectItem value="Moldávia">🇲🇩 Moldávia</SelectItem>
+      <SelectItem value="Mónaco">🇲🇨 Mónaco</SelectItem>
+      <SelectItem value="Montenegro">🇲🇪 Montenegro</SelectItem>
+      <SelectItem value="Noruega">🇳🇴 Noruega</SelectItem>
+      <SelectItem value="Países Baixos">🇳🇱 Países Baixos</SelectItem>
+      <SelectItem value="Polónia">🇵🇱 Polónia</SelectItem>
+      <SelectItem value="Portugal">🇵🇹 Portugal</SelectItem>
+      <SelectItem value="Reino Unido">🇬🇧 Reino Unido</SelectItem>
+      <SelectItem value="República Checa">🇨🇿 República Checa</SelectItem>
+      <SelectItem value="Roménia">🇷🇴 Roménia</SelectItem>
+      <SelectItem value="São Marino">🇸🇲 São Marino</SelectItem>
+      <SelectItem value="Sérvia">🇷🇸 Sérvia</SelectItem>
+      <SelectItem value="Suécia">🇸🇪 Suécia</SelectItem>
+      <SelectItem value="Suíça">🇨🇭 Suíça</SelectItem>
+      <SelectItem value="Ucrânia">🇺🇦 Ucrânia</SelectItem>
+      <SelectItem value="Vaticano">🇻🇦 Vaticano</SelectItem>
+
+      {/* Oceania */}
+      <SelectItem value="Oceania" className="font-semibold bg-gray-50 dark:bg-gray-800 mt-2">🌏 Oceania</SelectItem>
+      <SelectItem value="Austrália">🇦🇺 Austrália</SelectItem>
+      <SelectItem value="Fiji">🇫🇯 Fiji</SelectItem>
+      <SelectItem value="Ilhas Marshall">🇲🇭 Ilhas Marshall</SelectItem>
+      <SelectItem value="Ilhas Salomão">🇸🇧 Ilhas Salomão</SelectItem>
+      <SelectItem value="Kiribati">🇰🇮 Kiribati</SelectItem>
+      <SelectItem value="Micronésia">🇫🇲 Micronésia</SelectItem>
+      <SelectItem value="Nauru">🇳🇷 Nauru</SelectItem>
+      <SelectItem value="Nova Zelândia">🇳🇿 Nova Zelândia</SelectItem>
+      <SelectItem value="Palau">🇵🇼 Palau</SelectItem>
+      <SelectItem value="Papua-Nova Guiné">🇵🇬 Papua-Nova Guiné</SelectItem>
+      <SelectItem value="Samoa">🇼🇸 Samoa</SelectItem>
+      <SelectItem value="Tonga">🇹🇴 Tonga</SelectItem>
+      <SelectItem value="Tuvalu">🇹🇻 Tuvalu</SelectItem>
+      <SelectItem value="Vanuatu">🇻🇺 Vanuatu</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
 
                           {/* Idioma */}
                           <LanguageSelect
@@ -3224,6 +3390,34 @@ const UserProfile = ({ user: initialUser, onNavigate, initialTab }) => {
                           </div>
                         </div>
                       </div>
+
+                                        <Separator className="my-6" />
+
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Heart className="h-4 w-4 text-green-500" />
+                      Sugestões diárias
+                    </h3>
+                    <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-green-50 dark:bg-green-900/10">
+                      <div>
+                        <Label htmlFor="restrictionsInSuggestions" className="text-gray-700 dark:text-gray-300 font-medium">
+                          Aplicar restrições alimentares
+                        </Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                          Quando ligado, as sugestões do dia respeitam as tuas alergias e dietas.
+                        </p>
+                      </div>
+                              <Switch
+  id="restrictionsInSuggestions"
+  checked={settings?.restrictionsInSuggestions !== false}
+  onClick={() => {
+    const newVal = !(settings?.restrictionsInSuggestions !== false);
+    updateSettingField('restrictionsInSuggestions', newVal);
+  }}
+/>
+                    </div>
+                  </div>
+
 
                       {/* Reset Configurações */}
                       <div className="mt-8 p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/10">

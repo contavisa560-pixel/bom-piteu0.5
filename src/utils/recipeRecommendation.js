@@ -279,14 +279,16 @@ export function getPersonalizedSuggestions(user, preferences, recipeHistory, ext
     if (categoryClicks[recipe.categoria]) score += Math.min(categoryClicks[recipe.categoria] * 10, 40);
 
     const perfil = (recipe.perfil_alimentar || '').toLowerCase();
-    userDiets.forEach(diet => {
-      if (diet === 'Vegana' && perfil.includes('vegan')) score += 40;
-      if (diet === 'Vegetariana' && perfil.includes('vegetar')) score += 35;
-      if (diet === 'Sem Glúten' && perfil.includes('sem glúten')) score += 30;
-      if (diet === 'Paleo' && perfil.includes('paleo')) score += 30;
-      if (diet === 'Mediterrânica' && perfil.includes('mediterr')) score += 30;
-      if (diet === 'Flexitariana' && perfil.includes('flexitar')) score += 25;
-    });
+    if (applyRestrictions) {
+      diets.forEach(diet => {
+        if (diet === 'Vegana' && perfil.includes('vegan')) score += 35;
+        if (diet === 'Vegetariana' && perfil.includes('vegetar')) score += 30;
+        if (diet === 'Sem Glúten' && perfil.includes('sem glúten')) score += 25;
+        if (diet === 'Mediterrânica' && perfil.includes('mediterr')) score += 25;
+        if (diet === 'Paleo' && perfil.includes('paleo')) score += 25;
+        if (diet === 'Cetogênica (Keto)' && perfil.includes('keto')) score += 25;
+      });
+    }
 
     score += hashCode(`${recipe.nome_receita}-${dailySeed}`) % 20;
 

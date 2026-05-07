@@ -106,25 +106,32 @@ const FIELD_CONFIG = {
 const processPaymentAPI = async (method, formData, plan, user) => {
     const token = localStorage.getItem('bomPiteuToken');
     const userId = user?._id || user?.id;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+    // Simula delay do gateway de pagamento
     await new Promise(r => setTimeout(r, 2000));
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${userId}`, {
-        method: 'PUT',
+    // Chama a rota dedicada que activa premium E limpa o ciclo de uso
+    const res = await fetch(`${API_URL}/api/users/${userId}/activate-subscription`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-            isPremium: true,
-            premiumExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            plan: plan?.plan || 'premium',
+            durationDays: 30
         })
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erro ao ativar premium');
 
-    return { success: true, transactionId: `BMP-${Date.now()}`, user: data.user };
+    return {
+        success: true,
+        transactionId: `BMP-${Date.now()}`,
+        user: data.user   
+    };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -169,10 +176,12 @@ const PaymentPage = ({ user, plan = { plan: 'premium', price: '3.500 Kz', period
             if (result.success) {
                 setSuccess(true);
                 if (result.user) {
+                    // Guarda o utilizador actualizado (com isPremium, premiumExpiresAt, etc.)
                     localStorage.setItem('bomPiteuUser', JSON.stringify(result.user));
                 }
                 setTimeout(() => {
-                    onSubscribe?.('premium');
+                    // Passa o utilizador actualizado para o App.jsx
+                    onSubscribe?.('premium', result.user);
                     onNavigate?.('dashboard');
                 }, 2500);
             }

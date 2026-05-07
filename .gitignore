@@ -8,7 +8,4 @@ dist
 .env*
 smartchef_backend/backups/
 *.timestamp-*.mjs
-
-public/*.jpg
-public/*.jpeg
-public/*.webp
+public/*.png
